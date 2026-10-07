@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ДИРЕКТОР — дотер. 7к MMR. Ember Spirit — мой мейн.">
+<title>ДИРЕКТОР — дотер | 7к MMR</title>
+<style>
+  :root {
+    --accent: #f97316;
+    --accent-dim: rgba(249,115,22,0.15);
+    --text: #ffffff;
+    --text-dim: #999;
+    --bg: #0f0500;
+    --border: #2a1505;
+    --glow: rgba(249,115,22,0.6);
+  }
+  body.hero-invoker {
+    --accent: #a855f7; --accent-dim: rgba(168,85,247,0.15);
+    --bg: #0d0018; --border: #2a1045; --glow: rgba(168,85,247,0.5);
+  }
+  body.hero-sf {
+    --accent: #94a3b8; --accent-dim: rgba(148,163,184,0.15);
+    --bg: #050608; --border: #1a1f2a; --glow: rgba(148,163,184,0.5);
+  }
+  body.hero-pa {
+    --accent: #ef4444; --accent-dim: rgba(239,68,68,0.15);
+    --bg: #0a0505; --border: #2a1010; --glow: rgba(239,68,68,0.5);
+  }
+  body.hero-ember {
+    --accent: #f97316; --accent-dim: rgba(249,115,22,0.15);
+    --bg: #0f0500; --border: #2a1505; --glow: rgba(249,115,22,0.6);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Courier New', monospace;
+    overflow-x: hidden; cursor: none;
+    transition: background 0.6s ease;
+  }
+
+  .preloader {
+    position: fixed; inset: 0; background: #0f0500; z-index: 10000;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    transition: opacity 0.8s ease, visibility 0.8s;
+  }
+  .preloader.hidden { opacity: 0; visibility: hidden; }
+  .preloader .logo-pre {
+    font-size: clamp(1.5rem, 5vw, 2.5rem); letter-spacing: 0.3em; margin-bottom: 25px;
+    color: var(--accent); text-shadow: 0 0 20px var(--glow);
+    animation: preFlicker 0.15s infinite;
+  }
+  @keyframes preFlicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
+  .preloader .bar-wrap { width: 260px; height: 2px; background: #220; overflow: hidden; margin-bottom: 15px; }
+  .preloader .bar { height: 100%; width: 0%; background: var(--accent); transition: width 0.15s linear; box-shadow: 0 0 12px var(--glow); }
+  .preloader .percent { font-size: 0.85rem; color: var(--text-dim); letter-spacing: 0.2em; }
+
+  .cursor-dot {
+    position: fixed; width: 6px; height: 6px; background: var(--accent);
+    border-radius: 50%; pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%); box-shadow: 0 0 10px var(--glow);
+  }
+  .cursor-ring {
+    position: fixed; width: 34px; height: 34px;
+    border: 1px solid var(--accent-dim); border-radius: 50%;
+    pointer-events: none; z-index: 9998; transform: translate(-50%, -50%);
+    transition: width 0.25s, height 0.25s, border-color 0.25s, background 0.25s;
+  }
+  .cursor-ring.big { width: 70px; height: 70px; border-color: var(--accent); background: var(--accent-dim); }
+
+  .progress {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: var(--accent); width: 0%; z-index: 9997; box-shadow: 0 0 12px var(--glow);
+  }
+
+  #bgCanvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0; opacity: 0.4; transition: opacity 0.5s;
+  }
+
+  .hack-overlay {
+    position: fixed; inset: 0; background: rgba(255,43,78,0.15);
+    z-index: 9990; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hack-overlay.show { opacity: 1; }
+  .hack-overlay .hack-text {
+    font-size: clamp(2rem, 10vw, 8rem); font-weight: 900; color: var(--accent);
+    text-shadow: 0 0 40px var(--glow), 0 0 80px var(--glow);
+    letter-spacing: 0.2em; animation: hackPulse 0.5s infinite alternate;
+  }
+  @keyframes hackPulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+  .content { position: relative; z-index: 2; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; padding: 12px 40px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 100; background: rgba(15,5,0,0.75); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px;
+  }
+  nav .logo {
+    font-weight: 700; letter-spacing: 0.25em; font-size: 0.95rem;
+    color: var(--accent); text-shadow: 0 0 10px var(--glow);
+  }
+  nav .logo::after { content: ' ⚔'; }
+  nav ul { display: flex; gap: 18px; list-style: none; align-items: center; flex-wrap: wrap; }
+  nav a {
+    color: var(--text-dim); text-decoration: none; font-size: 0.74rem;
+    letter-spacing: 0.14em; transition: color 0.3s; position: relative;
+  }
+  nav a::after {
+    content: ''; position: absolute; bottom: -6px; left: 0;
+    width: 0; height: 1px; background: var(--accent); transition: width 0.3s;
+  }
+  nav a:hover { color: var(--accent); }
+  nav a:hover::after { width: 100%; }
+  nav .back-btn {
+    border: 1px solid var(--accent); color: var(--accent);
+    padding: 8px 16px; font-size: 0.72rem; letter-spacing: 0.14em;
+    text-decoration: none; transition: all 0.3s;
+  }
+  nav .back-btn:hover { background: var(--accent); color: #000; }
+
+  .hero-picker {
+    display: flex; gap: 8px; align-items: center;
+    margin-left: 15px; padding-left: 15px; border-left: 1px solid var(--border);
+  }
+  .hero-picker .pick-label { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.15em; }
+  .pick-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-dim); padding: 6px 12px;
+    font-family: inherit; font-size: 0.7rem; letter-spacing: 0.12em;
+    cursor: none; transition: all 0.3s;
+  }
+  .pick-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pick-btn.active {
+    background: var(--accent); color: #000; border-color: var(--accent);
+    box-shadow: 0 0 15px var(--glow);
+  }
+
+  .burger { display: none; background: none; border: none; color: var(--accent); font-size: 1.5rem; cursor: none; font-family: inherit; }
+
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+    padding: 140px 20px 40px; position: relative;
+  }
+  .hero .terminal-line { font-size: 0.85rem; color: var(--text-dim); letter-spacing: 0.15em; margin-bottom: 25px; }
+  .hero .terminal-line::before { content: '$ '; color: var(--accent); }
+  .hero h1 {
+    font-size: clamp(2.2rem, 11vw, 8rem); letter-spacing: 0.12em; font-weight: 700;
+    color: var(--accent); text-shadow: 0 0 30px var(--glow), 0 0 60px var(--glow);
+    transition: color 0.6s, text-shadow 0.6s;
+  }
+  .hero .sub {
+    margin-top: 15px; font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: var(--text-dim); letter-spacing: 0.15em;
+  }
+  .hero .mmr-block {
+    margin-top: 40px; display: flex; gap: 40px; flex-wrap: wrap; justify-content: center;
+  }
+  .hero .mmr-item { text-align: center; }
+  .hero .mmr-item .num {
+    font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 700;
+    color: var(--accent); text-shadow: 0 0 25px var(--glow);
+    display: block; margin-bottom: 5px; transition: color 0.6s;
+  }
+  .hero .mmr-item .label { font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.22em; }
+  .scroll-hint {
+    position: absolute; bottom: 40px; font-size: 0.7rem;
+    color: var(--text-dim); letter-spacing: 0.35em;
+    animation: float 2s ease-in-out infinite;
+  }
+  @keyframes float { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(10px); opacity: 1; } }
+
+  section {
+    max-width: 1050px; margin: 0 auto; padding: 100px 25px;
+    opacity: 0; transform: translateY(50px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+  section.visible { opacity: 1; transform: translateY(0); }
+  h2 {
+    font-size: clamp(1.5rem, 5vw, 2.5rem); margin-bottom: 45px;
+    letter-spacing: 0.1em; border-left: 3px solid var(--accent);
+    padding-left: 18px; color: var(--accent); text-shadow: 0 0 15px var(--glow);
+    transition: color 0.6s, border-color 0.6s;
+  }
+  h2::before { content: '> '; color: var(--text-dim); }
+  p, li { font-size: 1.02rem; line-height: 1.8; color: var(--text-dim); }
+
+  /* КУБ */
+  .cube-wrap { display: flex; justify-content: center; align-items: center; padding: 40px 0; perspective: 1200px; }
+  .cube-scene { width: 200px; height: 200px; position: relative; transform-style: preserve-3d; animation: cubeRotate 18s infinite linear; }
+  @keyframes cubeRotate { from { transform: rotateX(-20deg) rotateY(0); } to { transform: rotateX(-20deg) rotateY(360deg); } }
+  .cube-face {
+    position: absolute; width: 200px; height: 200px;
+    border: 2px solid var(--accent); background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); font-size: 1rem; letter-spacing: 0.15em;
+    box-shadow: 0 0 30px var(--glow) inset; text-shadow: 0 0 10px var(--glow); font-weight: 700;
+  }
+  .cube-face.front  { transform: translateZ(100px); }
+  .cube-face.back   { transform: rotateY(180deg) translateZ(100px); }
+  .cube-face.right  { transform: rotateY(90deg) translateZ(100px); }
+  .cube-face.left   { transform: rotateY(-90deg) translateZ(100px); }
+  .cube-face.top    { transform: rotateX(90deg) translateZ(100px); }
+  .cube-face.bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+  .roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-top: 30px; }
+  .role {
+    border: 1px solid var(--border); padding: 28px 20px; text-align: center;
+    transition: all 0.35s ease; cursor: none; position: relative; overflow: hidden;
+  }
+  .role::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+    background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease;
+  }
+  .role:hover::before { transform: scaleX(1); }
+  .role:hover { border-color: var(--accent); transform: translateY(-6px); box-shadow: 0 15px 40px var(--accent-dim); }
+  .role .icon { font-size: 2.4rem; margin-bottom: 12px; filter: drop-shadow(0 0 8px var(--glow)); }
+  .role .name { font-size: 1.05rem; color: var(--text); margin-bottom: 6px; letter-spacing: 0.1em; }
+  .role .desc { font-size: 0.8rem; color: var(--text-dim); }
+
+  .heroes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+  .hero-card {
+    border: 1px solid var(--border); padding: 25px 22px;
+    transition: all 0.4s ease; position: relative; overflow: hidden;
+    background: rgba(20,0,0,0.4); cursor: none;
+  }
+  .hero-card::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+    transition: left 0.7s ease; pointer-events: none;
+  }
+  .hero-card:hover::before { left: 100%; }
+  .hero-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 15px 40px var(--accent-dim); }
+  .hero-card.main-hero {
+    border: 2px solid var(--accent); box-shadow: 0 0 30px var(--glow);
+    grid-column: span 2;
+    background: linear-gradient(135deg, var(--accent-dim), rgba(0,0,0,0.4));
+  }
+  .hero-card.main-hero::after {
+    content: '★ МЕЙН ★'; position: absolute; top: 15px; right: 15px;
+    font-size: 0.65rem; color: var(--accent); letter-spacing: 0.2em;
+    border: 1px solid var(--accent); padding: 4px 10px; background: rgba(0,0,0,0.6);
+  }
+  .hero-card .hero-name { font-size: 1.2rem; color: var(--accent); margin-bottom: 8px; letter-spacing: 0.08em; font-weight: 700; }
+  .hero-card.main-hero .hero-name { font-size: 1.6rem; }
+  .hero-card .hero-role { font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.2em; margin-bottom: 15px; }
+  .hero-card .hero-desc { font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; }
+  .hero-card .hero-stats { margin-top: 15px; display: flex; gap: 15px; font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.1em; }
+  .hero-card .hero-stats span { color: var(--accent); }
+  @media (max-width: 760px) { .hero-card.main-hero { grid-column: span 1; } }
+
+  /* === ЖИВОЙ ПРОФИЛЬ === */
+  .live-link {
+    display: inline-block; margin-bottom: 30px;
+    font-size: 0.85rem; color: var(--accent);
+    text-decoration: none; letter-spacing: 0.1em;
+    border-bottom: 1px solid var(--border); padding-bottom: 3px;
+    transition: border-color 0.3s;
+  }
+  .live-link:hover { border-color: var(--accent); }
+
+  .mmr-graph-wrap {
+    border: 1px solid var(--border); padding: 20px;
+    background: rgba(0,0,0,0.5); margin-bottom: 30px;
+    position: relative;
+  }
+  .mmr-graph-title {
+    font-size: 0.75rem; color: var(--text-dim);
+    letter-spacing: 0.2em; margin-bottom: 15px;
+  }
+  .mmr-graph-title span { color: var(--accent); }
+  #mmrCanvas { display: block; width: 100%; height: 220px; }
+
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px; margin-bottom: 30px;
+  }
+  .stat-card {
+    border: 1px solid var(--border); padding: 24px 18px;
+    text-align: center; transition: all 0.35s;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+    background: var(--accent); transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s;
+  }
+  .stat-card:hover::before { transform: scaleX(1); }
+  .stat-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 10px 30px var(--accent-dim); }
+  .stat-card .icon { font-size: 1.6rem; margin-bottom: 10px; filter: drop-shadow(0 0 6px var(--glow)); }
+  .stat-card .val {
+    font-size: 2rem; font-weight: 700; color: var(--accent);
+    display: block; margin-bottom: 5px; letter-spacing: 0.05em;
+  }
+  .stat-card .lbl { font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.2em; }
+
+  .top-heroes-block {
+    border: 1px solid var(--border); padding: 25px;
+    background: rgba(0,0,0,0.5); margin-bottom: 30px;
+  }
+  .top-heroes-block .block-title {
+    font-size: 0.75rem; color: var(--text-dim);
+    letter-spacing: 0.2em; margin-bottom: 20px;
+  }
+  .top-heroes-block .block-title::before { content: '🔥 '; }
+  .top-hero-row { margin-bottom: 18px; }
+  .top-hero-row:last-child { margin-bottom: 0; }
+  .top-hero-head {
+    display: flex; justify-content: space-between;
+    font-size: 0.88rem; color: var(--text); margin-bottom: 8px;
+    letter-spacing: 0.08em;
+  }
+  .top-hero-head .wr { color: var(--accent); font-weight: 700; }
+  .top-hero-track { height: 4px; background: rgba(0,0,0,0.6); overflow: hidden; }
+  .top-hero-fill {
+    height: 100%; background: var(--accent);
+    width: 0%; transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 12px var(--glow);
+  }
+
+  .matches-block {
+    border: 1px solid var(--border); padding: 25px;
+    background: rgba(0,0,0,0.5); margin-bottom: 30px;
+  }
+  .matches-block .block-title {
+    font-size: 0.75rem; color: var(--text-dim);
+    letter-spacing: 0.2em; margin-bottom: 20px;
+  }
+  .matches-block .block-title::before { content: '📜 '; }
+  .live-match {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px; border: 1px solid var(--border);
+    margin-bottom: 10px; transition: all 0.3s; flex-wrap: wrap; gap: 10px;
+    cursor: none;
+  }
+  .live-match:hover { border-color: var(--accent); transform: translateX(5px); }
+  .live-match:last-child { margin-bottom: 0; }
+  .live-match.win { border-left: 3px solid #00ff41; }
+  .live-match.lose { border-left: 3px solid #ff2b4e; }
+  .live-match .lm-hero {
+    color: var(--text); font-size: 0.95rem; letter-spacing: 0.06em;
+    min-width: 130px; display: flex; align-items: center; gap: 8px;
+  }
+  .live-match .lm-hero .lm-icon { font-size: 1.1rem; filter: drop-shadow(0 0 4px var(--glow)); }
+  .live-match .lm-kda { font-size: 0.85rem; color: var(--text-dim); letter-spacing: 0.1em; }
+  .live-match .lm-kda span { color: var(--accent); font-weight: 700; }
+  .live-match .lm-result {
+    font-size: 0.7rem; letter-spacing: 0.15em; padding: 3px 10px; border: 1px solid;
+  }
+  .live-match.win .lm-result { color: #00ff41; border-color: #00ff41; }
+  .live-match.lose .lm-result { color: #ff2b4e; border-color: #ff2b4e; }
+  .live-match .lm-time { font-size: 0.75rem; color: var(--text-dim); }
+
+  .live-refresh {
+    display: flex; align-items: center; gap: 15px; flex-wrap: wrap;
+  }
+  .refresh-btn {
+    background: transparent; border: 1px solid var(--accent); color: var(--accent);
+    padding: 12px 24px; font-family: inherit; font-size: 0.78rem;
+    letter-spacing: 0.15em; cursor: none; transition: all 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .refresh-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 25px var(--glow); }
+  .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .refresh-hint { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.1em; }
+
+  /* === ХУК-ИГРА === */
+  .hook-wrap { margin-top: 30px; border: 1px solid var(--border); padding: 20px; background: rgba(0,0,0,0.5); }
+  .hook-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 15px; font-size: 0.85rem; letter-spacing: 0.15em;
+    color: var(--text-dim); flex-wrap: wrap; gap: 10px;
+  }
+  .hook-header .stat { color: var(--accent); }
+  #hookCanvas { display: block; width: 100%; height: 320px; background: #050505; border: 1px solid var(--border); cursor: none; }
+  .game-btn {
+    background: transparent; border: 1px solid var(--accent); color: var(--accent);
+    padding: 10px 22px; font-family: inherit; font-size: 0.78rem;
+    letter-spacing: 0.15em; cursor: none; transition: all 0.3s;
+  }
+  .game-btn:hover { background: var(--accent); color: #000; }
+  .game-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* === РЕЙТИНГ === */
+  .rating-table { width: 100%; border-collapse: collapse; margin-top: 30px; border: 1px solid var(--border); }
+  .rating-table th, .rating-table td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; letter-spacing: 0.08em; }
+  .rating-table th { background: rgba(0,0,0,0.5); color: var(--accent); font-size: 0.75rem; letter-spacing: 0.18em; }
+  .rating-table td { color: var(--text-dim); }
+  .rating-table tr:hover td { background: rgba(255,255,255,0.03); color: var(--text); }
+  .rating-table tr.me td { background: var(--accent-dim); color: var(--accent); font-weight: 700; font-size: 1rem; }
+  .rating-table .rank { color: var(--accent); font-weight: 700; }
+  .rating-table .mmr-col { color: var(--accent); font-weight: 700; }
+
+  /* === ТЕРМИНАЛ === */
+  .terminal { margin-top: 40px; border: 1px solid var(--border); background: rgba(0,0,0,0.7); font-size: 0.88rem; overflow: hidden; }
+  .terminal-head {
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center;
+    font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.15em;
+  }
+  .terminal-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
+  .terminal-dot:nth-child(1) { background: #333; }
+  .terminal-dot:nth-child(2) { background: #555; }
+  .terminal-dot:nth-child(3) { background: var(--accent); }
+  .terminal-body { padding: 18px; min-height: 200px; max-height: 300px; overflow-y: auto; line-height: 1.6; color: var(--text-dim); }
+  .terminal-body .line { margin-bottom: 4px; }
+  .terminal-body .line .cmd { color: var(--accent); }
+  .terminal-input-line { display: flex; padding: 12px 18px; border-top: 1px solid var(--border); align-items: center; gap: 8px; }
+  .terminal-input-line::before { content: '$'; color: var(--accent); }
+  .terminal-input { flex: 1; background: transparent; border: none; color: var(--text); font-family: inherit; font-size: 0.88rem; outline: none; cursor: none; }
+
+  .to-top {
+    position: fixed; bottom: 30px; right: 30px; width: 46px; height: 46px;
+    border: 1px solid var(--accent); background: rgba(0,0,0,0.7); color: var(--accent);
+    font-size: 1.1rem; cursor: none; z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s, transform 0.4s, background 0.3s;
+    font-family: inherit; backdrop-filter: blur(6px);
+  }
+  .to-top.show { opacity: 1; pointer-events: auto; }
+  .to-top:hover { background: var(--accent); color: #000; transform: translateY(-5px); }
+
+  footer {
+    text-align: center; padding: 50px 20px 60px;
+    color: var(--text-dim); font-size: 0.75rem; letter-spacing: 0.12em;
+    border-top: 1px solid var(--border); margin-top: 40px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  @media (max-width: 760px) {
+    body { cursor: auto; }
+    .cursor-dot, .cursor-ring { display: none; }
+    nav { padding: 12px 20px; }
+    nav ul {
+      position: fixed; top: 0; right: -100%; width: 85%; height: 100vh;
+      background: var(--bg); flex-direction: column; justify-content: flex-start;
+      padding-top: 80px; align-items: center; gap: 20px;
+      transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      border-left: 1px solid var(--border); overflow-y: auto;
+    }
+    nav ul.open { right: 0; }
+    nav ul a { font-size: 1rem; }
+    .hero-picker { flex-direction: column; border-left: none; margin-left: 0; padding-left: 0; border-top: 1px solid var(--border); padding-top: 15px; margin-top: 5px; }
+    .burger { display: block; cursor: pointer; }
+    .btn, .role, .hero-card, .match, .pick-btn, .game-btn, .refresh-btn, .live-match { cursor: pointer; }
+    .hero .mmr-block { gap: 25px; }
+    #hookCanvas { cursor: pointer; }
+    .terminal-input { cursor: text; }
+    .rating-table th, .rating-table td { padding: 10px 12px; font-size: 0.78rem; }
+    .live-match { justify-content: flex-start; }
+    .live-match .lm-hero { min-width: auto; }
+  }
+</style>
+</head>
+<body class="hero-ember">
+
+<div class="preloader" id="preloader">
+  <div class="logo-pre">DOTA · 7К MMR</div>
+  <div class="bar-wrap"><div class="bar" id="preBar"></div></div>
+  <div class="percent" id="prePercent">0%</div>
+</div>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress" id="progress"></div>
+<canvas id="bgCanvas"></canvas>
+
+<div class="hack-overlay" id="hackOverlay">
+  <div class="hack-text" id="hackText">RAMPAGE!</div>
+</div>
+
+<button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="content">
+
+  <nav>
+    <div class="logo">ДИРЕКТОР</div>
+    <ul id="navMenu">
+      <li><a href="#about">Обо мне</a></li>
+      <li><a href="#cube-sec">Скиллы</a></li>
+      <li><a href="#heroes">Герои</a></li>
+      <li><a href="#live-profile">Профиль</a></li>
+      <li><a href="#hook-game">Хук</a></li>
+      <li><a href="#rating">Рейтинг</a></li>
+      <li class="hero-picker">
+        <span class="pick-label">ГЕРОЙ:</span>
+        <button class="pick-btn active" data-hero="ember" onclick="pickHero('ember')">EMBER</button>
+        <button class="pick-btn" data-hero="invoker" onclick="pickHero('invoker')">INVOKER</button>
+        <button class="pick-btn" data-hero="sf" onclick="pickHero('sf')">SF</button>
+        <button class="pick-btn" data-hero="pa" onclick="pickHero('pa')">PA</button>
+      </li>
+      <li><a href="index.html" class="back-btn">← НА ГЛАВНУЮ</a></li>
+    </ul>
+    <button class="burger" id="burger">☰</button>
+  </nav>
+
+  <div class="hero">
+    <div class="terminal-line">loading dota_profile --user=director</div>
+    <h1>ДОТЕР</h1>
+    <div class="sub">MMR 2000 · МЕЙН: EMBER SPIRIT 🔥</div>
+
+    <div class="mmr-block">
+      <div class="mmr-item"><span class="num" data-target="2000">0</span><span class="label">MMR</span></div>
+      <div class="mmr-item"><span class="num" data-target="1500">0</span><span class="label">МАТЧЕЙ</span></div>
+      <div class="mmr-item"><span class="num" data-target="50">0</span><span class="label">% ВИНРЕЙТ</span></div>
+      <div class="mmr-item"><span class="num" data-target="750">0</span><span class="label">ЧАСОВ</span></div>
+    </div>
+
+    <div class="scroll-hint">▼ СКРОЛЛ ▼</div>
+  </div>
+
+  <section id="about">
+    <h2>ОБО МНЕ В ДОТЕ</h2>
+    <p>Играю с детства. Начинал с ботов, потом пошёл в пабы. Сейчас 2к MMR, в основном мид.</p>
+    <p style="margin-top:20px;">Мой мейн — <span style="color:var(--accent);font-weight:700;">🔥 EMBER SPIRIT</span>. На нём я силён как никто. Sleight of Fist, Fire Remnant, Remnant-комбо — всё моё.</p>
+  </section>
+
+  <section id="cube-sec">
+    <h2>МОИ СКИЛЛЫ</h2>
+    <p>Каждая грань куба — сторона моей игры.</p>
+    <div class="cube-wrap">
+      <div class="cube-scene">
+        <div class="cube-face front">ЛАСТХИТ</div>
+        <div class="cube-face back">КАРТА</div>
+        <div class="cube-face right">МИКРО</div>
+        <div class="cube-face left">ДРАФТ</div>
+        <div class="cube-face top">ТЕМП</div>
+        <div class="cube-face bottom">СПОКОЙСТВИЕ</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="roles">
+    <h2>РОЛИ</h2>
+    <div class="roles">
+      <div class="role"><div class="icon">⚔️</div><div class="name">МИД</div><div class="desc">Основная роль. Соло, темп, давление</div></div>
+      <div class="role"><div class="icon">🏹</div><div class="name">КЕРРИ</div><div class="desc">Люблю, когда могу выйти в лейт</div></div>
+      <div class="role"><div class="icon">🛡️</div><div class="name">ОФФЛЕЙН</div><div class="desc">Могу, если надо. Танкую, ломаю</div></div>
+      <div class="role"><div class="icon">✨</div><div class="name">САППОРТ</div><div class="desc">Только если просят. Не моё</div></div>
+    </div>
+  </section>
+
+  <section id="heroes">
+    <h2>МОИ ГЕРОИ</h2>
+    <div class="heroes" id="heroesGrid"></div>
+  </section>
+
+  <!-- ЖИВОЙ ПРОФИЛЬ -->
+  <section id="live-profile">
+    <h2>ЖИВОЙ ПРОФИЛЬ</h2>
+    <a class="live-link" href="https://steamcommunity.com/profiles/76561199852354854" target="_blank">🔗 steamcommunity.com/profiles/76561199852354854</a>
+
+    <div class="mmr-graph-wrap">
+      <div class="mmr-graph-title">📈 ДИНАМИКА MMR · последние 12 недель · сейчас <span id="graphCurrent">2000</span></div>
+      <canvas id="mmrCanvas"></canvas>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="icon">🏆</div><span class="val" id="liveMmr">0</span><span class="lbl">MMR</span></div>
+      <div class="stat-card"><div class="icon">⚔️</div><span class="val" id="liveMatches">0</span><span class="lbl">МАТЧЕЙ</span></div>
+      <div class="stat-card"><div class="icon">📊</div><span class="val" id="liveWr">0</span><span class="lbl">% ВИНРЕЙТ</span></div>
+      <div class="stat-card"><div class="icon">⏱</div><span class="val" id="liveHours">0</span><span class="lbl">ЧАСОВ</span></div>
+    </div>
+
+    <div class="top-heroes-block">
+      <div class="block-title">ТОП ГЕРОЕВ</div>
+      <div id="topHeroesLive"></div>
+    </div>
+
+    <div class="matches-block">
+      <div class="block-title">ПОСЛЕДНИЕ МАТЧИ</div>
+      <div id="liveMatchesList"></div>
+    </div>
+
+    <div class="live-refresh">
+      <button class="refresh-btn" id="refreshBtn" disabled>⚡ ОБНОВИТЬ ИЗ STEAM</button>
+      <span class="refresh-hint">скоро · подключаем OpenDota API</span>
+    </div>
+  </section>
+
+  <section id="hook-game">
+    <h2>МИНИ-ИГРА: ХУК PUDGE</h2>
+    <p>Кликай по движущейся цели — летит хук. Провафлил — цель ушла, попал — +1.</p>
+    <div class="hook-wrap">
+      <div class="hook-header">
+        <span>СЧЁТ: <span class="stat" id="hookScore">0</span></span>
+        <span>ПРОМАХИ: <span class="stat" id="hookMisses">0</span></span>
+        <span>ВРЕМЯ: <span class="stat" id="hookTime">30</span>с</span>
+        <button class="game-btn" id="hookBtn" onclick="startHookGame()">СТАРТ</button>
+      </div>
+      <canvas id="hookCanvas"></canvas>
+    </div>
+  </section>
+
+  <section id="rating">
+    <h2>ТОП ИГРОКОВ</h2>
+    <p>Рейтинг сервера. Я на первом месте, естественно.</p>
+    <table class="rating-table" id="ratingTable">
+      <thead><tr><th>#</th><th>НИК</th><th>MMR</th><th>РОЛЬ</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="terminal-sec">
+    <h2>ТЕРМИНАЛ ДОТЫ</h2>
+    <p>Попробуй: <span style="color:var(--accent)">help</span>, <span style="color:var(--accent)">find match</span>, <span style="color:var(--accent)">pick ember</span>, <span style="color:var(--accent)">profile</span>, <span style="color:var(--accent)">gg</span>.</p>
+    <div class="terminal">
+      <div class="terminal-head">
+        <div class="terminal-dot"></div><div class="terminal-dot"></div><div class="terminal-dot"></div>
+        <span style="margin-left:10px;">director@dota: ~</span>
+      </div>
+      <div class="terminal-body" id="termBody">
+        <div class="line">Dota Terminal v1.0 — подключено к серверу.</div>
+        <div class="line">Введи <span class="cmd">help</span> чтобы увидеть команды.</div>
+      </div>
+      <div class="terminal-input-line">
+        <input type="text" class="terminal-input" id="termInput" placeholder="введи команду..." autocomplete="off">
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Сделано с любовью к Доте · <a href="index.html">← Вернуться на главную</a>
+  </footer>
+
+</div>
+
+<!-- ЧАСТЬ B (JS) ВСТАВИТЬ ЗДЕСЬ -->
+<script>
+/* ============================================================
+   ЧАСТЬ B — JavaScript для dota.html (с живым профилем)
+   ============================================================ */
+
+/* ===== ПРЕЛОАДЕР ===== */
+const preBar = document.getElementById('preBar');
+const prePercent = document.getElementById('prePercent');
+let preProgress = 0;
+const preInterval = setInterval(() => {
+  preProgress += Math.random() * 12 + 6;
+  if (preProgress >= 100) {
+    preProgress = 100;
+    clearInterval(preInterval);
+    setTimeout(() => {
+      document.getElementById('preloader').classList.add('hidden');
+      startHeroCounters();
+      initLiveProfile();
+    }, 400);
+  }
+  preBar.style.width = preProgress + '%';
+  prePercent.textContent = Math.floor(preProgress) + '%';
+}, 100);
+
+/* ===== УТИЛИТА ===== */
+function hexToRgba(hex, alpha) {
+  hex = hex.replace('#', '');
+  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+/* ===== ФОНОВЫЙ ХОЛСТ ===== */
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const rainDrops = [];
+for (let i = 0; i < 100; i++) {
+  rainDrops.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    len: Math.random() * 20 + 10,
+    speed: Math.random() * 4 + 2,
+    opacity: Math.random() * 0.5 + 0.3
+  });
+}
+
+function drawBackground() {
+  ctx.fillStyle = 'rgba(15,5,0,0.15)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#f97316';
+  rainDrops.forEach(d => {
+    ctx.beginPath();
+    ctx.strokeStyle = hexToRgba(accent, d.opacity);
+    ctx.lineWidth = 1.5;
+    ctx.moveTo(d.x, d.y);
+    ctx.lineTo(d.x, d.y + d.len);
+    ctx.stroke();
+    d.y += d.speed;
+    if (d.y > canvas.height) {
+      d.y = -d.len;
+      d.x = Math.random() * canvas.width;
+    }
+  });
+  requestAnimationFrame(drawBackground);
+}
+drawBackground();
+
+/* ===== КУРСОР ===== */
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  dot.style.left = mx + 'px';
+  dot.style.top = my + 'px';
+});
+function animateRing() {
+  rx += (mx - rx) * 0.18;
+  ry += (my - ry) * 0.18;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+/* ===== ПРОГРЕСС + НАВЕРХ ===== */
+const progress = document.getElementById('progress');
+const toTop = document.getElementById('toTop');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (window.scrollY / h * 100) + '%';
+  if (window.scrollY > 500) toTop.classList.add('show');
+  else toTop.classList.remove('show');
+});
+
+/* ===== МЕНЮ ===== */
+const burger = document.getElementById('burger');
+const navMenu = document.getElementById('navMenu');
+burger.addEventListener('click', () => navMenu.classList.toggle('open'));
+navMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navMenu.classList.remove('open')));
+
+/* ===== СЕКЦИИ ===== */
+const sections = document.querySelectorAll('section');
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      entry.target.querySelectorAll('.fill[data-width]').forEach(runFill);
+      entry.target.querySelectorAll('.top-hero-fill').forEach(f => {
+        if (!f.dataset.done) {
+          f.dataset.done = '1';
+          setTimeout(() => { f.style.width = f.dataset.width + '%'; }, 200);
+        }
+      });
+    }
+  });
+}, { threshold: 0.15 });
+sections.forEach(s => sectionObserver.observe(s));
+
+/* ===== ВЫБОР ГЕРОЯ ===== */
+function pickHero(hero) {
+  document.body.classList.remove('hero-ember', 'hero-invoker', 'hero-sf', 'hero-pa');
+  document.body.classList.add('hero-' + hero);
+  document.querySelectorAll('.pick-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.hero === hero);
+  });
+  const freqs = { ember: 780, invoker: 660, sf: 220, pa: 440 };
+  playSound(freqs[hero] || 500, 0.12);
+  localStorage.setItem('dota_hero', hero);
+  setTimeout(drawMmrGraph, 100);
+}
+const savedHero = localStorage.getItem('dota_hero');
+if (savedHero) pickHero(savedHero);
+
+/* ===== СЧЁТЧИКИ ===== */
+function startHeroCounters() {
+  document.querySelectorAll('.hero .num[data-target]').forEach(runCounter);
+}
+function runCounter(el) {
+  if (el.dataset.done) return;
+  el.dataset.done = '1';
+  const target = +el.dataset.target;
+  const dur = 1800;
+  const start = performance.now();
+  function tick(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(eased * target).toLocaleString('ru-RU');
+    if (p < 1) requestAnimationFrame(tick);
+    else el.textContent = target.toLocaleString('ru-RU');
+  }
+  requestAnimationFrame(tick);
+}
+function runFill(el) {
+  if (el.dataset.done) return;
+  el.dataset.done = '1';
+  el.style.width = el.dataset.width + '%';
+}
+
+/* ===== ГЕРОИ ===== */
+const heroesData = [
+  { name: '🔥 EMBER SPIRIT', role: 'МИД · АГИ · МОЙ ЛЮБИМЫЙ', desc: 'Sleight of Fist, Fire Remnant, Remnant-комбо. Мой мейн, на нём я силён как никто.', wr: 68, matches: 340, main: true },
+  { name: 'PHANTOM ASSASSIN', role: 'КЕРРИ · АГИ', desc: 'Криты, блинк, мобильность. Люблю наказывать.', wr: 55, matches: 220 },
+  { name: 'PUDGE', role: 'МИД · ТАНК', desc: 'Хук, мясо, рот. Попал хук — полкарты твоё.', wr: 52, matches: 180 },
+  { name: 'INVOKER', role: 'МИД · МАГ', desc: '10 заклинаний. Каждый каст — как заклинание в коде.', wr: 58, matches: 140 },
+  { name: 'SF', role: 'МИД · КЕРРИ', desc: 'Shadow Fiend. Соулсы, давление, ракета.', wr: 56, matches: 120 },
+  { name: 'QOP', role: 'МИД · МАГ', desc: 'Queen of Pain. Мобильность, дамаг, ганги.', wr: 54, matches: 95 },
+  { name: 'STORM', role: 'МИД · МАГ', desc: 'Storm Spirit. Разогнался — остановить невозможно.', wr: 53, matches: 80 },
+  { name: 'JUGGERNAUT', role: 'КЕРРИ · АГИ', desc: 'Юггер. Спин, ульта, хил.', wr: 55, matches: 75 },
+  { name: 'ZEUS', role: 'МИД · МАГ', desc: 'Зевс. Глобальная ульта, молнии.', wr: 51, matches: 60 }
+];
+const heroesGrid = document.getElementById('heroesGrid');
+heroesData.forEach((h, i) => {
+  const card = document.createElement('div');
+  card.className = 'hero-card' + (h.main ? ' main-hero' : '');
+  card.innerHTML =
+    '<div class="hero-name">' + h.name + '</div>' +
+    '<div class="hero-role">// ' + h.role + '</div>' +
+    '<div class="hero-desc">' + h.desc + '</div>' +
+    '<div class="hero-stats">WR: <span>' + h.wr + '%</span> · Матчей: <span>' + h.matches + '</span></div>';
+  card.addEventListener('click', () => playSound(500 + i * 40, 0.08));
+  heroesGrid.appendChild(card);
+});
+
+/* ========================================================
+   ЖИВОЙ ПРОФИЛЬ
+   ======================================================== */
+
+/* --- ДАННЫЕ ПРОФИЛЯ (меняй здесь когда хочешь обновить) --- */
+const liveData = {
+  mmr: 2000,
+  matches: 1500,
+  winrate: 50,
+  hours: 750,
+  steamId: '76561199852354854',
+  mmrHistory: [1740, 1765, 1810, 1795, 1840, 1880, 1860, 1910, 1950, 1930, 1975, 2000],
+  topHeroes: [
+    { name: '🔥 EMBER SPIRIT', wr: 68, matches: 340 },
+    { name: '⚔️ PHANTOM ASSASSIN', wr: 55, matches: 220 },
+    { name: '🪝 PUDGE', wr: 52, matches: 180 }
+  ],
+  recentMatches: [
+    { hero: '🛡️ Omniknight', result: 'win', kda: '4/2/18', time: '32:08', date: '6.10 21:23' },
+    { hero: '🐍 Shadow Shaman', result: 'win', kda: '6/5/22', time: '23:54', date: '6.10 20:54' },
+    { hero: '🦈 Slark', result: 'win', kda: '14/3/8', time: '26:52', date: '6.10 11:52' },
+    { hero: '👻 Spectre', result: 'win', kda: '12/4/15', time: '31:39', date: '6.10 11:15' },
+    { hero: '👻 Spectre', result: 'lose', kda: '8/9/11', time: '36:41', date: '6.10 10:09' }
+  ]
+};
+
+function initLiveProfile() {
+  /* Заголовок графика */
+  const cur = document.getElementById('graphCurrent');
+  if (cur) cur.textContent = liveData.mmr;
+
+  /* Карточки статистики */
+  animateLiveNumber('liveMmr', liveData.mmr);
+  animateLiveNumber('liveMatches', liveData.matches);
+  animateLiveNumber('liveWr', liveData.winrate);
+  animateLiveNumber('liveHours', liveData.hours);
+
+  /* Топ героев */
+  const topWrap = document.getElementById('topHeroesLive');
+  if (topWrap) {
+    topWrap.innerHTML = '';
+    liveData.topHeroes.forEach(h => {
+      const row = document.createElement('div');
+      row.className = 'top-hero-row';
+      row.innerHTML =
+        '<div class="top-hero-head"><span>' + h.name + '</span><span class="wr">' + h.wr + '% · ' + h.matches + ' матчей</span></div>' +
+        '<div class="top-hero-track"><div class="top-hero-fill" data-width="' + h.wr + '"></div></div>';
+      topWrap.appendChild(row);
+    });
+    setTimeout(() => {
+      topWrap.querySelectorAll('.top-hero-fill').forEach(f => {
+        f.style.width = f.dataset.width + '%';
+      });
+    }, 400);
+  }
+
+  /* Лента матчей */
+  const matchesWrap = document.getElementById('liveMatchesList');
+  if (matchesWrap) {
+    matchesWrap.innerHTML = '';
+    liveData.recentMatches.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'live-match ' + m.result;
+      row.innerHTML =
+        '<div class="lm-hero"><span class="lm-icon">' + m.hero.split(' ')[0] + '</span>' + m.hero.split(' ').slice(1).join(' ') + '</div>' +
+        '<div class="lm-kda">KDA: <span>' + m.kda + '</span></div>' +
+        '<div class="lm-result">' + (m.result === 'win' ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ') + '</div>' +
+        '<div class="lm-time">' + m.time + ' · ' + m.date + '</div>';
+      matchesWrap.appendChild(row);
+    });
+  }
+
+  /* График MMR */
+  drawMmrGraph();
+}
+
+function animateLiveNumber(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const dur = 1600;
+  const start = performance.now();
+  function tick(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(eased * target).toLocaleString('ru-RU');
+    if (p < 1) requestAnimationFrame(tick);
+    else el.textContent = target.toLocaleString('ru-RU');
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ===== ГРАФИК MMR ===== */
+function drawMmrGraph() {
+  const c = document.getElementById('mmrCanvas');
+  if (!c) return;
+  const wrap = c.parentElement;
+  c.width = wrap.clientWidth - 40;
+  c.height = 220;
+
+  const gctx = c.getContext('2d');
+  const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#f97316';
+  const data = liveData.mmrHistory;
+  const w = c.width;
+  const h = c.height;
+  const padX = 30;
+  const padTop = 20;
+  const padBottom = 30;
+  const innerW = w - padX * 2;
+  const innerH = h - padTop - padBottom;
+
+  gctx.clearRect(0, 0, w, h);
+
+  const min = Math.min.apply(null, data) - 30;
+  const max = Math.max.apply(null, data) + 30;
+
+  /* Сетка */
+  gctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  gctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = padTop + (innerH / 4) * i;
+    gctx.beginPath();
+    gctx.moveTo(padX, y);
+    gctx.lineTo(w - padX, y);
+    gctx.stroke();
+  }
+
+  /* Подписи min/max */
+  gctx.fillStyle = 'rgba(255,255,255,0.4)';
+  gctx.font = '11px monospace';
+  gctx.textAlign = 'right';
+  gctx.fillText(max, padX - 6, padTop + 4);
+  gctx.fillText(min, padX - 6, h - padBottom + 4);
+
+  /* Точки */
+  const points = data.map((val, i) => {
+    const x = padX + (innerW / (data.length - 1)) * i;
+    const y = padTop + innerH - ((val - min) / (max - min)) * innerH;
+    return { x, y, val };
+  });
+
+  /* Площадь */
+  gctx.beginPath();
+  gctx.moveTo(points[0].x, h - padBottom);
+  points.forEach(p => gctx.lineTo(p.x, p.y));
+  gctx.lineTo(points[points.length - 1].x, h - padBottom);
+  gctx.closePath();
+  const grad = gctx.createLinearGradient(0, padTop, 0, h - padBottom);
+  grad.addColorStop(0, hexToRgba(accent, 0.35));
+  grad.addColorStop(1, hexToRgba(accent, 0));
+  gctx.fillStyle = grad;
+  gctx.fill();
+
+  /* Линия */
+  gctx.beginPath();
+  points.forEach((p, i) => {
+    if (i === 0) gctx.moveTo(p.x, p.y);
+    else gctx.lineTo(p.x, p.y);
+  });
+  gctx.strokeStyle = accent;
+  gctx.lineWidth = 2.5;
+  gctx.shadowColor = accent;
+  gctx.shadowBlur = 12;
+  gctx.stroke();
+  gctx.shadowBlur = 0;
+
+  /* Точки-кружки */
+  points.forEach(p => {
+    gctx.beginPath();
+    gctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    gctx.fillStyle = '#000';
+    gctx.fill();
+    gctx.strokeStyle = accent;
+    gctx.lineWidth = 2;
+    gctx.stroke();
+  });
+
+  /* Последняя точка — больше */
+  const last = points[points.length - 1];
+  gctx.beginPath();
+  gctx.arc(last.x, last.y, 7, 0, Math.PI * 2);
+  gctx.fillStyle = accent;
+  gctx.shadowColor = accent;
+  gctx.shadowBlur = 15;
+  gctx.fill();
+  gctx.shadowBlur = 0;
+
+  /* Подпись последней точки */
+  gctx.fillStyle = accent;
+  gctx.font = 'bold 12px monospace';
+  gctx.textAlign = 'right';
+  gctx.fillText(last.val, last.x - 12, last.y - 8);
+}
+
+window.addEventListener('resize', () => setTimeout(drawMmrGraph, 100));
+
+/* ===== РЕЙТИНГ ===== */
+const ratingData = [
+  { rank: 1, name: 'ДИРЕКТОР', mmr: 2000, role: 'МИД', me: true },
+  { rank: 2, name: 'ShadowFiendGod', mmr: 1950, role: 'МИД' },
+  { rank: 3, name: 'PudgeLord', mmr: 1880, role: 'ТАНК' },
+  { rank: 4, name: 'MidOrFeed', mmr: 1820, role: 'МИД' },
+  { rank: 5, name: 'InvokerOnly', mmr: 1760, role: 'МИД' },
+  { rank: 6, name: 'SilentCarry', mmr: 1680, role: 'КЕРРИ' },
+  { rank: 7, name: 'SupportSlave', mmr: 1590, role: 'САППОРТ' },
+  { rank: 8, name: 'OfflaneKing', mmr: 1480, role: 'ОФФЛЕЙН' },
+  { rank: 9, name: 'FeederPro', mmr: 1350, role: 'ЛЕС' },
+  { rank: 10, name: 'NoobMaster', mmr: 1200, role: 'САППОРТ' }
+];
+const ratingBody = document.querySelector('#ratingTable tbody');
+ratingData.forEach(p => {
+  const tr = document.createElement('tr');
+  if (p.me) tr.classList.add('me');
+  const crown = p.me ? ' 👑' : '';
+  tr.innerHTML =
+    '<td class="rank">#' + p.rank + '</td>' +
+    '<td>' + p.name + crown + '</td>' +
+    '<td class="mmr-col">' + p.mmr + '</td>' +
+    '<td>' + p.role + '</td>';
+  ratingBody.appendChild(tr);
+});
+
+/* ===== ХУК-ИГРА ===== */
+const hookCanvas = document.getElementById('hookCanvas');
+const hctx = hookCanvas.getContext('2d');
+const hookScoreEl = document.getElementById('hookScore');
+const hookMissesEl = document.getElementById('hookMisses');
+const hookTimeEl = document.getElementById('hookTime');
+const hookBtn = document.getElementById('hookBtn');
+
+let hookRunning = false;
+let hookScore = 0;
+let hookMisses = 0;
+let hookTimeLeft = 30;
+let hookTimerInterval = null;
+let hookTarget = null;
+let hookProjectile = null;
+let hookFloatTexts = [];
+
+function resizeHook() {
+  hookCanvas.width = hookCanvas.clientWidth;
+  hookCanvas.height = 320;
+}
+resizeHook();
+window.addEventListener('resize', resizeHook);
+
+function resetTarget() {
+  hookTarget = {
+    x: 80 + Math.random() * (hookCanvas.width - 160),
+    y: 60 + Math.random() * (hookCanvas.height - 120),
+    r: 28,
+    vx: (Math.random() - 0.5) * 4,
+    vy: (Math.random() - 0.5) * 4
+  };
+}
+
+function startHookGame() {
+  if (hookRunning) return;
+  hookRunning = true;
+  hookScore = 0;
+  hookMisses = 0;
+  hookTimeLeft = 30;
+  hookProjectile = null;
+  hookFloatTexts = [];
+  hookScoreEl.textContent = '0';
+  hookMissesEl.textContent = '0';
+  hookTimeEl.textContent = '30';
+  hookBtn.textContent = '30с';
+  hookBtn.disabled = true;
+  resetTarget();
+
+  hookTimerInterval = setInterval(() => {
+    hookTimeLeft--;
+    hookTimeEl.textContent = hookTimeLeft;
+    hookBtn.textContent = hookTimeLeft + 'с';
+    if (hookTimeLeft <= 0) endHookGame();
+  }, 1000);
+
+  drawHook();
+}
+
+function endHookGame() {
+  hookRunning = false;
+  clearInterval(hookTimerInterval);
+  hookBtn.textContent = 'ЕЩЁ РАЗ';
+  hookBtn.disabled = false;
+  const best = Math.max(hookScore, +(localStorage.getItem('dota_hook_best') || 0));
+  localStorage.setItem('dota_hook_best', best);
+}
+
+function drawHook() {
+  hctx.fillStyle = '#050505';
+  hctx.fillRect(0, 0, hookCanvas.width, hookCanvas.height);
+  const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#f97316';
+
+  const pudgeX = 50;
+  const pudgeY = hookCanvas.height - 50;
+  hctx.beginPath();
+  hctx.arc(pudgeX, pudgeY, 22, 0, Math.PI * 2);
+  hctx.strokeStyle = accent;
+  hctx.lineWidth = 2;
+  hctx.stroke();
+  hctx.fillStyle = hexToRgba(accent, 0.2);
+  hctx.fill();
+  hctx.fillStyle = accent;
+  hctx.font = 'bold 14px monospace';
+  hctx.textAlign = 'center';
+  hctx.textBaseline = 'middle';
+  hctx.fillText('P', pudgeX, pudgeY);
+
+  if (hookTarget) {
+    hookTarget.x += hookTarget.vx;
+    hookTarget.y += hookTarget.vy;
+    if (hookTarget.x < hookTarget.r || hookTarget.x > hookCanvas.width - hookTarget.r) hookTarget.vx *= -1;
+    if (hookTarget.y < hookTarget.r || hookTarget.y > hookCanvas.height - hookTarget.r) hookTarget.vy *= -1;
+
+    hctx.beginPath();
+    hctx.arc(hookTarget.x, hookTarget.y, hookTarget.r, 0, Math.PI * 2);
+    hctx.strokeStyle = accent;
+    hctx.lineWidth = 2;
+    hctx.stroke();
+    hctx.fillStyle = hexToRgba(accent, 0.15);
+    hctx.fill();
+    hctx.fillStyle = accent;
+    hctx.font = 'bold 20px monospace';
+    hctx.fillText('✕', hookTarget.x, hookTarget.y);
+
+    hctx.beginPath();
+    hctx.arc(hookTarget.x, hookTarget.y, hookTarget.r + 5, 0, Math.PI * 2);
+    hctx.strokeStyle = hexToRgba(accent, 0.3);
+    hctx.stroke();
+  }
+
+  if (hookProjectile) {
+    const p = hookProjectile;
+    p.progress += 0.04;
+    const tx = p.x1 + (p.x2 - p.x1) * Math.min(p.progress, 1);
+    const ty = p.y1 + (p.y2 - p.y1) * Math.min(p.progress, 1);
+    hctx.beginPath();
+    hctx.moveTo(p.x1, p.y1);
+    hctx.lineTo(tx, ty);
+    hctx.strokeStyle = accent;
+    hctx.lineWidth = 4;
+    hctx.stroke();
+    hctx.beginPath();
+    hctx.arc(tx, ty, 8, 0, Math.PI * 2);
+    hctx.fillStyle = accent;
+    hctx.fill();
+    if (p.progress >= 1) hookProjectile = null;
+  }
+
+  hookFloatTexts = hookFloatTexts.filter(t => t.life > 0);
+  hookFloatTexts.forEach(t => {
+    t.life -= 0.02;
+    t.y -= 1;
+    hctx.fillStyle = hexToRgba(accent, t.life);
+    hctx.font = 'bold 22px monospace';
+    hctx.fillText(t.text, t.x, t.y);
+  });
+
+  requestAnimationFrame(drawHook);
+}
+
+hookCanvas.addEventListener('click', e => {
+  if (!hookRunning || !hookTarget) return;
+  const r = hookCanvas.getBoundingClientRect();
+  const cx = e.clientX - r.left;
+  const cy = e.clientY - r.top;
+  const pudgeX = 50;
+  const pudgeY = hookCanvas.height - 50;
+  hookProjectile = { x1: pudgeX, y1: pudgeY, x2: cx, y2: cy, progress: 0 };
+
+  const dist = Math.hypot(hookTarget.x - cx, hookTarget.y - cy);
+  if (dist < hookTarget.r + 8) {
+    hookScore++;
+    hookScoreEl.textContent = hookScore;
+    hookFloatTexts.push({ x: hookTarget.x, y: hookTarget.y, text: '+1', life: 1 });
+    playSound(900, 0.1);
+    resetTarget();
+  } else {
+    hookMisses++;
+    hookMissesEl.textContent = hookMisses;
+    playSound(180, 0.15);
+  }
+});
+
+/* ===== ТЕРМИНАЛ ===== */
+const termInput = document.getElementById('termInput');
+const termBody = document.getElementById('termBody');
+
+const commands = {
+  help: () => [
+    'Доступные команды:',
+    '  help              — этот список',
+    '  about             — обо мне',
+    '  find match        — поиск игры',
+    '  pick ember        — выбрать Ember Spirit',
+    '  pick invoker      — выбрать Invoker',
+    '  pick sf           — выбрать SF',
+    '  pick pa           — выбрать PA',
+    '  main              — мой мейн-герой',
+    '  stats             — статистика',
+    '  profile           — живой профиль',
+    '  mid               — совет от капитана',
+    '  gg                — пасхалка 😉',
+    '  clear             — очистить'
+  ],
+  about: () => ['2к MMR. Мид или ничего.', 'Мейн — Ember Spirit 🔥'],
+  main: () => ['🔥 МОЙ МЕЙН: EMBER SPIRIT', 'Sleight of Fist + Fire Remnant = уничтожение.', 'WR: 68%, 340 матчей.'],
+  stats: () => ['MMR: 2000', 'Матчей: 1500', 'Винрейт: 50%', 'Часов: 750', 'Мейн: Ember Spirit'],
+  profile: () => {
+    setTimeout(() => {
+      const el = document.getElementById('live-profile');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 300);
+    return ['Открываю живой профиль...', 'MMR: 2000 | Матчей: 1500 | WR: 50%'];
+  },
+  gg: () => { triggerRampage(); return ['Good game. Все сдались. 😎', 'RAMPAGE!']; },
+  mid: () => {
+    const tips = [
+      'Не забудь руну на 2:00.',
+      'Проверь карту — сап не пуллит.',
+      'Купи БКБ, если у них много станов.',
+      'Смотри по миникарте каждые 3 секунды.',
+      'На Ember: следи за маной для Remnant.',
+      'Фарми и не дерись без причины.'
+    ];
+    return ['Совет капитана: ' + tips[Math.floor(Math.random() * tips.length)]];
+  },
+  clear: () => { termBody.innerHTML = ''; return []; }
+};
+
+function printTerm(lines) {
+  lines.forEach(l => {
+    const div = document.createElement('div');
+    div.className = 'line';
+    div.innerHTML = l;
+    termBody.appendChild(div);
+  });
+  termBody.scrollTop = termBody.scrollHeight;
+}
+
+termInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const raw = termInput.value.trim();
+    const cmd = raw.toLowerCase();
+    termInput.value = '';
+    if (!cmd) return;
+
+    const line = document.createElement('div');
+    line.className = 'line';
+    line.innerHTML = '<span class="cmd">$ ' + raw + '</span>';
+    termBody.appendChild(line);
+
+    if (cmd === 'find match') {
+      printTerm(['Поиск игры...']);
+      setTimeout(() => {
+        printTerm(['Игра найдена! Введи pick ember / pick invoker / pick sf / pick pa.']);
+      }, 1200);
+      return;
+    }
+
+    if (cmd.startsWith('pick ')) {
+      const hero = cmd.replace('pick ', '').trim();
+      if (['ember', 'invoker', 'sf', 'pa'].includes(hero)) {
+        pickHero(hero);
+        printTerm(['Выбран герой: ' + hero.toUpperCase(), hero === 'ember' ? '🔥 Мейн! Удачи на миду.' : 'Удачи на миду.']);
+      } else {
+        printTerm(['Такого героя нет. Доступны: ember, invoker, sf, pa.']);
+      }
+      return;
+    }
+
+    if (commands[cmd]) printTerm(commands[cmd]());
+    else printTerm(['Команда не найдена: ' + cmd, 'Введи help.']);
+  }
+});
+
+/* ===== ПАСХАЛКА RAMPAGE ===== */
+const hackOverlay = document.getElementById('hackOverlay');
+const hackText = document.getElementById('hackText');
+function triggerRampage() {
+  hackOverlay.classList.add('show');
+  playSound(1200, 0.3);
+  setTimeout(() => hackOverlay.classList.remove('show'), 1800);
+}
+
+/* ===== KONAMI ===== */
+const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let konamiIdx = 0;
+document.addEventListener('keydown', e => {
+  if (e.key === konami[konamiIdx]) {
+    konamiIdx++;
+    if (konamiIdx === konami.length) {
+      hackText.textContent = 'GODLIKE!';
+      hackOverlay.classList.add('show');
+      playSound(1500, 0.4);
+      setTimeout(() => {
+        hackOverlay.classList.remove('show');
+        hackText.textContent = 'RAMPAGE!';
+      }, 2000);
+      konamiIdx = 0;
+    }
+  } else konamiIdx = 0;
+});
+
+/* ===== ЗВУК ===== */
+let audioCtx;
+function playSound(freq, dur) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + dur);
+  } catch (e) {}
+}
+
+/* ===== КУРСОР + ИНТЕРАКТИВ ===== */
+document.querySelectorAll('a, .role, .hero-card, .match, .btn, .burger, .pick-btn, .game-btn, .refresh-btn, .live-match, .stat-card').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('big'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('big'));
+});
+
+/* ===== ПЛАВНЫЙ СКРОЛЛ ===== */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href');
+    if (id.length > 1) {
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
