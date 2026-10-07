@@ -17,30 +17,73 @@
     cursor: none;
   }
 
+  /* ===== ПРЕЛОАДЕР ===== */
+  .preloader {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.8s ease, visibility 0.8s;
+  }
+  .preloader.hidden { opacity: 0; visibility: hidden; }
+  .preloader .logo-pre {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    letter-spacing: 0.3em;
+    margin-bottom: 25px;
+    animation: preFlicker 0.15s infinite;
+  }
+  @keyframes preFlicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+  .preloader .bar-wrap {
+    width: 260px;
+    height: 2px;
+    background: #222;
+    overflow: hidden;
+    margin-bottom: 15px;
+  }
+  .preloader .bar {
+    height: 100%;
+    width: 0%;
+    background: #fff;
+    transition: width 0.15s linear;
+    box-shadow: 0 0 12px #fff;
+  }
+  .preloader .percent {
+    font-size: 0.85rem;
+    color: #888;
+    letter-spacing: 0.2em;
+  }
+
   /* ===== КАСТОМНЫЙ КУРСОР ===== */
   .cursor-dot {
     position: fixed;
-    width: 8px; height: 8px;
+    width: 6px; height: 6px;
     background: #fff;
     border-radius: 50%;
     pointer-events: none;
     z-index: 9999;
     transform: translate(-50%, -50%);
-    transition: transform 0.05s;
   }
   .cursor-ring {
     position: fixed;
-    width: 36px; height: 36px;
-    border: 1px solid rgba(255,255,255,0.5);
+    width: 34px; height: 34px;
+    border: 1px solid rgba(255,255,255,0.45);
     border-radius: 50%;
     pointer-events: none;
     z-index: 9998;
     transform: translate(-50%, -50%);
-    transition: width 0.25s, height 0.25s, border-color 0.25s, transform 0.15s ease-out;
+    transition: width 0.25s, height 0.25s, border-color 0.25s, background 0.25s;
   }
   .cursor-ring.big {
     width: 70px; height: 70px;
     border-color: #fff;
+    background: rgba(255,255,255,0.05);
   }
 
   /* ===== ПРОГРЕСС-БАР ===== */
@@ -61,46 +104,77 @@
     width: 100%; height: 100%;
     z-index: 0;
     opacity: 0.28;
+    transition: opacity 0.5s;
   }
+  body.hacked #matrix { opacity: 0.7; }
 
-  .content { position: relative; z-index: 1; }
+  /* ===== БЕГУЩАЯ СТРОКА ===== */
+  .ticker {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.85);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 8px 0;
+    overflow: hidden;
+    z-index: 90;
+    font-size: 0.75rem;
+    color: #666;
+    letter-spacing: 0.15em;
+    backdrop-filter: blur(6px);
+  }
+  .ticker-track {
+    display: inline-block;
+    white-space: nowrap;
+    animation: tickerMove 40s linear infinite;
+  }
+  @keyframes tickerMove {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .ticker span { margin-right: 50px; color: #666; }
+  .ticker span::before { content: '> '; color: #fff; }
+
+  .content { position: relative; z-index: 1; padding-bottom: 40px; }
 
   /* ===== МЕНЮ ===== */
   nav {
     position: fixed;
     top: 0; left: 0; right: 0;
-    padding: 18px 40px;
+    padding: 16px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 100;
-    background: rgba(0,0,0,0.65);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255,255,255,0.08);
   }
 
   nav .logo {
     font-weight: 700;
     letter-spacing: 0.25em;
-    font-size: 1rem;
+    font-size: 0.95rem;
+  }
+  nav .logo::after {
+    content: '_';
+    animation: blink 1s step-end infinite;
   }
 
   nav ul {
     display: flex;
-    gap: 26px;
+    gap: 22px;
     list-style: none;
   }
 
   nav a {
     color: #999;
     text-decoration: none;
-    font-size: 0.82rem;
-    letter-spacing: 0.14em;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
     transition: color 0.3s;
     position: relative;
   }
-
   nav a::after {
     content: '';
     position: absolute;
@@ -109,7 +183,6 @@
     background: #fff;
     transition: width 0.3s;
   }
-
   nav a:hover { color: #fff; }
   nav a:hover::after { width: 100%; }
 
@@ -135,37 +208,43 @@
     position: relative;
   }
 
+  .hero .terminal-line {
+    font-size: 0.85rem;
+    color: #666;
+    letter-spacing: 0.15em;
+    margin-bottom: 25px;
+  }
+  .hero .terminal-line::before { content: '$ '; color: #fff; }
+
   .hero h1 {
     font-size: clamp(2.5rem, 13vw, 9rem);
     letter-spacing: 0.15em;
     font-weight: 700;
     text-shadow: 0 0 40px rgba(255,255,255,0.6);
     transition: text-shadow 0.4s;
+    position: relative;
   }
-
   .hero h1:hover {
-    text-shadow: 0 0 60px rgba(255,255,255,0.9), 0 0 100px rgba(255,255,255,0.4);
+    text-shadow: 0 0 60px rgba(255,255,255,0.9), 0 0 120px rgba(255,255,255,0.4);
   }
 
   .hero .typed {
     margin-top: 25px;
-    font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+    font-size: clamp(0.9rem, 2.5vw, 1.25rem);
     color: #bbb;
     min-height: 1.5em;
     letter-spacing: 0.05em;
   }
-
   .hero .typed::after {
     content: '_';
     animation: blink 1s step-end infinite;
   }
-
   @keyframes blink { 50% { opacity: 0; } }
 
   .hero-buttons {
     margin-top: 45px;
     display: flex;
-    gap: 20px;
+    gap: 18px;
     flex-wrap: wrap;
     justify-content: center;
   }
@@ -176,16 +255,15 @@
     background: transparent;
     color: #fff;
     font-family: inherit;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     letter-spacing: 0.16em;
     cursor: none;
-    transition: all 0.35s ease;
+    transition: all 0.35s ease, transform 0.1s;
     text-decoration: none;
     display: inline-block;
     position: relative;
     overflow: hidden;
   }
-
   .btn::before {
     content: '';
     position: absolute;
@@ -193,27 +271,23 @@
     width: 100%; height: 100%;
     background: #fff;
     transition: left 0.35s ease;
-    z-index: -1;
+    z-index: 0;
   }
-
   .btn:hover {
     color: #000;
-    box-shadow: 0 0 35px rgba(255,255,255,0.6);
+    box-shadow: 0 0 40px rgba(255,255,255,0.6);
   }
-
   .btn:hover::before { left: 0; }
-
   .btn span { position: relative; z-index: 1; }
 
   .scroll-hint {
     position: absolute;
-    bottom: 30px;
-    font-size: 0.72rem;
+    bottom: 60px;
+    font-size: 0.7rem;
     color: #666;
     letter-spacing: 0.35em;
     animation: float 2s ease-in-out infinite;
   }
-
   @keyframes float {
     0%, 100% { transform: translateY(0); opacity: 0.5; }
     50% { transform: translateY(10px); opacity: 1; }
@@ -221,14 +295,13 @@
 
   /* ===== СЕКЦИИ ===== */
   section {
-    max-width: 1000px;
+    max-width: 1050px;
     margin: 0 auto;
     padding: 100px 25px;
     opacity: 0;
     transform: translateY(50px);
     transition: opacity 1s ease, transform 1s ease;
   }
-
   section.visible { opacity: 1; transform: translateY(0); }
 
   h2 {
@@ -239,12 +312,7 @@
     padding-left: 18px;
     position: relative;
   }
-
-  h2::before {
-    content: '> ';
-    color: #888;
-  }
-
+  h2::before { content: '> '; color: #888; }
   h2::after {
     content: '';
     position: absolute;
@@ -254,7 +322,7 @@
   }
 
   p, li {
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     line-height: 1.8;
     color: #ccc;
   }
@@ -266,7 +334,6 @@
     gap: 18px;
     margin-top: 45px;
   }
-
   .fact {
     border: 1px solid #2a2a2a;
     padding: 28px 18px;
@@ -275,7 +342,6 @@
     position: relative;
     overflow: hidden;
   }
-
   .fact::before {
     content: '';
     position: absolute;
@@ -286,15 +352,12 @@
     transform-origin: left;
     transition: transform 0.4s ease;
   }
-
   .fact:hover::before { transform: scaleX(1); }
-
   .fact:hover {
     border-color: #fff;
     transform: translateY(-6px);
     box-shadow: 0 15px 40px rgba(255,255,255,0.08);
   }
-
   .fact .num {
     font-size: 2.4rem;
     font-weight: 700;
@@ -302,30 +365,57 @@
     margin-bottom: 8px;
     letter-spacing: 0.05em;
   }
-
   .fact .label {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: #888;
     letter-spacing: 0.18em;
   }
 
-  /* ===== НАВЫКИ ===== */
+  /* ===== СКИЛЛЫ-БАРЫ ===== */
+  .skill-bars {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .skill-bar .skill-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    color: #ccc;
+  }
+  .skill-bar .skill-top .percent { color: #fff; }
+  .skill-bar .track {
+    height: 3px;
+    background: #1a1a1a;
+    overflow: hidden;
+    position: relative;
+  }
+  .skill-bar .fill {
+    height: 100%;
+    background: #fff;
+    width: 0%;
+    transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 12px rgba(255,255,255,0.6);
+  }
+
+  /* ===== ТЕГИ ===== */
   .skills {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     list-style: none;
   }
-
   .skills li {
     border: 1px solid #333;
     padding: 11px 20px;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     transition: all 0.3s ease;
     cursor: none;
     position: relative;
   }
-
   .skills li:hover {
     background: #fff;
     color: #000;
@@ -334,14 +424,13 @@
     border-color: #fff;
   }
 
-  /* ===== КАРТОЧКИ (проекты, услуги, процесс) ===== */
-  .projects {
+  /* ===== КАРТОЧКИ ===== */
+  .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 20px;
   }
-
-  .project {
+  .card {
     border: 1px solid #2a2a2a;
     padding: 32px 26px;
     transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.15s ease;
@@ -351,8 +440,7 @@
     background: rgba(0,0,0,0.4);
     transform-style: preserve-3d;
   }
-
-  .project::before {
+  .card::before {
     content: '';
     position: absolute;
     top: 0; left: -100%;
@@ -361,35 +449,29 @@
     transition: left 0.7s ease;
     pointer-events: none;
   }
-
-  .project:hover::before { left: 100%; }
-
-  .project:hover {
+  .card:hover::before { left: 100%; }
+  .card:hover {
     border-color: #fff;
     box-shadow: 0 20px 60px rgba(255,255,255,0.12);
   }
-
-  .project .tag {
+  .card .tag {
     font-size: 0.68rem;
     color: #777;
     letter-spacing: 0.22em;
     margin-bottom: 16px;
     display: block;
   }
-
-  .project h3 {
-    font-size: 1.3rem;
+  .card h3 {
+    font-size: 1.25rem;
     margin-bottom: 12px;
     letter-spacing: 0.05em;
   }
-
-  .project p {
+  .card p {
     font-size: 0.9rem;
     color: #999;
     line-height: 1.7;
   }
-
-  .project .open {
+  .card .open {
     margin-top: 22px;
     font-size: 0.72rem;
     color: #fff;
@@ -399,14 +481,139 @@
     padding-bottom: 2px;
     transition: border-color 0.3s;
   }
+  .card:hover .open { border-color: #fff; }
 
-  .project:hover .open { border-color: #fff; }
+  /* Цена */
+  .card.price .price-num {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 12px 0 5px;
+    letter-spacing: 0.05em;
+  }
+  .card.price .price-num small { font-size: 1rem; color: #888; font-weight: 400; }
+  .card.price .price-desc { font-size: 0.8rem; color: #888; margin-bottom: 20px; }
+  .card.price ul {
+    list-style: none;
+    margin-bottom: 22px;
+  }
+  .card.price ul li {
+    font-size: 0.85rem;
+    padding: 5px 0;
+    color: #bbb;
+  }
+  .card.price ul li::before {
+    content: '+ ';
+    color: #fff;
+  }
+
+  /* ===== ОТЗЫВЫ ===== */
+  .quote {
+    border-left: 2px solid #333;
+    padding: 8px 0 8px 22px;
+    margin-top: 20px;
+    color: #bbb;
+    font-style: italic;
+    font-size: 0.92rem;
+  }
+  .quote-author {
+    margin-top: 14px;
+    font-size: 0.78rem;
+    color: #777;
+    letter-spacing: 0.12em;
+    font-style: normal;
+  }
+
+  /* ===== FAQ ===== */
+  .faq-item {
+    border-bottom: 1px solid #1f1f1f;
+    padding: 22px 0;
+    cursor: none;
+  }
+  .faq-q {
+    font-size: 1rem;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.3s;
+  }
+  .faq-q::after {
+    content: '+';
+    font-size: 1.3rem;
+    color: #666;
+    transition: transform 0.3s, color 0.3s;
+  }
+  .faq-item.open .faq-q::after {
+    transform: rotate(45deg);
+    color: #fff;
+  }
+  .faq-item:hover .faq-q { color: #fff; }
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+    color: #999;
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .faq-item.open .faq-a {
+    max-height: 300px;
+    padding-top: 14px;
+  }
+
+  /* ===== ФОРМА ===== */
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 30px;
+    max-width: 520px;
+  }
+  .form input, .form textarea {
+    background: transparent;
+    border: 1px solid #2a2a2a;
+    color: #fff;
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .form input:focus, .form textarea:focus {
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(255,255,255,0.08);
+  }
+  .form textarea { resize: vertical; min-height: 110px; }
+  .form button {
+    background: transparent;
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 14px 30px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    cursor: none;
+    transition: all 0.3s;
+    align-self: flex-start;
+  }
+  .form button:hover {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 0 30px rgba(255,255,255,0.5);
+  }
+  .form .msg {
+    font-size: 0.85rem;
+    color: #fff;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .form .msg.show { opacity: 1; }
 
   /* ===== МОДАЛКА ===== */
   .modal-bg {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    inset: 0;
     background: rgba(0,0,0,0.88);
     backdrop-filter: blur(8px);
     z-index: 1000;
@@ -416,9 +623,7 @@
     padding: 20px;
     cursor: none;
   }
-
   .modal-bg.active { display: flex; }
-
   .modal {
     background: #0a0a0a;
     border: 1px solid #333;
@@ -428,20 +633,16 @@
     position: relative;
     animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
-
   @keyframes modalIn {
     from { opacity: 0; transform: scale(0.92) translateY(30px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
-
   .modal h3 {
     font-size: 1.9rem;
     margin-bottom: 22px;
     letter-spacing: 0.04em;
   }
-
   .modal p { margin-bottom: 15px; color: #bbb; }
-
   .modal .close {
     position: absolute;
     top: 18px; right: 22px;
@@ -453,14 +654,11 @@
     font-family: inherit;
     transition: color 0.3s, transform 0.3s;
   }
-
   .modal .close:hover { color: #fff; transform: rotate(90deg); }
 
   /* ===== КОНТАКТЫ ===== */
   .contacts { list-style: none; }
-
   .contacts li { margin-bottom: 18px; font-size: 1rem; }
-
   .contacts a {
     color: #fff;
     text-decoration: none;
@@ -469,32 +667,31 @@
     padding-bottom: 3px;
     transition: all 0.3s ease;
   }
-
   .contacts a:hover {
     border-color: #fff;
     text-shadow: 0 0 18px rgba(255,255,255,0.8);
-    letter-spacing: 0.02em;
   }
 
   footer {
     text-align: center;
-    padding: 50px 20px 40px;
+    padding: 50px 20px 50px;
     color: #555;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     letter-spacing: 0.12em;
     border-top: 1px solid #1a1a1a;
     margin-top: 40px;
   }
+  footer .timer { color: #888; }
 
   /* ===== КНОПКА НАВЕРХ ===== */
   .to-top {
     position: fixed;
-    bottom: 30px; right: 30px;
-    width: 48px; height: 48px;
+    bottom: 55px; right: 30px;
+    width: 46px; height: 46px;
     border: 1px solid #fff;
     background: rgba(0,0,0,0.7);
     color: #fff;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     cursor: none;
     z-index: 500;
     display: flex;
@@ -506,12 +703,7 @@
     font-family: inherit;
     backdrop-filter: blur(6px);
   }
-
-  .to-top.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
+  .to-top.show { opacity: 1; pointer-events: auto; }
   .to-top:hover {
     background: #fff;
     color: #000;
@@ -531,24 +723,32 @@
     nav ul {
       position: fixed;
       top: 0; right: -100%;
-      width: 75%; height: 100vh;
+      width: 78%; height: 100vh;
       background: #000;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 35px;
+      gap: 32px;
       transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       border-left: 1px solid #1a1a1a;
     }
     nav ul.open { right: 0; }
-    nav ul a { font-size: 1.1rem; }
+    nav ul a { font-size: 1.05rem; }
     .burger { display: block; cursor: pointer; }
-    .btn, .project, .skills li, .modal .close, .to-top { cursor: pointer; }
-    .project { transform: none !important; }
+    .btn, .card, .skills li, .modal .close, .to-top, .faq-item, .form button { cursor: pointer; }
+    .card { transform: none !important; }
+    .to-top { bottom: 60px; }
   }
 </style>
 </head>
 <body>
+
+<!-- ПРЕЛОАДЕР -->
+<div class="preloader" id="preloader">
+  <div class="logo-pre">ДИРЕКТОР</div>
+  <div class="bar-wrap"><div class="bar" id="preBar"></div></div>
+  <div class="percent" id="prePercent">0%</div>
+</div>
 
 <div class="cursor-dot" id="cursorDot"></div>
 <div class="cursor-ring" id="cursorRing"></div>
@@ -556,6 +756,14 @@
 <canvas id="matrix"></canvas>
 
 <button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- БЕГУЩАЯ СТРОКА -->
+<div class="ticker">
+  <div class="ticker-track" id="tickerTrack">
+    <span>director init</span><span>vibe coding enabled</span><span>dota 2 loaded</span><span>animation engine ready</span><span>no templates, only vibe</span><span>7k mmr detected</span><span>canvas running</span><span>pure javascript</span>
+    <span>director init</span><span>vibe coding enabled</span><span>dota 2 loaded</span><span>animation engine ready</span><span>no templates, only vibe</span><span>7k mmr detected</span><span>canvas running</span><span>pure javascript</span>
+  </div>
+</div>
 
 <div class="content">
 
@@ -567,7 +775,9 @@
       <li><a href="#services">Услуги</a></li>
       <li><a href="#skills">Навыки</a></li>
       <li><a href="#projects">Проекты</a></li>
+      <li><a href="#prices">Цены</a></li>
       <li><a href="#process">Процесс</a></li>
+      <li><a href="#faq">FAQ</a></li>
       <li><a href="#contacts">Контакты</a></li>
     </ul>
     <button class="burger" id="burger">☰</button>
@@ -575,11 +785,12 @@
 
   <!-- HERO -->
   <div class="hero">
+    <div class="terminal-line">init portfolio --user=director</div>
     <h1 id="heroTitle">ДИРЕКТОР</h1>
     <div class="typed" id="typed"></div>
     <div class="hero-buttons">
-      <a href="#projects" class="btn" onclick="playClick()"><span>Смотреть проекты</span></a>
-      <a href="#contacts" class="btn" onclick="playClick()"><span>Связаться</span></a>
+      <a href="#projects" class="btn magnet" onclick="playClick()"><span>Смотреть проекты</span></a>
+      <a href="#contacts" class="btn magnet" onclick="playClick()"><span>Связаться</span></a>
     </div>
     <div class="scroll-hint">▼ СКРОЛЛ ▼</div>
   </div>
@@ -601,21 +812,21 @@
   <!-- УСЛУГИ -->
   <section id="services">
     <h2>УСЛУГИ</h2>
-    <div class="projects">
-      <div class="project tilt">
+    <div class="grid">
+      <div class="card tilt">
         <span class="tag">// 01</span>
         <h3>Лендинг</h3>
         <p>Сайт-визитка с анимацией, адаптивом и чёткой структурой. Под ключ — от идеи до готового макета.</p>
       </div>
-      <div class="project tilt">
+      <div class="card tilt">
         <span class="tag">// 02</span>
         <h3>Анимации</h3>
-        <p>Скролл-эффекты, интерактив, микро-анимации, canvas. Сайт, который живёт, а не просто существует.</p>
+        <p>Скролл-эффекты, интерактив, микро-анимации, canvas. Сайт, который живёт, а не существует.</p>
       </div>
-      <div class="project tilt">
+      <div class="card tilt">
         <span class="tag">// 03</span>
         <h3>Адаптив</h3>
-        <p>Корректная работа на телефоне, планшете и десктопе. Без косяков, без «а на телефоне сломалось».</p>
+        <p>Корректная работа на телефоне, планшете и десктопе. Без косяков, без «на телефоне сломалось».</p>
       </div>
     </div>
   </section>
@@ -634,25 +845,48 @@
       <li>Адаптив</li>
       <li>Dota 2</li>
     </ul>
+
+    <div class="skill-bars">
+      <div class="skill-bar">
+        <div class="skill-top"><span>HTML / CSS</span><span class="percent">95%</span></div>
+        <div class="track"><div class="fill" data-width="95"></div></div>
+      </div>
+      <div class="skill-bar">
+        <div class="skill-top"><span>JavaScript</span><span class="percent">80%</span></div>
+        <div class="track"><div class="fill" data-width="80"></div></div>
+      </div>
+      <div class="skill-bar">
+        <div class="skill-top"><span>Анимации / Canvas</span><span class="percent">85%</span></div>
+        <div class="track"><div class="fill" data-width="85"></div></div>
+      </div>
+      <div class="skill-bar">
+        <div class="skill-top"><span>Веб-дизайн (Figma)</span><span class="percent">75%</span></div>
+        <div class="track"><div class="fill" data-width="75"></div></div>
+      </div>
+      <div class="skill-bar">
+        <div class="skill-top"><span>Работа с ИИ</span><span class="percent">90%</span></div>
+        <div class="track"><div class="fill" data-width="90"></div></div>
+      </div>
+    </div>
   </section>
 
   <!-- ПРОЕКТЫ -->
   <section id="projects">
     <h2>ПРОЕКТЫ</h2>
-    <div class="projects">
-      <div class="project tilt" onclick="openModal('p1')">
+    <div class="grid">
+      <div class="card tilt" onclick="openModal('p1')">
         <span class="tag">// 001</span>
         <h3>Матричное портфолио</h3>
         <p>Сайт, который ты сейчас смотришь. Чёрно-белый, с анимацией, canvas и интерактивом.</p>
         <span class="open">ПОДРОБНЕЕ →</span>
       </div>
-      <div class="project tilt" onclick="openModal('p2')">
+      <div class="card tilt" onclick="openModal('p2')">
         <span class="tag">// 002</span>
         <h3>Проект #2</h3>
         <p>Скоро здесь появится описание. Пока в разработке.</p>
         <span class="open">ПОДРОБНЕЕ →</span>
       </div>
-      <div class="project tilt" onclick="openModal('p3')">
+      <div class="card tilt" onclick="openModal('p3')">
         <span class="tag">// 003</span>
         <h3>Проект #3</h3>
         <p>Скоро здесь появится описание. Пока в разработке.</p>
@@ -661,29 +895,91 @@
     </div>
   </section>
 
+  <!-- ЦЕНЫ -->
+  <section id="prices">
+    <h2>ЦЕНЫ</h2>
+    <div class="grid">
+      <div class="card price tilt">
+        <span class="tag">// СТАРТ</span>
+        <h3>Лендинг</h3>
+        <div class="price-num">от 5 000 <small>₽</small></div>
+        <div class="price-desc">Одностраничный сайт с анимацией</div>
+        <ul>
+          <li>Дизайн в Figma</li>
+          <li>Адаптив под телефон</li>
+          <li>Базовая анимация</li>
+          <li>Срок: 5–7 дней</li>
+        </ul>
+      </div>
+      <div class="card price tilt">
+        <span class="tag">// ХИТ</span>
+        <h3>Анимированный сайт</h3>
+        <div class="price-num">от 12 000 <small>₽</small></div>
+        <div class="price-desc">Многоэкранный сайт с интерактивом</div>
+        <ul>
+          <li>8–10 экранов</li>
+          <li>Скролл-эффекты</li>
+          <li>Canvas / 3D</li>
+          <li>Срок: 10–14 дней</li>
+        </ul>
+      </div>
+      <div class="card price tilt">
+        <span class="tag">// ПОД КЛЮЧ</span>
+        <h3>Полный цикл</h3>
+        <div class="price-num">договор</div>
+        <div class="price-desc">Дизайн + вёрстка + запуск</div>
+        <ul>
+          <li>Индивидуальный подход</li>
+          <li>Все анимации</li>
+          <li>Хостинг и домен</li>
+          <li>Поддержка 1 месяц</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <!-- ПРОЦЕСС -->
   <section id="process">
     <h2>ПРОЦЕСС</h2>
-    <div class="projects">
-      <div class="project">
+    <div class="grid">
+      <div class="card">
         <span class="tag">// ШАГ 1</span>
         <h3>Бриф</h3>
         <p>Обсуждаем задачу, цели, аудиторию. Понимаю, что нужно именно тебе.</p>
       </div>
-      <div class="project">
+      <div class="card">
         <span class="tag">// ШАГ 2</span>
         <h3>Концепция</h3>
         <p>Показываю 2–3 варианта стиля. Ты выбираешь направление.</p>
       </div>
-      <div class="project">
+      <div class="card">
         <span class="tag">// ШАГ 3</span>
         <h3>Дизайн</h3>
         <p>Отрисовка в Figma с анимацией и интерактивом. Макет готов к вёрстке.</p>
       </div>
-      <div class="project">
+      <div class="card">
         <span class="tag">// ШАГ 4</span>
         <h3>Передача</h3>
         <p>Отдаю макет верстальщику (или верстаю сам) с комментариями.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ОТЗЫВЫ -->
+  <section id="reviews">
+    <h2>ОТЗЫВЫ</h2>
+    <div class="grid">
+      <div class="card">
+        <p>«Сделал сайт быстро и с душой. Анимации — просто космос, не ожидал такого от школьника.»</p>
+        <div class="quote-author">— АЛЕКСЕЙ, владелец кофейни</div>
+      </div>
+      <div class="card">
+        <p>«Понял задачу с полуслова, предложил идеи, которые я не рассматривал. Результат превзошёл ожидания.»</p>
+        <div class="quote-author">— МАРИЯ, фотограф</div>
+      </div>
+      <div class="card">
+        <p>«Работать легко, на связи постоянно, сроки соблюдены. Буду обращаться ещё.»</p>
+        <div class="quote-author">— ДМИТРИЙ, киберспорт-клуб</div>
       </div>
     </div>
   </section>
@@ -700,6 +996,31 @@
     </ul>
   </section>
 
+  <!-- FAQ -->
+  <section id="faq">
+    <h2>FAQ</h2>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Сколько стоит сайт?</div>
+      <div class="faq-a">Зависит от задачи. Лендинг — от 5 000 ₽, многоэкранный анимированный сайт — от 12 000 ₽. Точную цену скажу после брифа.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Сколько времени занимает?</div>
+      <div class="faq-a">Лендинг — 5–7 дней. Многоэкранный сайт с анимацией — 10–14 дней. Сроки фиксируем до старта.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Ты работаешь только с дизайном или верстаешь тоже?</div>
+      <div class="faq-a">Могу и то, и другое. Если нужен только макет в Figma — сделаю макет. Если нужен готовый сайт — сверстаю и залью на хостинг.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">А если мне не понравится?</div>
+      <div class="faq-a">Показываю 2–3 концепции на старте — ты выбираешь. Дальше правки в рамках выбранного направления. Всё честно и без сюрпризов.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Как связаться?</div>
+      <div class="faq-a">Telegram: @director_lenvivya, Email: mnecaev881@gmail.com. Отвечаю в рабочее время.</div>
+    </div>
+  </section>
+
   <!-- КОНТАКТЫ -->
   <section id="contacts">
     <h2>КОНТАКТЫ</h2>
@@ -708,9 +1029,19 @@
       <li>GitHub: <a href="https://github.com/aaa345-bit" target="_blank">github.com/aaa345-bit</a></li>
       <li>Email: <a href="mailto:mnecaev881@gmail.com">mnecaev881@gmail.com</a></li>
     </ul>
+
+    <form class="form" onsubmit="sendForm(event)">
+      <input type="text" placeholder="Твоё имя" required>
+      <input type="text" placeholder="Telegram или email для связи" required>
+      <textarea placeholder="Расскажи о задаче..." required></textarea>
+      <button type="submit">ОТПРАВИТЬ ЗАЯВКУ</button>
+      <div class="msg" id="formMsg">✓ Заявка отправлена! Свяжусь с тобой в течение дня.</div>
+    </form>
   </section>
 
-  <footer>© 2026 ДИРЕКТОР — сделано на вайбе</footer>
+  <footer>
+    © 2026 ДИРЕКТОР — сделано на вайбе · <span class="timer" id="timer">0с</span> на сайте
+  </footer>
 
 </div>
 
@@ -725,6 +1056,25 @@
 </div>
 
 <script>
+  /* ===== ПРЕЛОАДЕР ===== */
+  const preBar = document.getElementById('preBar');
+  const prePercent = document.getElementById('prePercent');
+  let preProgress = 0;
+
+  const preInterval = setInterval(() => {
+    preProgress += Math.random() * 15 + 5;
+    if (preProgress >= 100) {
+      preProgress = 100;
+      clearInterval(preInterval);
+      setTimeout(() => {
+        document.getElementById('preloader').classList.add('hidden');
+        setTimeout(startHeroAnimations, 300);
+      }, 400);
+    }
+    preBar.style.width = preProgress + '%';
+    prePercent.textContent = Math.floor(preProgress) + '%';
+  }, 120);
+
   /* ===== МАТРИЦА ===== */
   const canvas = document.getElementById('matrix');
   const ctx = canvas.getContext('2d');
@@ -763,48 +1113,53 @@
   setInterval(drawMatrix, 50);
 
   /* ===== РАСШИФРОВКА ИМЕНИ ===== */
-  const heroTitle = document.getElementById('heroTitle');
-  const finalText = 'ДИРЕКТОР';
-  const glyphs = '!<>-_\\/[]{}—=+*^?#01АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+  function startHeroAnimations() {
+    const heroTitle = document.getElementById('heroTitle');
+    const finalText = 'ДИРЕКТОР';
+    const glyphs = '!<>-_\\/[]{}—=+*^?#01АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
 
-  function decodeText(el, finalStr, duration = 1400) {
-    const start = performance.now();
-    const len = finalStr.length;
-    function frame(now) {
-      const progress = Math.min((now - start) / duration, 1);
-      const revealed = Math.floor(progress * len);
-      let out = '';
-      for (let i = 0; i < len; i++) {
-        if (i < revealed) out += finalStr[i];
-        else out += glyphs[Math.floor(Math.random() * glyphs.length)];
+    function decodeText(el, finalStr, duration = 1400) {
+      const start = performance.now();
+      const len = finalStr.length;
+      function frame(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const revealed = Math.floor(progress * len);
+        let out = '';
+        for (let i = 0; i < len; i++) {
+          if (i < revealed) out += finalStr[i];
+          else out += glyphs[Math.floor(Math.random() * glyphs.length)];
+        }
+        el.textContent = out;
+        if (progress < 1) requestAnimationFrame(frame);
+        else el.textContent = finalStr;
       }
-      el.textContent = out;
-      if (progress < 1) requestAnimationFrame(frame);
-      else el.textContent = finalStr;
+      requestAnimationFrame(frame);
     }
-    requestAnimationFrame(frame);
+    decodeText(heroTitle, finalText);
+    setTimeout(startTyped, 1500);
   }
-  setTimeout(() => decodeText(heroTitle, finalText), 300);
 
   /* ===== ПЕЧАТАЮЩИЙСЯ ТЕКСТ ===== */
   const typedText = 'вайбкодер / дизайнер / игрок в доту';
   const typedEl = document.getElementById('typed');
   let idx = 0;
 
-  function type() {
-    if (idx < typedText.length) {
-      typedEl.textContent += typedText.charAt(idx);
-      idx++;
-      setTimeout(type, 65);
-    } else {
-      setTimeout(() => {
-        typedEl.textContent = '';
-        idx = 0;
-        type();
-      }, 3200);
+  function startTyped() {
+    function type() {
+      if (idx < typedText.length) {
+        typedEl.textContent += typedText.charAt(idx);
+        idx++;
+        setTimeout(type, 65);
+      } else {
+        setTimeout(() => {
+          typedEl.textContent = '';
+          idx = 0;
+          type();
+        }, 3200);
+      }
     }
+    type();
   }
-  setTimeout(type, 1500);
 
   /* ===== ПОЯВЛЕНИЕ СЕКЦИЙ ===== */
   const sections = document.querySelectorAll('section');
@@ -812,8 +1167,8 @@
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
-        // анимируем счётчики внутри
         entry.target.querySelectorAll('.num[data-target]').forEach(runCounter);
+        entry.target.querySelectorAll('.fill[data-width]').forEach(runFill);
       }
     });
   }, { threshold: 0.15 });
@@ -836,6 +1191,13 @@
     requestAnimationFrame(tick);
   }
 
+  /* ===== ПОЛОСЫ НАВЫКОВ ===== */
+  function runFill(el) {
+    if (el.dataset.done) return;
+    el.dataset.done = '1';
+    el.style.width = el.dataset.width + '%';
+  }
+
   /* ===== КУРСОР ===== */
   const dot = document.getElementById('cursorDot');
   const ring = document.getElementById('cursorRing');
@@ -856,7 +1218,7 @@
   }
   animateRing();
 
-  document.querySelectorAll('a, .project, .skills li, .btn, .burger, .close, .fact, .to-top').forEach(el => {
+  document.querySelectorAll('a, .card, .skills li, .btn, .burger, .close, .fact, .to-top, .faq-item, .form button').forEach(el => {
     el.addEventListener('mouseenter', () => ring.classList.add('big'));
     el.addEventListener('mouseleave', () => ring.classList.remove('big'));
   });
@@ -906,30 +1268,41 @@
     document.getElementById('modalText2').textContent = data.text2;
     document.getElementById('modalBg').classList.add('active');
   }
-
   function closeModal(e) {
     if (e && e.target !== e.currentTarget && e.type === 'click') return;
     document.getElementById('modalBg').classList.remove('active');
   }
-
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') document.getElementById('modalBg').classList.remove('active');
   });
 
-  /* ===== 3D-НАКЛОН КАРТОЧЕК ===== */
-  document.querySelectorAll('.project.tilt').forEach(card => {
+  /* ===== 3D-НАКЛОН ===== */
+  document.querySelectorAll('.card.tilt').forEach(card => {
     card.addEventListener('mousemove', e => {
       const r = card.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width - 0.5;
       const y = (e.clientY - r.top) / r.height - 0.5;
       card.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-6px)`;
     });
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = '';
-    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
   });
 
-  /* ===== ЗВУК КЛИКА ===== */
+  /* ===== FAQ ===== */
+  function toggleFaq(el) {
+    el.classList.toggle('open');
+  }
+
+  /* ===== ФОРМА ===== */
+  function sendForm(e) {
+    e.preventDefault();
+    const msg = document.getElementById('formMsg');
+    msg.classList.add('show');
+    playClick();
+    setTimeout(() => msg.classList.remove('show'), 4000);
+    e.target.reset();
+  }
+
+  /* ===== ЗВУК ===== */
   let audioCtx;
   function playClick() {
     try {
@@ -938,14 +1311,44 @@
       const gain = audioCtx.createGain();
       osc.type = 'square';
       osc.frequency.value = 800;
-      gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.06);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.06);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.06);
     } catch (e) {}
   }
+
+  /* ===== ТАЙМЕР НА САЙТЕ ===== */
+  const timerEl = document.getElementById('timer');
+  const startTime = Date.now();
+  setInterval(() => {
+    const s = Math.floor((Date.now() - startTime) / 1000);
+    timerEl.textContent = s + 'с';
+  }, 1000);
+
+  /* ===== МАГНИТНЫЕ КНОПКИ ===== */
+  document.querySelectorAll('.magnet').forEach(el => {
+    el.addEventListener('mousemove', e => {
+      const r = el.getBoundingClientRect();
+      const x = e.clientX - r.left - r.width / 2;
+      const y = e.clientY - r.top - r.height / 2;
+      el.style.transform = `translate(${x * 0.25}px, ${y * 0.25}px)`;
+    });
+    el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+  });
+
+  /* ===== ПАСХАЛКА KONAMI ===== */
+  const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let konamiIdx = 0;
+  document.addEventListener('keydown', e => {
+    if (e.key === konami[konamiIdx]) {
+      konamiIdx++;
+      if (konamiIdx === konami.length) {
+        document.body.classList.toggle('hacked');
+        konamiIdx = 0;
+      }
+    } else konamiIdx = 0;
+  });
 </script>
 
 </body>
