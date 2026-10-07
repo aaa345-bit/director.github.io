@@ -1440,6 +1440,533 @@
 
 <!-- ЧАСТЬ 2: JS-СКРИПТ ВСТАВЬ СЮДА -->
 <!-- ПОКА МЕСТО ПУСТОЕ — ЖДИ СЛЕДУЮЩЕЕ СООБЩЕНИЕ -->
+<script>
+  /* ===== ПРЕЛОАДЕР ===== */
+  const preBar = document.getElementById('preBar');
+  const prePercent = document.getElementById('prePercent');
+  let preProgress = 0;
 
+  const preInterval = setInterval(() => {
+    preProgress += Math.random() * 12 + 6;
+    if (preProgress >= 100) {
+      preProgress = 100;
+      clearInterval(preInterval);
+      setTimeout(() => {
+        document.getElementById('preloader').classList.add('hidden');
+        setTimeout(startHeroAnimations, 300);
+      }, 400);
+    }
+    preBar.style.width = preProgress + '%';
+    prePercent.textContent = Math.floor(preProgress) + '%';
+  }, 100);
+
+  /* ===== МАТРИЦА ===== */
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF';
+  const fontSize = 16;
+  let columns, drops;
+  function initDrops() {
+    columns = Math.floor(canvas.width / fontSize);
+    drops = Array(columns).fill(1);
+  }
+  initDrops();
+  window.addEventListener('resize', initDrops);
+
+  function drawMatrix() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#fff';
+    ctx.fillStyle = accent;
+    ctx.font = fontSize + 'px monospace';
+    for (let i = 0; i < drops.length; i++) {
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+  setInterval(drawMatrix, 50);
+
+  /* ===== РАСШИФРОВКА ИМЕНИ ===== */
+  function startHeroAnimations() {
+    const heroTitle = document.getElementById('heroTitle');
+    const finalText = 'ДИРЕКТОР';
+    const glyphs = '!<>-_\\/[]{}—=+*^?#01АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+    function decodeText(el, finalStr, duration = 1400) {
+      const start = performance.now();
+      const len = finalStr.length;
+      function frame(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const revealed = Math.floor(progress * len);
+        let out = '';
+        for (let i = 0; i < len; i++) {
+          if (i < revealed) out += finalStr[i];
+          else out += glyphs[Math.floor(Math.random() * glyphs.length)];
+        }
+        el.textContent = out;
+        if (progress < 1) requestAnimationFrame(frame);
+        else el.textContent = finalStr;
+      }
+      requestAnimationFrame(frame);
+    }
+    decodeText(heroTitle, finalText);
+    setTimeout(startTyped, 1500);
+  }
+
+  /* ===== ПЕЧАТАЮЩИЙСЯ ТЕКСТ ===== */
+  const typedText = 'вайбкодер / дизайнер / игрок в доту';
+  const typedEl = document.getElementById('typed');
+  let idx = 0;
+  function startTyped() {
+    function type() {
+      if (idx < typedText.length) {
+        typedEl.textContent += typedText.charAt(idx);
+        idx++;
+        setTimeout(type, 65);
+      } else {
+        setTimeout(() => {
+          typedEl.textContent = '';
+          idx = 0;
+          type();
+        }, 3200);
+      }
+    }
+    type();
+  }
+
+  /* ===== ПОЯВЛЕНИЕ СЕКЦИЙ ===== */
+  const sections = document.querySelectorAll('section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        entry.target.querySelectorAll('.num[data-target]').forEach(runCounter);
+        entry.target.querySelectorAll('.fill[data-width]').forEach(runFill);
+      }
+    });
+  }, { threshold: 0.15 });
+  sections.forEach(s => observer.observe(s));
+
+  function runCounter(el) {
+    if (el.dataset.done) return;
+    el.dataset.done = '1';
+    const target = +el.dataset.target;
+    const dur = 1400;
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.floor(eased * target);
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function runFill(el) {
+    if (el.dataset.done) return;
+    el.dataset.done = '1';
+    el.style.width = el.dataset.width + '%';
+  }
+
+  /* ===== КУРСОР ===== */
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  const glow = document.getElementById('cursorGlow');
+  let mx = 0, my = 0, rx = 0, ry = 0, gx = 0, gy = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx + 'px';
+    dot.style.top = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.18;
+    ry += (my - ry) * 0.18;
+    gx += (mx - gx) * 0.08;
+    gy += (my - gy) * 0.08;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    glow.style.left = gx + 'px';
+    glow.style.top = gy + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, .card, .skills li, .btn, .burger, .close, .fact, .to-top, .faq-item, .form button, .blog-post, .theme-btn, .sound-btn, .game-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('big'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('big'));
+  });
+
+  /* ===== ПРОГРЕСС + НАВЕРХ ===== */
+  const progress = document.getElementById('progress');
+  const toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (window.scrollY / h * 100) + '%';
+    if (window.scrollY > 500) toTop.classList.add('show');
+    else toTop.classList.remove('show');
+  });
+
+  /* ===== МЕНЮ ===== */
+  const burger = document.getElementById('burger');
+  const navMenu = document.getElementById('navMenu');
+  burger.addEventListener('click', () => navMenu.classList.toggle('open'));
+  navMenu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => navMenu.classList.remove('open'));
+  });
+
+  /* ===== МОДАЛКИ ===== */
+  const projectsData = {
+    p1: {
+      title: 'Матричное портфолио',
+      text: 'Личный сайт-портфолио в стиле «Матрица». Падающие цифры, кастомный курсор, мини-игра, терминал, переключатель тем, ачивки и адаптив.',
+      text2: 'Стек: HTML, CSS, JavaScript (Canvas API, IntersectionObserver, Web Audio). Сделано вручную, без фреймворков.'
+    },
+    p2: { title: 'Проект #2', text: 'Описание появится позже.', text2: 'Пока в разработке.' },
+    p3: { title: 'Проект #3', text: 'Описание появится позже.', text2: 'Пока в разработке.' }
+  };
+  function openModal(id) {
+    playClick();
+    const data = projectsData[id];
+    document.getElementById('modalTitle').textContent = data.title;
+    document.getElementById('modalText').textContent = data.text;
+    document.getElementById('modalText2').textContent = data.text2;
+    document.getElementById('modalBg').classList.add('active');
+  }
+  function closeModal(e) {
+    if (e && e.target !== e.currentTarget && e.type === 'click') return;
+    document.getElementById('modalBg').classList.remove('active');
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('modalBg').classList.remove('active');
+  });
+
+  /* ===== 3D-НАКЛОН ===== */
+  document.querySelectorAll('.card.tilt').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-6px)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+
+  /* ===== FAQ ===== */
+  function toggleFaq(el) { el.classList.toggle('open'); }
+
+  /* ===== ФОРМА ===== */
+  function sendForm(e) {
+    e.preventDefault();
+    const msg = document.getElementById('formMsg');
+    msg.classList.add('show');
+    playClick();
+    setTimeout(() => msg.classList.remove('show'), 4000);
+    e.target.reset();
+    unlockAchv('hacker');
+  }
+
+  /* ===== ЗВУК ===== */
+  let audioCtx;
+  function playClick() {
+    if (!soundOn) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 800;
+      gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.06);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.06);
+    } catch (e) {}
+  }
+
+  /* ===== ТАЙМЕР + ЗАХОДЫ ===== */
+  const timerEl = document.getElementById('timer');
+  const startTime = Date.now();
+  setInterval(() => {
+    const s = Math.floor((Date.now() - startTime) / 1000);
+    timerEl.textContent = s + 'с';
+  }, 1000);
+
+  let visits = parseInt(localStorage.getItem('director_visits') || '0') + 1;
+  localStorage.setItem('director_visits', visits);
+  document.getElementById('visitCount').textContent = visits;
+
+  /* ===== МАГНИТНЫЕ КНОПКИ ===== */
+  document.querySelectorAll('.magnet').forEach(el => {
+    el.addEventListener('mousemove', e => {
+      const r = el.getBoundingClientRect();
+      const x = e.clientX - r.left - r.width / 2;
+      const y = e.clientY - r.top - r.height / 2;
+      el.style.transform = `translate(${x * 0.25}px, ${y * 0.25}px)`;
+    });
+    el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+  });
+
+  /* ===== ТЕМЫ ===== */
+  function setTheme(theme) {
+    document.body.classList.remove('theme-green', 'theme-red');
+    if (theme === 'green') document.body.classList.add('theme-green');
+    if (theme === 'red') document.body.classList.add('theme-red');
+    document.querySelectorAll('.theme-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.theme === theme);
+    });
+    localStorage.setItem('director_theme', theme);
+    playClick();
+  }
+  const savedTheme = localStorage.getItem('director_theme');
+  if (savedTheme) setTheme(savedTheme);
+
+  /* ===== ЗВУК ON/OFF ===== */
+  let soundOn = false;
+  const soundBtn = document.getElementById('soundBtn');
+  function toggleSound() {
+    soundOn = !soundOn;
+    soundBtn.classList.toggle('on', soundOn);
+    soundBtn.textContent = soundOn ? '🔊' : '🔇';
+    if (soundOn) playClick();
+  }
+
+  /* ===== ЧАСЫ ===== */
+  const clockEl = document.getElementById('clock');
+  setInterval(() => {
+    const d = new Date();
+    clockEl.textContent = d.toLocaleTimeString('ru-RU');
+  }, 1000);
+
+  /* ===== МИНИ-ИГРА ===== */
+  const gameCanvas = document.getElementById('gameCanvas');
+  const gctx = gameCanvas.getContext('2d');
+  const gameScoreEl = document.getElementById('gameScore');
+  const gameBestEl = document.getElementById('gameBest');
+  const gameBtn = document.getElementById('gameBtn');
+  let gameRunning = false;
+  let score = 0;
+  let targets = [];
+  let gameTimer = null;
+  let timeLeft = 20;
+
+  let best = parseInt(localStorage.getItem('director_game_best') || '0');
+  gameBestEl.textContent = best;
+
+  function resizeGame() {
+    gameCanvas.width = gameCanvas.clientWidth;
+    gameCanvas.height = 300;
+  }
+  resizeGame();
+  window.addEventListener('resize', resizeGame);
+
+  function spawnTarget() {
+    const isBad = Math.random() < 0.25;
+    targets.push({
+      x: 30 + Math.random() * (gameCanvas.width - 60),
+      y: 30 + Math.random() * (gameCanvas.height - 60),
+      r: 20,
+      bad: isBad,
+      life: 1.6,
+      born: performance.now() / 1000
+    });
+  }
+
+  function drawGame() {
+    gctx.fillStyle = '#050505';
+    gctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+    if (!gameRunning) return;
+
+    const now = performance.now() / 1000;
+    targets = targets.filter(t => now - t.born < t.life);
+
+    targets.forEach(t => {
+      const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#fff';
+      gctx.beginPath();
+      gctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+      gctx.strokeStyle = t.bad ? '#ff2b4e' : accent;
+      gctx.lineWidth = 2;
+      gctx.stroke();
+      gctx.fillStyle = t.bad ? 'rgba(255,43,78,0.2)' : 'rgba(255,255,255,0.1)';
+      gctx.fill();
+      gctx.fillStyle = t.bad ? '#ff2b4e' : accent;
+      gctx.font = 'bold 16px monospace';
+      gctx.textAlign = 'center';
+      gctx.textBaseline = 'middle';
+      gctx.fillText(t.bad ? '✕' : Math.floor(Math.random() * 10), t.x, t.y);
+    });
+
+    if (Math.random() < 0.03) spawnTarget();
+    requestAnimationFrame(drawGame);
+  }
+  drawGame();
+
+  gameCanvas.addEventListener('click', e => {
+    if (!gameRunning) return;
+    const r = gameCanvas.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    for (let i = targets.length - 1; i >= 0; i--) {
+      const t = targets[i];
+      if (Math.hypot(t.x - x, t.y - y) < t.r + 5) {
+        if (t.bad) {
+          score = Math.max(0, score - 2);
+          targets.splice(i, 1);
+        } else {
+          score++;
+          targets.splice(i, 1);
+        }
+        gameScoreEl.textContent = score;
+        playClick();
+        break;
+      }
+    }
+  });
+
+  function startGame() {
+    if (gameRunning) return;
+    unlockAchv('gamer');
+    gameRunning = true;
+    score = 0;
+    timeLeft = 20;
+    targets = [];
+    gameScoreEl.textContent = '0';
+    gameBtn.textContent = timeLeft + 'с';
+    gameBtn.disabled = true;
+
+    gameTimer = setInterval(() => {
+      timeLeft--;
+      gameBtn.textContent = timeLeft + 'с';
+      if (timeLeft <= 0) endGame();
+    }, 1000);
+  }
+
+  function endGame() {
+    gameRunning = false;
+    clearInterval(gameTimer);
+    gameBtn.textContent = 'ЕЩЁ РАЗ';
+    gameBtn.disabled = false;
+    if (score > best) {
+      best = score;
+      localStorage.setItem('director_game_best', best);
+      gameBestEl.textContent = best;
+    }
+  }
+
+  /* ===== ТЕРМИНАЛ ===== */
+  const termInput = document.getElementById('termInput');
+  const termBody = document.getElementById('termBody');
+
+  const commands = {
+    help: () => [
+      'Доступные команды:',
+      '  help      — показать это',
+      '  about     — обо мне',
+      '  skills    — мои навыки',
+      '  projects  — мои проекты',
+      '  dota      — секрет 😉',
+      '  contacts  — как связаться',
+      '  theme     — сменить тему',
+      '  clear     — очистить терминал'
+    ],
+    about: () => ['Вайбкодер. Делаю сайты, которые живут.', 'Люблю анимацию, чистый код и Dota 2.'],
+    skills: () => ['HTML / CSS / JavaScript / Canvas / Анимации / Работа с ИИ'],
+    projects: () => ['Сейчас в портфолио: матричное портфолио (этот сайт).', 'Скоро больше.'],
+    dota: () => { unlockAchv('dota'); return ['7к MMR. Мид или ничего. 😎']; },
+    contacts: () => ['Telegram: @director_lenvivya', 'GitHub: github.com/aaa345-bit', 'Email: mnecaev881@gmail.com'],
+    theme: () => { 
+      const themes = ['white', 'green', 'red'];
+      const cur = localStorage.getItem('director_theme') || 'white';
+      const next = themes[(themes.indexOf(cur) + 1) % themes.length];
+      setTheme(next);
+      return ['Тема переключена на: ' + next];
+    },
+    clear: () => { termBody.innerHTML = ''; return []; }
+  };
+
+  function printTerm(lines) {
+    lines.forEach(l => {
+      const div = document.createElement('div');
+      div.className = 'line';
+      div.textContent = l;
+      termBody.appendChild(div);
+    });
+    termBody.scrollTop = termBody.scrollHeight;
+  }
+
+  termInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const cmd = termInput.value.trim().toLowerCase();
+      termInput.value = '';
+      if (!cmd) return;
+      const line = document.createElement('div');
+      line.className = 'line';
+      line.innerHTML = '<span class="cmd">$ ' + cmd + '</span>';
+      termBody.appendChild(line);
+      if (commands[cmd]) {
+        printTerm(commands[cmd]());
+      } else {
+        printTerm(['Команда не найдена: ' + cmd, 'Введи help.']);
+      }
+      unlockAchv('hacker');
+    }
+  });
+
+  /* ===== АЧИВКИ ===== */
+  const achvToast = document.getElementById('achvToast');
+  const achvTitle = document.getElementById('achvTitle');
+  const achvSub = document.getElementById('achvSub');
+  const achvData = {
+    welcome: { name: 'ДОБРО ПОЖАЛОВАТЬ', desc: 'Зашёл на сайт' },
+    scroller: { name: 'СКРОЛЛЕР', desc: 'Проскроллил вниз' },
+    gamer: { name: 'ГЕЙМЕР', desc: 'Сыграл в мини-игру' },
+    hacker: { name: 'ХАКЕР', desc: 'Использовал терминал' },
+    dota: { name: 'ДОТТЕР', desc: 'Ввёл dota' },
+    konami: { name: 'КОНАМИ', desc: '↑↑↓↓←→←→BA' }
+  };
+
+  function unlockAchv(id) {
+    if (!achvData[id]) return;
+    const el = document.querySelector(`.achv[data-id="${id}"]`);
+    if (el && !el.classList.contains('unlocked')) {
+      el.classList.add('unlocked');
+      achvTitle.textContent = '🏆 ' + achvData[id].name;
+      achvSub.textContent = achvData[id].desc;
+      achvToast.classList.add('show');
+      setTimeout(() => achvToast.classList.remove('show'), 3000);
+      playClick();
+    }
+  }
+
+  setTimeout(() => unlockAchv('welcome'), 2500);
+
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY > h * 0.6) unlockAchv('scroller');
+  }, { passive: true });
+
+  /* ===== KONAMI ===== */
+  const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  let konamiIdx = 0;
+  document.addEventListener('keydown', e => {
+    if (e.key === konami[konamiIdx]) {
+      konamiIdx++;
+      if (konamiIdx === konami.length) {
+        document.body.classList.toggle('hacked');
+        unlockAchv('konami');
+        konamiIdx = 0;
+      }
+    } else konamiIdx = 0;
+  });
+</script>
 </body>
 </html>
