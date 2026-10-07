@@ -3,18 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="ДИРЕКТОР — вайбкодер. Делаю современные сайты с анимацией. Портфолио.">
+<meta name="description" content="ДИРЕКТОР — вайбкодер. Сайты с анимацией, мини-игры, интерактив. Портфолио.">
 <title>ДИРЕКТОР — вайбкодер / портфолио</title>
 <style>
+  :root {
+    --accent: #ffffff;
+    --accent-dim: rgba(255,255,255,0.15);
+    --text: #ffffff;
+    --text-dim: #999;
+    --bg: #000000;
+    --border: #2a2a2a;
+    --glow: rgba(255,255,255,0.5);
+  }
+
+  body.theme-green {
+    --accent: #00ff41;
+    --accent-dim: rgba(0,255,65,0.15);
+    --text: #00ff41;
+    --text-dim: #008822;
+    --glow: rgba(0,255,65,0.6);
+  }
+
+  body.theme-red {
+    --accent: #ff2b4e;
+    --accent-dim: rgba(255,43,78,0.15);
+    --text: #ff2b4e;
+    --text-dim: #8a1a2c;
+    --glow: rgba(255,43,78,0.6);
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
 
   body {
-    background: #000;
-    color: #fff;
+    background: var(--bg);
+    color: var(--text);
     font-family: 'Courier New', monospace;
     overflow-x: hidden;
     cursor: none;
+    transition: color 0.5s ease;
   }
 
   /* ===== ПРЕЛОАДЕР ===== */
@@ -50,30 +77,31 @@
   .preloader .bar {
     height: 100%;
     width: 0%;
-    background: #fff;
+    background: var(--accent);
     transition: width 0.15s linear;
-    box-shadow: 0 0 12px #fff;
+    box-shadow: 0 0 12px var(--glow);
   }
   .preloader .percent {
     font-size: 0.85rem;
-    color: #888;
+    color: var(--text-dim);
     letter-spacing: 0.2em;
   }
 
-  /* ===== КАСТОМНЫЙ КУРСОР ===== */
+  /* ===== КУРСОР ===== */
   .cursor-dot {
     position: fixed;
     width: 6px; height: 6px;
-    background: #fff;
+    background: var(--accent);
     border-radius: 50%;
     pointer-events: none;
     z-index: 9999;
     transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px var(--glow);
   }
   .cursor-ring {
     position: fixed;
     width: 34px; height: 34px;
-    border: 1px solid rgba(255,255,255,0.45);
+    border: 1px solid var(--accent-dim);
     border-radius: 50%;
     pointer-events: none;
     z-index: 9998;
@@ -82,19 +110,32 @@
   }
   .cursor-ring.big {
     width: 70px; height: 70px;
-    border-color: #fff;
-    background: rgba(255,255,255,0.05);
+    border-color: var(--accent);
+    background: var(--accent-dim);
   }
 
-  /* ===== ПРОГРЕСС-БАР ===== */
+  /* Свечение за курсором */
+  .cursor-glow {
+    position: fixed;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s;
+    opacity: 0.6;
+  }
+
+  /* ===== ПРОГРЕСС ===== */
   .progress {
     position: fixed;
     top: 0; left: 0;
     height: 2px;
-    background: #fff;
+    background: var(--accent);
     width: 0%;
     z-index: 9997;
-    box-shadow: 0 0 12px #fff;
+    box-shadow: 0 0 12px var(--glow);
   }
 
   /* ===== МАТРИЦА ===== */
@@ -106,19 +147,19 @@
     opacity: 0.28;
     transition: opacity 0.5s;
   }
-  body.hacked #matrix { opacity: 0.7; }
+  body.hacked #matrix { opacity: 0.75; }
 
   /* ===== БЕГУЩАЯ СТРОКА ===== */
   .ticker {
     position: fixed;
     bottom: 0; left: 0; right: 0;
     background: rgba(0,0,0,0.85);
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid var(--border);
     padding: 8px 0;
     overflow: hidden;
     z-index: 90;
-    font-size: 0.75rem;
-    color: #666;
+    font-size: 0.72rem;
+    color: var(--text-dim);
     letter-spacing: 0.15em;
     backdrop-filter: blur(6px);
   }
@@ -131,10 +172,25 @@
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
   }
-  .ticker span { margin-right: 50px; color: #666; }
-  .ticker span::before { content: '> '; color: #fff; }
+  .ticker span { margin-right: 50px; }
+  .ticker span::before { content: '> '; color: var(--accent); }
 
-  .content { position: relative; z-index: 1; padding-bottom: 40px; }
+  /* ===== ЧАСЫ ===== */
+  .clock {
+    position: fixed;
+    top: 90px; right: 40px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    z-index: 50;
+    background: rgba(0,0,0,0.5);
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(6px);
+  }
+  @media (max-width: 760px) { .clock { display: none; } }
+
+  .content { position: relative; z-index: 2; padding-bottom: 40px; }
 
   /* ===== МЕНЮ ===== */
   nav {
@@ -147,10 +203,8 @@
     z-index: 100;
     background: rgba(0,0,0,0.7);
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid var(--border);
   }
-
   nav .logo {
     font-weight: 700;
     letter-spacing: 0.25em;
@@ -160,17 +214,16 @@
     content: '_';
     animation: blink 1s step-end infinite;
   }
-
   nav ul {
     display: flex;
-    gap: 22px;
+    gap: 18px;
     list-style: none;
+    align-items: center;
   }
-
   nav a {
-    color: #999;
+    color: var(--text-dim);
     text-decoration: none;
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     letter-spacing: 0.12em;
     transition: color 0.3s;
     position: relative;
@@ -180,17 +233,52 @@
     position: absolute;
     bottom: -6px; left: 0;
     width: 0; height: 1px;
-    background: #fff;
+    background: var(--accent);
     transition: width 0.3s;
   }
-  nav a:hover { color: #fff; }
+  nav a:hover { color: var(--text); }
   nav a:hover::after { width: 100%; }
+
+  .theme-switch {
+    display: flex;
+    gap: 6px;
+    margin-left: 10px;
+  }
+  .theme-btn {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    cursor: none;
+    transition: transform 0.2s, box-shadow 0.3s;
+    padding: 0;
+  }
+  .theme-btn:hover { transform: scale(1.2); }
+  .theme-btn[data-theme="white"] { background: #fff; }
+  .theme-btn[data-theme="green"] { background: #00ff41; }
+  .theme-btn[data-theme="red"] { background: #ff2b4e; }
+  .theme-btn.active { box-shadow: 0 0 12px currentColor; }
+
+  .sound-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 30px; height: 30px;
+    cursor: none;
+    font-family: inherit;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sound-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .sound-btn.on { color: var(--accent); border-color: var(--accent); }
 
   .burger {
     display: none;
     background: none;
     border: none;
-    color: #fff;
+    color: var(--accent);
     font-size: 1.5rem;
     cursor: none;
     font-family: inherit;
@@ -207,31 +295,29 @@
     padding: 120px 20px 40px;
     position: relative;
   }
-
   .hero .terminal-line {
     font-size: 0.85rem;
-    color: #666;
+    color: var(--text-dim);
     letter-spacing: 0.15em;
     margin-bottom: 25px;
   }
-  .hero .terminal-line::before { content: '$ '; color: #fff; }
+  .hero .terminal-line::before { content: '$ '; color: var(--accent); }
 
   .hero h1 {
     font-size: clamp(2.5rem, 13vw, 9rem);
     letter-spacing: 0.15em;
     font-weight: 700;
-    text-shadow: 0 0 40px rgba(255,255,255,0.6);
+    text-shadow: 0 0 40px var(--glow);
     transition: text-shadow 0.4s;
-    position: relative;
   }
   .hero h1:hover {
-    text-shadow: 0 0 60px rgba(255,255,255,0.9), 0 0 120px rgba(255,255,255,0.4);
+    text-shadow: 0 0 60px var(--glow), 0 0 120px var(--glow);
   }
 
   .hero .typed {
     margin-top: 25px;
     font-size: clamp(0.9rem, 2.5vw, 1.25rem);
-    color: #bbb;
+    color: var(--text-dim);
     min-height: 1.5em;
     letter-spacing: 0.05em;
   }
@@ -248,12 +334,11 @@
     flex-wrap: wrap;
     justify-content: center;
   }
-
   .btn {
     padding: 14px 34px;
-    border: 1px solid #fff;
+    border: 1px solid var(--accent);
     background: transparent;
-    color: #fff;
+    color: var(--accent);
     font-family: inherit;
     font-size: 0.85rem;
     letter-spacing: 0.16em;
@@ -269,14 +354,11 @@
     position: absolute;
     top: 0; left: -100%;
     width: 100%; height: 100%;
-    background: #fff;
+    background: var(--accent);
     transition: left 0.35s ease;
     z-index: 0;
   }
-  .btn:hover {
-    color: #000;
-    box-shadow: 0 0 40px rgba(255,255,255,0.6);
-  }
+  .btn:hover { color: #000; box-shadow: 0 0 40px var(--glow); }
   .btn:hover::before { left: 0; }
   .btn span { position: relative; z-index: 1; }
 
@@ -284,7 +366,7 @@
     position: absolute;
     bottom: 60px;
     font-size: 0.7rem;
-    color: #666;
+    color: var(--text-dim);
     letter-spacing: 0.35em;
     animation: float 2s ease-in-out infinite;
   }
@@ -308,23 +390,23 @@
     font-size: clamp(1.5rem, 5vw, 2.5rem);
     margin-bottom: 45px;
     letter-spacing: 0.1em;
-    border-left: 3px solid #fff;
+    border-left: 3px solid var(--accent);
     padding-left: 18px;
     position: relative;
   }
-  h2::before { content: '> '; color: #888; }
+  h2::before { content: '> '; color: var(--text-dim); }
   h2::after {
     content: '';
     position: absolute;
     bottom: -18px; left: 18px;
     width: 60px; height: 1px;
-    background: #333;
+    background: var(--border);
   }
 
   p, li {
     font-size: 1.02rem;
     line-height: 1.8;
-    color: #ccc;
+    color: var(--text-dim);
   }
 
   /* ===== ФАКТЫ ===== */
@@ -335,7 +417,7 @@
     margin-top: 45px;
   }
   .fact {
-    border: 1px solid #2a2a2a;
+    border: 1px solid var(--border);
     padding: 28px 18px;
     text-align: center;
     transition: all 0.35s ease;
@@ -347,31 +429,32 @@
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 2px;
-    background: #fff;
+    background: var(--accent);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.4s ease;
   }
   .fact:hover::before { transform: scaleX(1); }
   .fact:hover {
-    border-color: #fff;
+    border-color: var(--accent);
     transform: translateY(-6px);
-    box-shadow: 0 15px 40px rgba(255,255,255,0.08);
+    box-shadow: 0 15px 40px var(--accent-dim);
   }
   .fact .num {
     font-size: 2.4rem;
     font-weight: 700;
     display: block;
     margin-bottom: 8px;
+    color: var(--accent);
     letter-spacing: 0.05em;
   }
   .fact .label {
     font-size: 0.72rem;
-    color: #888;
+    color: var(--text-dim);
     letter-spacing: 0.18em;
   }
 
-  /* ===== СКИЛЛЫ-БАРЫ ===== */
+  /* ===== НАВЫКИ ===== */
   .skill-bars {
     margin-top: 40px;
     display: flex;
@@ -384,24 +467,21 @@
     font-size: 0.85rem;
     letter-spacing: 0.1em;
     margin-bottom: 8px;
-    color: #ccc;
+    color: var(--text-dim);
   }
-  .skill-bar .skill-top .percent { color: #fff; }
+  .skill-bar .skill-top .percent { color: var(--accent); }
   .skill-bar .track {
     height: 3px;
     background: #1a1a1a;
     overflow: hidden;
-    position: relative;
   }
   .skill-bar .fill {
     height: 100%;
-    background: #fff;
+    background: var(--accent);
     width: 0%;
     transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 0 12px rgba(255,255,255,0.6);
+    box-shadow: 0 0 12px var(--glow);
   }
-
-  /* ===== ТЕГИ ===== */
   .skills {
     display: flex;
     flex-wrap: wrap;
@@ -409,19 +489,18 @@
     list-style: none;
   }
   .skills li {
-    border: 1px solid #333;
+    border: 1px solid var(--border);
     padding: 11px 20px;
     font-size: 0.9rem;
     transition: all 0.3s ease;
     cursor: none;
-    position: relative;
   }
   .skills li:hover {
-    background: #fff;
+    background: var(--accent);
     color: #000;
     transform: translateY(-3px);
-    box-shadow: 0 0 30px rgba(255,255,255,0.45);
-    border-color: #fff;
+    box-shadow: 0 0 30px var(--glow);
+    border-color: var(--accent);
   }
 
   /* ===== КАРТОЧКИ ===== */
@@ -431,7 +510,7 @@
     gap: 20px;
   }
   .card {
-    border: 1px solid #2a2a2a;
+    border: 1px solid var(--border);
     padding: 32px 26px;
     transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.15s ease;
     position: relative;
@@ -445,18 +524,18 @@
     position: absolute;
     top: 0; left: -100%;
     width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
     transition: left 0.7s ease;
     pointer-events: none;
   }
   .card:hover::before { left: 100%; }
   .card:hover {
-    border-color: #fff;
-    box-shadow: 0 20px 60px rgba(255,255,255,0.12);
+    border-color: var(--accent);
+    box-shadow: 0 20px 60px var(--accent-dim);
   }
   .card .tag {
     font-size: 0.68rem;
-    color: #777;
+    color: var(--text-dim);
     letter-spacing: 0.22em;
     margin-bottom: 16px;
     display: block;
@@ -465,94 +544,297 @@
     font-size: 1.25rem;
     margin-bottom: 12px;
     letter-spacing: 0.05em;
+    color: var(--text);
   }
   .card p {
     font-size: 0.9rem;
-    color: #999;
+    color: var(--text-dim);
     line-height: 1.7;
   }
   .card .open {
     margin-top: 22px;
     font-size: 0.72rem;
-    color: #fff;
+    color: var(--accent);
     letter-spacing: 0.18em;
     display: inline-block;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid var(--border);
     padding-bottom: 2px;
-    transition: border-color 0.3s;
   }
-  .card:hover .open { border-color: #fff; }
+  .card:hover .open { border-color: var(--accent); }
 
-  /* Цена */
   .card.price .price-num {
     font-size: 2.2rem;
     font-weight: 700;
     margin: 12px 0 5px;
-    letter-spacing: 0.05em;
+    color: var(--accent);
   }
-  .card.price .price-num small { font-size: 1rem; color: #888; font-weight: 400; }
-  .card.price .price-desc { font-size: 0.8rem; color: #888; margin-bottom: 20px; }
-  .card.price ul {
-    list-style: none;
-    margin-bottom: 22px;
+  .card.price .price-num small { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+  .card.price .price-desc { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 20px; }
+  .card.price ul { list-style: none; margin-bottom: 22px; }
+  .card.price ul li { font-size: 0.85rem; padding: 5px 0; color: var(--text-dim); }
+  .card.price ul li::before { content: '+ '; color: var(--accent); }
+
+  /* ===== МИНИ-ИГРА ===== */
+  .game-wrap {
+    margin-top: 30px;
+    border: 1px solid var(--border);
+    padding: 20px;
+    background: rgba(0,0,0,0.5);
+    position: relative;
   }
-  .card.price ul li {
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
     font-size: 0.85rem;
-    padding: 5px 0;
-    color: #bbb;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
   }
-  .card.price ul li::before {
-    content: '+ ';
-    color: #fff;
+  .game-header .score { color: var(--accent); }
+  #gameCanvas {
+    display: block;
+    width: 100%;
+    height: 300px;
+    background: #050505;
+    border: 1px solid var(--border);
+    cursor: none;
+  }
+  .game-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 10px 22px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    cursor: none;
+    transition: all 0.3s;
+  }
+  .game-btn:hover { background: var(--accent); color: #000; }
+  @media (max-width: 760px) { #gameCanvas { cursor: pointer; } .game-btn { cursor: pointer; } }
+
+  /* ===== ТЕРМИНАЛ ===== */
+  .terminal {
+    margin-top: 40px;
+    border: 1px solid var(--border);
+    background: rgba(0,0,0,0.7);
+    font-size: 0.88rem;
+    overflow: hidden;
+  }
+  .terminal-head {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+  }
+  .terminal-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .terminal-dot:nth-child(1) { background: #333; }
+  .terminal-dot:nth-child(2) { background: #555; }
+  .terminal-dot:nth-child(3) { background: var(--accent); }
+  .terminal-body {
+    padding: 18px;
+    min-height: 180px;
+    max-height: 260px;
+    overflow-y: auto;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  .terminal-body .line { margin-bottom: 4px; }
+  .terminal-body .line .cmd { color: var(--accent); }
+  .terminal-input-line {
+    display: flex;
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    align-items: center;
+    gap: 8px;
+  }
+  .terminal-input-line::before { content: '$'; color: var(--accent); }
+  .terminal-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.88rem;
+    outline: none;
+    cursor: none;
+  }
+  @media (max-width: 760px) { .terminal-input { cursor: text; } }
+
+  /* ===== ДОСТИЖЕНИЯ ===== */
+  .achievements {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .achv {
+    border: 1px solid var(--border);
+    padding: 20px 18px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    transition: all 0.3s;
+    opacity: 0.35;
+  }
+  .achv.unlocked {
+    opacity: 1;
+    border-color: var(--accent);
+    box-shadow: 0 0 25px var(--accent-dim);
+  }
+  .achv .icon {
+    font-size: 1.8rem;
+    filter: grayscale(1);
+    transition: filter 0.5s;
+  }
+  .achv.unlocked .icon { filter: grayscale(0); }
+  .achv .info .name {
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .achv .info .desc {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
   }
 
-  /* ===== ОТЗЫВЫ ===== */
-  .quote {
-    border-left: 2px solid #333;
-    padding: 8px 0 8px 22px;
-    margin-top: 20px;
-    color: #bbb;
-    font-style: italic;
-    font-size: 0.92rem;
+  /* Всплывающее уведомление об ачивке */
+  .achv-toast {
+    position: fixed;
+    top: 90px; left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: rgba(0,0,0,0.95);
+    border: 1px solid var(--accent);
+    padding: 16px 26px;
+    z-index: 9999;
+    box-shadow: 0 0 40px var(--accent-dim);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(10px);
   }
-  .quote-author {
-    margin-top: 14px;
-    font-size: 0.78rem;
-    color: #777;
-    letter-spacing: 0.12em;
-    font-style: normal;
+  .achv-toast.show { transform: translateX(-50%) translateY(0); }
+  .achv-toast .icon { font-size: 1.6rem; }
+  .achv-toast .text {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+  .achv-toast .text .title { color: var(--accent); display: block; margin-bottom: 2px; }
+  .achv-toast .text .sub { color: var(--text-dim); font-size: 0.7rem; }
+
+  /* ===== ТАЙМЛАЙН ===== */
+  .timeline {
+    margin-top: 30px;
+    position: relative;
+    padding-left: 40px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 35px;
+    padding-left: 10px;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -38px; top: 6px;
+    width: 16px; height: 16px;
+    border: 2px solid var(--accent);
+    background: #000;
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--glow);
+  }
+  .tl-item .tl-date {
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 6px;
+  }
+  .tl-item .tl-title {
+    font-size: 1.1rem;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .tl-item .tl-desc {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+
+  /* ===== БЛОГ ===== */
+  .blog-post {
+    border: 1px solid var(--border);
+    padding: 28px 26px;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+    cursor: none;
+  }
+  .blog-post:hover {
+    border-color: var(--accent);
+    transform: translateX(8px);
+    box-shadow: 0 0 30px var(--accent-dim);
+  }
+  .blog-post .post-date {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    margin-bottom: 10px;
+  }
+  .blog-post h3 {
+    font-size: 1.15rem;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .blog-post p {
+    font-size: 0.88rem;
+    color: var(--text-dim);
   }
 
   /* ===== FAQ ===== */
   .faq-item {
-    border-bottom: 1px solid #1f1f1f;
+    border-bottom: 1px solid var(--border);
     padding: 22px 0;
     cursor: none;
   }
   .faq-q {
     font-size: 1rem;
-    color: #fff;
+    color: var(--text);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: color 0.3s;
   }
   .faq-q::after {
     content: '+';
     font-size: 1.3rem;
-    color: #666;
+    color: var(--text-dim);
     transition: transform 0.3s, color 0.3s;
   }
   .faq-item.open .faq-q::after {
     transform: rotate(45deg);
-    color: #fff;
+    color: var(--accent);
   }
-  .faq-item:hover .faq-q { color: #fff; }
   .faq-a {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.4s ease, padding 0.3s;
-    color: #999;
+    color: var(--text-dim);
     font-size: 0.92rem;
     line-height: 1.7;
   }
@@ -571,23 +853,23 @@
   }
   .form input, .form textarea {
     background: transparent;
-    border: 1px solid #2a2a2a;
-    color: #fff;
+    border: 1px solid var(--border);
+    color: var(--text);
     padding: 14px 16px;
     font-family: inherit;
     font-size: 0.9rem;
     outline: none;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
   }
   .form input:focus, .form textarea:focus {
-    border-color: #fff;
-    box-shadow: 0 0 20px rgba(255,255,255,0.08);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-dim);
   }
   .form textarea { resize: vertical; min-height: 110px; }
   .form button {
     background: transparent;
-    border: 1px solid #fff;
-    color: #fff;
+    border: 1px solid var(--accent);
+    color: var(--accent);
     padding: 14px 30px;
     font-family: inherit;
     font-size: 0.85rem;
@@ -597,18 +879,19 @@
     align-self: flex-start;
   }
   .form button:hover {
-    background: #fff;
+    background: var(--accent);
     color: #000;
-    box-shadow: 0 0 30px rgba(255,255,255,0.5);
+    box-shadow: 0 0 30px var(--glow);
   }
   .form .msg {
     font-size: 0.85rem;
-    color: #fff;
+    color: var(--accent);
     margin-top: 8px;
     opacity: 0;
     transition: opacity 0.3s;
   }
   .form .msg.show { opacity: 1; }
+  @media (max-width: 760px) { .form input, .form textarea, .form button { cursor: text; } .form button { cursor: pointer; } }
 
   /* ===== МОДАЛКА ===== */
   .modal-bg {
@@ -626,7 +909,7 @@
   .modal-bg.active { display: flex; }
   .modal {
     background: #0a0a0a;
-    border: 1px solid #333;
+    border: 1px solid var(--border);
     max-width: 620px;
     width: 100%;
     padding: 50px 40px;
@@ -637,60 +920,56 @@
     from { opacity: 0; transform: scale(0.92) translateY(30px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
-  .modal h3 {
-    font-size: 1.9rem;
-    margin-bottom: 22px;
-    letter-spacing: 0.04em;
-  }
-  .modal p { margin-bottom: 15px; color: #bbb; }
+  .modal h3 { font-size: 1.9rem; margin-bottom: 22px; color: var(--text); }
+  .modal p { margin-bottom: 15px; color: var(--text-dim); }
   .modal .close {
     position: absolute;
     top: 18px; right: 22px;
     font-size: 1.6rem;
-    color: #888;
+    color: var(--text-dim);
     background: none;
     border: none;
     cursor: none;
     font-family: inherit;
     transition: color 0.3s, transform 0.3s;
   }
-  .modal .close:hover { color: #fff; transform: rotate(90deg); }
+  .modal .close:hover { color: var(--accent); transform: rotate(90deg); }
 
   /* ===== КОНТАКТЫ ===== */
   .contacts { list-style: none; }
   .contacts li { margin-bottom: 18px; font-size: 1rem; }
   .contacts a {
-    color: #fff;
+    color: var(--accent);
     text-decoration: none;
     font-size: 1.05rem;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid var(--border);
     padding-bottom: 3px;
     transition: all 0.3s ease;
   }
   .contacts a:hover {
-    border-color: #fff;
-    text-shadow: 0 0 18px rgba(255,255,255,0.8);
+    border-color: var(--accent);
+    text-shadow: 0 0 18px var(--glow);
   }
 
   footer {
     text-align: center;
-    padding: 50px 20px 50px;
-    color: #555;
+    padding: 50px 20px 60px;
+    color: var(--text-dim);
     font-size: 0.75rem;
     letter-spacing: 0.12em;
-    border-top: 1px solid #1a1a1a;
+    border-top: 1px solid var(--border);
     margin-top: 40px;
   }
-  footer .timer { color: #888; }
+  footer .timer { color: var(--accent); }
 
-  /* ===== КНОПКА НАВЕРХ ===== */
+  /* ===== НАВЕРХ ===== */
   .to-top {
     position: fixed;
     bottom: 55px; right: 30px;
     width: 46px; height: 46px;
-    border: 1px solid #fff;
+    border: 1px solid var(--accent);
     background: rgba(0,0,0,0.7);
-    color: #fff;
+    color: var(--accent);
     font-size: 1.1rem;
     cursor: none;
     z-index: 500;
@@ -704,11 +983,7 @@
     backdrop-filter: blur(6px);
   }
   .to-top.show { opacity: 1; pointer-events: auto; }
-  .to-top:hover {
-    background: #fff;
-    color: #000;
-    transform: translateY(-5px);
-  }
+  .to-top:hover { background: var(--accent); color: #000; transform: translateY(-5px); }
 
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: #000; }
@@ -718,24 +993,25 @@
   /* ===== МОБИЛКА ===== */
   @media (max-width: 760px) {
     body { cursor: auto; }
-    .cursor-dot, .cursor-ring { display: none; }
+    .cursor-dot, .cursor-ring, .cursor-glow { display: none; }
     nav { padding: 14px 20px; }
     nav ul {
       position: fixed;
       top: 0; right: -100%;
-      width: 78%; height: 100vh;
+      width: 80%; height: 100vh;
       background: #000;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 32px;
+      gap: 28px;
       transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      border-left: 1px solid #1a1a1a;
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
     }
     nav ul.open { right: 0; }
-    nav ul a { font-size: 1.05rem; }
+    nav ul a { font-size: 1rem; }
     .burger { display: block; cursor: pointer; }
-    .btn, .card, .skills li, .modal .close, .to-top, .faq-item, .form button { cursor: pointer; }
+    .btn, .card, .skills li, .modal .close, .to-top, .faq-item, .form button, .blog-post { cursor: pointer; }
     .card { transform: none !important; }
     .to-top { bottom: 60px; }
   }
@@ -743,7 +1019,6 @@
 </head>
 <body>
 
-<!-- ПРЕЛОАДЕР -->
 <div class="preloader" id="preloader">
   <div class="logo-pre">ДИРЕКТОР</div>
   <div class="bar-wrap"><div class="bar" id="preBar"></div></div>
@@ -752,50 +1027,63 @@
 
 <div class="cursor-dot" id="cursorDot"></div>
 <div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
 <div class="progress" id="progress"></div>
 <canvas id="matrix"></canvas>
 
+<div class="clock" id="clock">--:--:--</div>
+
 <button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
-<!-- БЕГУЩАЯ СТРОКА -->
+<div class="achv-toast" id="achvToast">
+  <div class="icon">🏆</div>
+  <div class="text">
+    <span class="title" id="achvTitle">Достижение!</span>
+    <span class="sub" id="achvSub">Новое разблокировано</span>
+  </div>
+</div>
+
 <div class="ticker">
-  <div class="ticker-track" id="tickerTrack">
-    <span>director init</span><span>vibe coding enabled</span><span>dota 2 loaded</span><span>animation engine ready</span><span>no templates, only vibe</span><span>7k mmr detected</span><span>canvas running</span><span>pure javascript</span>
-    <span>director init</span><span>vibe coding enabled</span><span>dota 2 loaded</span><span>animation engine ready</span><span>no templates, only vibe</span><span>7k mmr detected</span><span>canvas running</span><span>pure javascript</span>
+  <div class="ticker-track">
+    <span>director init</span><span>vibe coding enabled</span><span>dota 2 loaded</span><span>animation engine ready</span><span>no templates, only vibe</span><span>7k mmr detected</span><span>canvas running</span><span>pure javascript</span><span>zero frameworks</span><span>hand crafted</span>
+    <span>director init</span><span>vibe coding enabled</span><span>dota 2 loaded</span><span>animation engine ready</span><span>no templates, only vibe</span><span>7k mmr detected</span><span>canvas running</span><span>pure javascript</span><span>zero frameworks</span><span>hand crafted</span>
   </div>
 </div>
 
 <div class="content">
 
-  <!-- МЕНЮ -->
   <nav>
     <div class="logo">ДИРЕКТОР</div>
     <ul id="navMenu">
       <li><a href="#about">Обо мне</a></li>
       <li><a href="#services">Услуги</a></li>
-      <li><a href="#skills">Навыки</a></li>
       <li><a href="#projects">Проекты</a></li>
-      <li><a href="#prices">Цены</a></li>
-      <li><a href="#process">Процесс</a></li>
-      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#game">Игра</a></li>
+      <li><a href="#terminal-sec">Терминал</a></li>
+      <li><a href="#blog">Блог</a></li>
       <li><a href="#contacts">Контакты</a></li>
+      <li class="theme-switch">
+        <button class="theme-btn active" data-theme="white" onclick="setTheme('white')"></button>
+        <button class="theme-btn" data-theme="green" onclick="setTheme('green')"></button>
+        <button class="theme-btn" data-theme="red" onclick="setTheme('red')"></button>
+      </li>
+      <li><button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔇</button></li>
     </ul>
     <button class="burger" id="burger">☰</button>
   </nav>
 
-  <!-- HERO -->
   <div class="hero">
     <div class="terminal-line">init portfolio --user=director</div>
     <h1 id="heroTitle">ДИРЕКТОР</h1>
     <div class="typed" id="typed"></div>
     <div class="hero-buttons">
       <a href="#projects" class="btn magnet" onclick="playClick()"><span>Смотреть проекты</span></a>
+      <a href="#game" class="btn magnet" onclick="playClick()"><span>Сыграть</span></a>
       <a href="#contacts" class="btn magnet" onclick="playClick()"><span>Связаться</span></a>
     </div>
     <div class="scroll-hint">▼ СКРОЛЛ ▼</div>
   </div>
 
-  <!-- ОБО МНЕ -->
   <section id="about">
     <h2>ОБО МНЕ</h2>
     <p>Вайбкодер. Делаю сайты, которые живут и дышат. Люблю анимацию, чистый код и хороший вайб. В свободное время — Dota 2.</p>
@@ -809,29 +1097,27 @@
     </div>
   </section>
 
-  <!-- УСЛУГИ -->
   <section id="services">
     <h2>УСЛУГИ</h2>
     <div class="grid">
       <div class="card tilt">
         <span class="tag">// 01</span>
         <h3>Лендинг</h3>
-        <p>Сайт-визитка с анимацией, адаптивом и чёткой структурой. Под ключ — от идеи до готового макета.</p>
+        <p>Сайт-визитка с анимацией, адаптивом и чёткой структурой. Под ключ.</p>
       </div>
       <div class="card tilt">
         <span class="tag">// 02</span>
         <h3>Анимации</h3>
-        <p>Скролл-эффекты, интерактив, микро-анимации, canvas. Сайт, который живёт, а не существует.</p>
+        <p>Скролл-эффекты, интерактив, микро-анимации, canvas. Сайт, который живёт.</p>
       </div>
       <div class="card tilt">
         <span class="tag">// 03</span>
         <h3>Адаптив</h3>
-        <p>Корректная работа на телефоне, планшете и десктопе. Без косяков, без «на телефоне сломалось».</p>
+        <p>Корректная работа на телефоне, планшете и десктопе. Без косяков.</p>
       </div>
     </div>
   </section>
 
-  <!-- НАВЫКИ -->
   <section id="skills">
     <h2>НАВЫКИ</h2>
     <ul class="skills">
@@ -870,14 +1156,13 @@
     </div>
   </section>
 
-  <!-- ПРОЕКТЫ -->
   <section id="projects">
     <h2>ПРОЕКТЫ</h2>
     <div class="grid">
       <div class="card tilt" onclick="openModal('p1')">
         <span class="tag">// 001</span>
         <h3>Матричное портфолио</h3>
-        <p>Сайт, который ты сейчас смотришь. Чёрно-белый, с анимацией, canvas и интерактивом.</p>
+        <p>Сайт, который ты сейчас смотришь. С мини-игрой, терминалом и темами.</p>
         <span class="open">ПОДРОБНЕЕ →</span>
       </div>
       <div class="card tilt" onclick="openModal('p2')">
@@ -895,7 +1180,141 @@
     </div>
   </section>
 
-  <!-- ЦЕНЫ -->
+  <section id="game">
+    <h2>МИНИ-ИГРА</h2>
+    <p>Лови белые цифры мышкой. Красные — не трогай, штраф.</p>
+    <div class="game-wrap">
+      <div class="game-header">
+        <span>СЧЁТ: <span class="score" id="gameScore">0</span></span>
+        <span>РЕКОРД: <span class="score" id="gameBest">0</span></span>
+        <button class="game-btn" id="gameBtn" onclick="startGame()">СТАРТ</button>
+      </div>
+      <canvas id="gameCanvas"></canvas>
+    </div>
+  </section>
+
+  <section id="terminal-sec">
+    <h2>ТЕРМИНАЛ</h2>
+    <p>Напиши команду. Попробуй: <span style="color:var(--accent)">help</span>, <span style="color:var(--accent)">about</span>, <span style="color:var(--accent)">skills</span>, <span style="color:var(--accent)">dota</span>, <span style="color:var(--accent)">contacts</span>.</p>
+    <div class="terminal">
+      <div class="terminal-head">
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <span style="margin-left:10px;">director@portfolio: ~</span>
+      </div>
+      <div class="terminal-body" id="termBody">
+        <div class="line">Директор ОС v1.0 — терминал загружен.</div>
+        <div class="line">Введи <span class="cmd">help</span> чтобы увидеть команды.</div>
+      </div>
+      <div class="terminal-input-line">
+        <input type="text" class="terminal-input" id="termInput" placeholder="введи команду..." autocomplete="off">
+      </div>
+    </div>
+  </section>
+
+  <section id="achievements-sec">
+    <h2>ДОСТИЖЕНИЯ</h2>
+    <p>Разблокируй всё. Некоторые открываются просто за скролл.</p>
+    <div class="achievements" id="achvGrid">
+      <div class="achv" data-id="welcome">
+        <div class="icon">👋</div>
+        <div class="info"><div class="name">ДОБРО ПОЖАЛОВАТЬ</div><div class="desc">Зашёл на сайт</div></div>
+      </div>
+      <div class="achv" data-id="scroller">
+        <div class="icon">📜</div>
+        <div class="info"><div class="name">СКРОЛЛЕР</div><div class="desc">Проскроллил вниз</div></div>
+      </div>
+      <div class="achv" data-id="gamer">
+        <div class="icon">🎮</div>
+        <div class="info"><div class="name">ГЕЙМЕР</div><div class="desc">Сыграл в мини-игру</div></div>
+      </div>
+      <div class="achv" data-id="hacker">
+        <div class="icon">💻</div>
+        <div class="info"><div class="name">ХАКЕР</div><div class="desc">Использовал терминал</div></div>
+      </div>
+      <div class="achv" data-id="dota">
+        <div class="icon">⚔️</div>
+        <div class="info"><div class="name">ДОТТЕР</div><div class="desc">Ввёл 'dota' в терминал</div></div>
+      </div>
+      <div class="achv" data-id="konami">
+        <div class="icon">🕹️</div>
+        <div class="info"><div class="name">КОНАМИ</div><div class="desc">↑↑↓↓←→←→BA</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="timeline-sec">
+    <h2>ПУТЬ</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-date">НАЧАЛО</div>
+        <div class="tl-title">Первая строка кода</div>
+        <div class="tl-desc">Открыл редактор. Понял — это моё.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">ПОТОМ</div>
+        <div class="tl-title">Первые сайты</div>
+        <div class="tl-desc">Клепал лендинги друзьям и знакомым. Набивал руку.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">СЕЙЧАС</div>
+        <div class="tl-title">Вайбкодинг + ИИ</div>
+        <div class="tl-desc">Собираю сайты с анимацией. Портфолио, которое ты видишь — тому пример.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">СКОРО</div>
+        <div class="tl-title">Дальше — больше</div>
+        <div class="tl-desc">Проекты, клиенты, рост. Только вперёд.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="blog">
+    <h2>ДНЕВНИК ВАЙБКОДЕРА</h2>
+    <div class="blog-post" onclick="playClick()">
+      <div class="post-date">ЗАПИСЬ #003</div>
+      <h3>Зачем я делаю сайты</h3>
+      <p>Не ради денег. Ради ощущения, когда код оживает и начинает звучать. Это как собрать что-то из ничего.</p>
+    </div>
+    <div class="blog-post" onclick="playClick()">
+      <div class="post-date">ЗАПИСЬ #002</div>
+      <h3>Как я использую нейросети</h3>
+      <p>ИИ — это не замена. Это ускоритель. Он даёт идеи, я придаю форму. Вкус — мой, код — наш.</p>
+    </div>
+    <div class="blog-post" onclick="playClick()">
+      <div class="post-date">ЗАПИСЬ #001</div>
+      <h3>Почему матричный стиль</h3>
+      <p>Чёрное и белое — это честно. Ничего лишнего. Как хороший код.</p>
+    </div>
+  </section>
+
+  <section id="process">
+    <h2>ПРОЦЕСС</h2>
+    <div class="grid">
+      <div class="card">
+        <span class="tag">// ШАГ 1</span>
+        <h3>Бриф</h3>
+        <p>Обсуждаем задачу, цели, аудиторию.</p>
+      </div>
+      <div class="card">
+        <span class="tag">// ШАГ 2</span>
+        <h3>Концепция</h3>
+        <p>Показываю 2–3 варианта стиля.</p>
+      </div>
+      <div class="card">
+        <span class="tag">// ШАГ 3</span>
+        <h3>Дизайн</h3>
+        <p>Отрисовка в Figma с анимацией.</p>
+      </div>
+      <div class="card">
+        <span class="tag">// ШАГ 4</span>
+        <h3>Передача</h3>
+        <p>Отдаю макет верстальщику или верстаю сам.</p>
+      </div>
+    </div>
+  </section>
+
   <section id="prices">
     <h2>ЦЕНЫ</h2>
     <div class="grid">
@@ -903,10 +1322,10 @@
         <span class="tag">// СТАРТ</span>
         <h3>Лендинг</h3>
         <div class="price-num">от 5 000 <small>₽</small></div>
-        <div class="price-desc">Одностраничный сайт с анимацией</div>
+        <div class="price-desc">Одностраничный сайт</div>
         <ul>
           <li>Дизайн в Figma</li>
-          <li>Адаптив под телефон</li>
+          <li>Адаптив</li>
           <li>Базовая анимация</li>
           <li>Срок: 5–7 дней</li>
         </ul>
@@ -915,7 +1334,7 @@
         <span class="tag">// ХИТ</span>
         <h3>Анимированный сайт</h3>
         <div class="price-num">от 12 000 <small>₽</small></div>
-        <div class="price-desc">Многоэкранный сайт с интерактивом</div>
+        <div class="price-desc">Многоэкранный с интерактивом</div>
         <ul>
           <li>8–10 экранов</li>
           <li>Скролл-эффекты</li>
@@ -938,53 +1357,24 @@
     </div>
   </section>
 
-  <!-- ПРОЦЕСС -->
-  <section id="process">
-    <h2>ПРОЦЕСС</h2>
-    <div class="grid">
-      <div class="card">
-        <span class="tag">// ШАГ 1</span>
-        <h3>Бриф</h3>
-        <p>Обсуждаем задачу, цели, аудиторию. Понимаю, что нужно именно тебе.</p>
-      </div>
-      <div class="card">
-        <span class="tag">// ШАГ 2</span>
-        <h3>Концепция</h3>
-        <p>Показываю 2–3 варианта стиля. Ты выбираешь направление.</p>
-      </div>
-      <div class="card">
-        <span class="tag">// ШАГ 3</span>
-        <h3>Дизайн</h3>
-        <p>Отрисовка в Figma с анимацией и интерактивом. Макет готов к вёрстке.</p>
-      </div>
-      <div class="card">
-        <span class="tag">// ШАГ 4</span>
-        <h3>Передача</h3>
-        <p>Отдаю макет верстальщику (или верстаю сам) с комментариями.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ОТЗЫВЫ -->
   <section id="reviews">
     <h2>ОТЗЫВЫ</h2>
     <div class="grid">
       <div class="card">
-        <p>«Сделал сайт быстро и с душой. Анимации — просто космос, не ожидал такого от школьника.»</p>
-        <div class="quote-author">— АЛЕКСЕЙ, владелец кофейни</div>
+        <p>«Сделал сайт быстро и с душой. Анимации — космос.»</p>
+        <div style="margin-top:14px;font-size:0.78rem;color:var(--text-dim);letter-spacing:0.12em;">— АЛЕКСЕЙ, кофейня</div>
       </div>
       <div class="card">
-        <p>«Понял задачу с полуслова, предложил идеи, которые я не рассматривал. Результат превзошёл ожидания.»</p>
-        <div class="quote-author">— МАРИЯ, фотограф</div>
+        <p>«Понял задачу с полуслова. Результат превзошёл ожидания.»</p>
+        <div style="margin-top:14px;font-size:0.78rem;color:var(--text-dim);letter-spacing:0.12em;">— МАРИЯ, фотограф</div>
       </div>
       <div class="card">
-        <p>«Работать легко, на связи постоянно, сроки соблюдены. Буду обращаться ещё.»</p>
-        <div class="quote-author">— ДМИТРИЙ, киберспорт-клуб</div>
+        <p>«Работать легко, на связи, сроки соблюдены.»</p>
+        <div style="margin-top:14px;font-size:0.78rem;color:var(--text-dim);letter-spacing:0.12em;">— ДМИТРИЙ, киберспорт-клуб</div>
       </div>
     </div>
   </section>
 
-  <!-- СЕЙЧАС РАБОТАЮ -->
   <section id="now">
     <h2>СЕЙЧАС РАБОТАЮ НАД</h2>
     <ul class="skills">
@@ -996,32 +1386,26 @@
     </ul>
   </section>
 
-  <!-- FAQ -->
   <section id="faq">
     <h2>FAQ</h2>
     <div class="faq-item" onclick="toggleFaq(this)">
       <div class="faq-q">Сколько стоит сайт?</div>
-      <div class="faq-a">Зависит от задачи. Лендинг — от 5 000 ₽, многоэкранный анимированный сайт — от 12 000 ₽. Точную цену скажу после брифа.</div>
+      <div class="faq-a">Лендинг — от 5 000 ₽, многоэкранный анимированный сайт — от 12 000 ₽.</div>
     </div>
     <div class="faq-item" onclick="toggleFaq(this)">
       <div class="faq-q">Сколько времени занимает?</div>
-      <div class="faq-a">Лендинг — 5–7 дней. Многоэкранный сайт с анимацией — 10–14 дней. Сроки фиксируем до старта.</div>
+      <div class="faq-a">Лендинг — 5–7 дней. Многоэкранный — 10–14 дней.</div>
     </div>
     <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">Ты работаешь только с дизайном или верстаешь тоже?</div>
-      <div class="faq-a">Могу и то, и другое. Если нужен только макет в Figma — сделаю макет. Если нужен готовый сайт — сверстаю и залью на хостинг.</div>
-    </div>
-    <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-q">А если мне не понравится?</div>
-      <div class="faq-a">Показываю 2–3 концепции на старте — ты выбираешь. Дальше правки в рамках выбранного направления. Всё честно и без сюрпризов.</div>
+      <div class="faq-q">Работаешь только с дизайном?</div>
+      <div class="faq-a">Могу и дизайн, и вёрстку. Как удобнее.</div>
     </div>
     <div class="faq-item" onclick="toggleFaq(this)">
       <div class="faq-q">Как связаться?</div>
-      <div class="faq-a">Telegram: @director_lenvivya, Email: mnecaev881@gmail.com. Отвечаю в рабочее время.</div>
+      <div class="faq-a">Telegram: @director_lenvivya, Email: mnecaev881@gmail.com</div>
     </div>
   </section>
 
-  <!-- КОНТАКТЫ -->
   <section id="contacts">
     <h2>КОНТАКТЫ</h2>
     <ul class="contacts">
@@ -1032,20 +1416,19 @@
 
     <form class="form" onsubmit="sendForm(event)">
       <input type="text" placeholder="Твоё имя" required>
-      <input type="text" placeholder="Telegram или email для связи" required>
+      <input type="text" placeholder="Telegram или email" required>
       <textarea placeholder="Расскажи о задаче..." required></textarea>
       <button type="submit">ОТПРАВИТЬ ЗАЯВКУ</button>
-      <div class="msg" id="formMsg">✓ Заявка отправлена! Свяжусь с тобой в течение дня.</div>
+      <div class="msg" id="formMsg">✓ Заявка отправлена! Свяжусь в течение дня.</div>
     </form>
   </section>
 
   <footer>
-    © 2026 ДИРЕКТОР — сделано на вайбе · <span class="timer" id="timer">0с</span> на сайте
+    © 2026 ДИРЕКТОР — сделано на вайбе · <span class="timer" id="timer">0с</span> на сайте · заходов: <span class="timer" id="visitCount">1</span>
   </footer>
 
 </div>
 
-<!-- МОДАЛКА -->
 <div class="modal-bg" id="modalBg" onclick="closeModal(event)">
   <div class="modal" onclick="event.stopPropagation()">
     <button class="close" onclick="closeModal()">✕</button>
@@ -1055,301 +1438,8 @@
   </div>
 </div>
 
-<script>
-  /* ===== ПРЕЛОАДЕР ===== */
-  const preBar = document.getElementById('preBar');
-  const prePercent = document.getElementById('prePercent');
-  let preProgress = 0;
-
-  const preInterval = setInterval(() => {
-    preProgress += Math.random() * 15 + 5;
-    if (preProgress >= 100) {
-      preProgress = 100;
-      clearInterval(preInterval);
-      setTimeout(() => {
-        document.getElementById('preloader').classList.add('hidden');
-        setTimeout(startHeroAnimations, 300);
-      }, 400);
-    }
-    preBar.style.width = preProgress + '%';
-    prePercent.textContent = Math.floor(preProgress) + '%';
-  }, 120);
-
-  /* ===== МАТРИЦА ===== */
-  const canvas = document.getElementById('matrix');
-  const ctx = canvas.getContext('2d');
-
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF';
-  const fontSize = 16;
-  let columns, drops;
-
-  function initDrops() {
-    columns = Math.floor(canvas.width / fontSize);
-    drops = Array(columns).fill(1);
-  }
-  initDrops();
-  window.addEventListener('resize', initDrops);
-
-  function drawMatrix() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#fff';
-    ctx.font = fontSize + 'px monospace';
-
-    for (let i = 0; i < drops.length; i++) {
-      const char = chars[Math.floor(Math.random() * chars.length)];
-      ctx.fillText(char, i * fontSize, drops[i] * fontSize);
-      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
-    }
-  }
-  setInterval(drawMatrix, 50);
-
-  /* ===== РАСШИФРОВКА ИМЕНИ ===== */
-  function startHeroAnimations() {
-    const heroTitle = document.getElementById('heroTitle');
-    const finalText = 'ДИРЕКТОР';
-    const glyphs = '!<>-_\\/[]{}—=+*^?#01АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
-
-    function decodeText(el, finalStr, duration = 1400) {
-      const start = performance.now();
-      const len = finalStr.length;
-      function frame(now) {
-        const progress = Math.min((now - start) / duration, 1);
-        const revealed = Math.floor(progress * len);
-        let out = '';
-        for (let i = 0; i < len; i++) {
-          if (i < revealed) out += finalStr[i];
-          else out += glyphs[Math.floor(Math.random() * glyphs.length)];
-        }
-        el.textContent = out;
-        if (progress < 1) requestAnimationFrame(frame);
-        else el.textContent = finalStr;
-      }
-      requestAnimationFrame(frame);
-    }
-    decodeText(heroTitle, finalText);
-    setTimeout(startTyped, 1500);
-  }
-
-  /* ===== ПЕЧАТАЮЩИЙСЯ ТЕКСТ ===== */
-  const typedText = 'вайбкодер / дизайнер / игрок в доту';
-  const typedEl = document.getElementById('typed');
-  let idx = 0;
-
-  function startTyped() {
-    function type() {
-      if (idx < typedText.length) {
-        typedEl.textContent += typedText.charAt(idx);
-        idx++;
-        setTimeout(type, 65);
-      } else {
-        setTimeout(() => {
-          typedEl.textContent = '';
-          idx = 0;
-          type();
-        }, 3200);
-      }
-    }
-    type();
-  }
-
-  /* ===== ПОЯВЛЕНИЕ СЕКЦИЙ ===== */
-  const sections = document.querySelectorAll('section');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        entry.target.querySelectorAll('.num[data-target]').forEach(runCounter);
-        entry.target.querySelectorAll('.fill[data-width]').forEach(runFill);
-      }
-    });
-  }, { threshold: 0.15 });
-  sections.forEach(s => observer.observe(s));
-
-  /* ===== СЧЁТЧИКИ ===== */
-  function runCounter(el) {
-    if (el.dataset.done) return;
-    el.dataset.done = '1';
-    const target = +el.dataset.target;
-    const dur = 1400;
-    const start = performance.now();
-    function tick(now) {
-      const p = Math.min((now - start) / dur, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      el.textContent = Math.floor(eased * target);
-      if (p < 1) requestAnimationFrame(tick);
-      else el.textContent = target;
-    }
-    requestAnimationFrame(tick);
-  }
-
-  /* ===== ПОЛОСЫ НАВЫКОВ ===== */
-  function runFill(el) {
-    if (el.dataset.done) return;
-    el.dataset.done = '1';
-    el.style.width = el.dataset.width + '%';
-  }
-
-  /* ===== КУРСОР ===== */
-  const dot = document.getElementById('cursorDot');
-  const ring = document.getElementById('cursorRing');
-  let mx = 0, my = 0, rx = 0, ry = 0;
-
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    dot.style.left = mx + 'px';
-    dot.style.top = my + 'px';
-  });
-
-  function animateRing() {
-    rx += (mx - rx) * 0.18;
-    ry += (my - ry) * 0.18;
-    ring.style.left = rx + 'px';
-    ring.style.top = ry + 'px';
-    requestAnimationFrame(animateRing);
-  }
-  animateRing();
-
-  document.querySelectorAll('a, .card, .skills li, .btn, .burger, .close, .fact, .to-top, .faq-item, .form button').forEach(el => {
-    el.addEventListener('mouseenter', () => ring.classList.add('big'));
-    el.addEventListener('mouseleave', () => ring.classList.remove('big'));
-  });
-
-  /* ===== ПРОГРЕСС + КНОПКА НАВЕРХ ===== */
-  const progress = document.getElementById('progress');
-  const toTop = document.getElementById('toTop');
-  window.addEventListener('scroll', () => {
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    progress.style.width = (window.scrollY / h * 100) + '%';
-    if (window.scrollY > 500) toTop.classList.add('show');
-    else toTop.classList.remove('show');
-  });
-
-  /* ===== МОБИЛЬНОЕ МЕНЮ ===== */
-  const burger = document.getElementById('burger');
-  const navMenu = document.getElementById('navMenu');
-  burger.addEventListener('click', () => navMenu.classList.toggle('open'));
-  navMenu.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => navMenu.classList.remove('open'));
-  });
-
-  /* ===== МОДАЛКИ ===== */
-  const projectsData = {
-    p1: {
-      title: 'Матричное портфолио',
-      text: 'Личный сайт-портфолио в стиле «Матрица». Чёрно-белая палитра, падающие цифры на canvas, кастомный курсор с кольцом, модальные окна, 3D-наклон карточек, счётчики и адаптив под мобильные.',
-      text2: 'Стек: HTML, CSS, JavaScript (Canvas API, IntersectionObserver, Web Audio). Сделано вручную, без фреймворков. Живёт тут же — можно потыкать.'
-    },
-    p2: {
-      title: 'Проект #2',
-      text: 'Описание появится позже. Здесь будет рассказ о задаче, решении и результате.',
-      text2: 'Пока в разработке.'
-    },
-    p3: {
-      title: 'Проект #3',
-      text: 'Описание появится позже. Здесь будет рассказ о задаче, решении и результате.',
-      text2: 'Пока в разработке.'
-    }
-  };
-
-  function openModal(id) {
-    playClick();
-    const data = projectsData[id];
-    document.getElementById('modalTitle').textContent = data.title;
-    document.getElementById('modalText').textContent = data.text;
-    document.getElementById('modalText2').textContent = data.text2;
-    document.getElementById('modalBg').classList.add('active');
-  }
-  function closeModal(e) {
-    if (e && e.target !== e.currentTarget && e.type === 'click') return;
-    document.getElementById('modalBg').classList.remove('active');
-  }
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') document.getElementById('modalBg').classList.remove('active');
-  });
-
-  /* ===== 3D-НАКЛОН ===== */
-  document.querySelectorAll('.card.tilt').forEach(card => {
-    card.addEventListener('mousemove', e => {
-      const r = card.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      card.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-6px)`;
-    });
-    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
-  });
-
-  /* ===== FAQ ===== */
-  function toggleFaq(el) {
-    el.classList.toggle('open');
-  }
-
-  /* ===== ФОРМА ===== */
-  function sendForm(e) {
-    e.preventDefault();
-    const msg = document.getElementById('formMsg');
-    msg.classList.add('show');
-    playClick();
-    setTimeout(() => msg.classList.remove('show'), 4000);
-    e.target.reset();
-  }
-
-  /* ===== ЗВУК ===== */
-  let audioCtx;
-  function playClick() {
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'square';
-      osc.frequency.value = 800;
-      gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.06);
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.06);
-    } catch (e) {}
-  }
-
-  /* ===== ТАЙМЕР НА САЙТЕ ===== */
-  const timerEl = document.getElementById('timer');
-  const startTime = Date.now();
-  setInterval(() => {
-    const s = Math.floor((Date.now() - startTime) / 1000);
-    timerEl.textContent = s + 'с';
-  }, 1000);
-
-  /* ===== МАГНИТНЫЕ КНОПКИ ===== */
-  document.querySelectorAll('.magnet').forEach(el => {
-    el.addEventListener('mousemove', e => {
-      const r = el.getBoundingClientRect();
-      const x = e.clientX - r.left - r.width / 2;
-      const y = e.clientY - r.top - r.height / 2;
-      el.style.transform = `translate(${x * 0.25}px, ${y * 0.25}px)`;
-    });
-    el.addEventListener('mouseleave', () => { el.style.transform = ''; });
-  });
-
-  /* ===== ПАСХАЛКА KONAMI ===== */
-  const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-  let konamiIdx = 0;
-  document.addEventListener('keydown', e => {
-    if (e.key === konami[konamiIdx]) {
-      konamiIdx++;
-      if (konamiIdx === konami.length) {
-        document.body.classList.toggle('hacked');
-        konamiIdx = 0;
-      }
-    } else konamiIdx = 0;
-  });
-</script>
+<!-- ЧАСТЬ 2: JS-СКРИПТ ВСТАВЬ СЮДА -->
+<!-- ПОКА МЕСТО ПУСТОЕ — ЖДИ СЛЕДУЮЩЕЕ СООБЩЕНИЕ -->
 
 </body>
 </html>
