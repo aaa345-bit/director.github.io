@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ДИРЕКТОР — вайбкодер</title>
+<meta name="description" content="ДИРЕКТОР — вайбкодер. Делаю современные сайты с анимацией. Портфолио.">
+<title>ДИРЕКТОР — вайбкодер / портфолио</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -17,18 +18,30 @@
   }
 
   /* ===== КАСТОМНЫЙ КУРСОР ===== */
-  .cursor {
+  .cursor-dot {
     position: fixed;
-    width: 12px; height: 12px;
+    width: 8px; height: 8px;
     background: #fff;
     border-radius: 50%;
     pointer-events: none;
     z-index: 9999;
     transform: translate(-50%, -50%);
-    transition: width 0.2s, height 0.2s, background 0.2s;
-    mix-blend-mode: difference;
+    transition: transform 0.05s;
   }
-  .cursor.big { width: 40px; height: 40px; background: #fff; }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: width 0.25s, height 0.25s, border-color 0.25s, transform 0.15s ease-out;
+  }
+  .cursor-ring.big {
+    width: 70px; height: 70px;
+    border-color: #fff;
+  }
 
   /* ===== ПРОГРЕСС-БАР ===== */
   .progress {
@@ -37,17 +50,17 @@
     height: 2px;
     background: #fff;
     width: 0%;
-    z-index: 9998;
-    box-shadow: 0 0 10px #fff;
+    z-index: 9997;
+    box-shadow: 0 0 12px #fff;
   }
 
-  /* ===== МАТРИЧНЫЙ ФОН ===== */
+  /* ===== МАТРИЦА ===== */
   #matrix {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     z-index: 0;
-    opacity: 0.3;
+    opacity: 0.28;
   }
 
   .content { position: relative; z-index: 1; }
@@ -56,33 +69,34 @@
   nav {
     position: fixed;
     top: 0; left: 0; right: 0;
-    padding: 20px 40px;
+    padding: 18px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 100;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
   }
 
   nav .logo {
     font-weight: 700;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.25em;
     font-size: 1rem;
   }
 
   nav ul {
     display: flex;
-    gap: 30px;
+    gap: 26px;
     list-style: none;
   }
 
   nav a {
-    color: #bbb;
+    color: #999;
     text-decoration: none;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
     transition: color 0.3s;
     position: relative;
   }
@@ -90,7 +104,7 @@
   nav a::after {
     content: '';
     position: absolute;
-    bottom: -5px; left: 0;
+    bottom: -6px; left: 0;
     width: 0; height: 1px;
     background: #fff;
     transition: width 0.3s;
@@ -99,8 +113,15 @@
   nav a:hover { color: #fff; }
   nav a:hover::after { width: 100%; }
 
-  /* Бургер для мобилки */
-  .burger { display: none; cursor: none; }
+  .burger {
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: none;
+    font-family: inherit;
+  }
 
   /* ===== HERO ===== */
   .hero {
@@ -111,27 +132,19 @@
     align-items: center;
     text-align: center;
     padding: 120px 20px 40px;
-  }
-
-  .hero h1 {
-    font-size: clamp(2.5rem, 12vw, 8rem);
-    letter-spacing: 0.15em;
-    font-weight: 700;
-    text-shadow: 0 0 30px rgba(255,255,255,0.5);
     position: relative;
   }
 
-  .hero h1:hover {
-    animation: glitch 0.3s infinite;
+  .hero h1 {
+    font-size: clamp(2.5rem, 13vw, 9rem);
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    text-shadow: 0 0 40px rgba(255,255,255,0.6);
+    transition: text-shadow 0.4s;
   }
 
-  @keyframes glitch {
-    0% { transform: translate(0); text-shadow: 0 0 30px rgba(255,255,255,0.5); }
-    20% { transform: translate(-3px, 2px); text-shadow: 3px 0 #fff, -3px 0 #666; }
-    40% { transform: translate(3px, -2px); text-shadow: -3px 0 #fff, 3px 0 #666; }
-    60% { transform: translate(-2px, -2px); }
-    80% { transform: translate(2px, 2px); }
-    100% { transform: translate(0); }
+  .hero h1:hover {
+    text-shadow: 0 0 60px rgba(255,255,255,0.9), 0 0 100px rgba(255,255,255,0.4);
   }
 
   .hero .typed {
@@ -139,6 +152,7 @@
     font-size: clamp(0.9rem, 2.5vw, 1.3rem);
     color: #bbb;
     min-height: 1.5em;
+    letter-spacing: 0.05em;
   }
 
   .hero .typed::after {
@@ -157,37 +171,52 @@
   }
 
   .btn {
-    padding: 14px 32px;
+    padding: 14px 34px;
     border: 1px solid #fff;
     background: transparent;
     color: #fff;
     font-family: inherit;
-    font-size: 0.9rem;
-    letter-spacing: 0.15em;
+    font-size: 0.88rem;
+    letter-spacing: 0.16em;
     cursor: none;
-    transition: all 0.3s ease;
+    transition: all 0.35s ease;
     text-decoration: none;
     display: inline-block;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: #fff;
+    transition: left 0.35s ease;
+    z-index: -1;
   }
 
   .btn:hover {
-    background: #fff;
     color: #000;
-    box-shadow: 0 0 30px rgba(255,255,255,0.6);
+    box-shadow: 0 0 35px rgba(255,255,255,0.6);
   }
+
+  .btn:hover::before { left: 0; }
+
+  .btn span { position: relative; z-index: 1; }
 
   .scroll-hint {
     position: absolute;
     bottom: 30px;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: #666;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.35em;
     animation: float 2s ease-in-out infinite;
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(10px); }
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(10px); opacity: 1; }
   }
 
   /* ===== СЕКЦИИ ===== */
@@ -196,7 +225,7 @@
     margin: 0 auto;
     padding: 100px 25px;
     opacity: 0;
-    transform: translateY(40px);
+    transform: translateY(50px);
     transition: opacity 1s ease, transform 1s ease;
   }
 
@@ -204,13 +233,25 @@
 
   h2 {
     font-size: clamp(1.5rem, 5vw, 2.5rem);
-    margin-bottom: 40px;
+    margin-bottom: 45px;
     letter-spacing: 0.1em;
     border-left: 3px solid #fff;
-    padding-left: 15px;
+    padding-left: 18px;
+    position: relative;
   }
 
-  h2::before { content: '> '; color: #888; }
+  h2::before {
+    content: '> ';
+    color: #888;
+  }
+
+  h2::after {
+    content: '';
+    position: absolute;
+    bottom: -18px; left: 18px;
+    width: 60px; height: 1px;
+    background: #333;
+  }
 
   p, li {
     font-size: 1.05rem;
@@ -221,34 +262,51 @@
   /* ===== ФАКТЫ ===== */
   .facts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 20px;
-    margin-top: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 18px;
+    margin-top: 45px;
   }
 
   .fact {
-    border: 1px solid #333;
-    padding: 25px 20px;
+    border: 1px solid #2a2a2a;
+    padding: 28px 18px;
     text-align: center;
-    transition: all 0.3s;
+    transition: all 0.35s ease;
+    position: relative;
+    overflow: hidden;
   }
+
+  .fact::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: #fff;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .fact:hover::before { transform: scaleX(1); }
 
   .fact:hover {
     border-color: #fff;
-    transform: translateY(-5px);
+    transform: translateY(-6px);
+    box-shadow: 0 15px 40px rgba(255,255,255,0.08);
   }
 
   .fact .num {
-    font-size: 2.2rem;
+    font-size: 2.4rem;
     font-weight: 700;
     display: block;
     margin-bottom: 8px;
+    letter-spacing: 0.05em;
   }
 
   .fact .label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #888;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.18em;
   }
 
   /* ===== НАВЫКИ ===== */
@@ -260,21 +318,23 @@
   }
 
   .skills li {
-    border: 1px solid #444;
-    padding: 10px 18px;
-    font-size: 0.95rem;
+    border: 1px solid #333;
+    padding: 11px 20px;
+    font-size: 0.92rem;
     transition: all 0.3s ease;
     cursor: none;
+    position: relative;
   }
 
   .skills li:hover {
     background: #fff;
     color: #000;
     transform: translateY(-3px);
-    box-shadow: 0 0 25px rgba(255,255,255,0.4);
+    box-shadow: 0 0 30px rgba(255,255,255,0.45);
+    border-color: #fff;
   }
 
-  /* ===== ПРОЕКТЫ ===== */
+  /* ===== КАРТОЧКИ (проекты, услуги, процесс) ===== */
   .projects {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -282,12 +342,14 @@
   }
 
   .project {
-    border: 1px solid #333;
-    padding: 30px 25px;
-    transition: all 0.4s ease;
+    border: 1px solid #2a2a2a;
+    padding: 32px 26px;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.15s ease;
     position: relative;
     overflow: hidden;
     cursor: none;
+    background: rgba(0,0,0,0.4);
+    transform-style: preserve-3d;
   }
 
   .project::before {
@@ -296,22 +358,22 @@
     top: 0; left: -100%;
     width: 100%; height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-    transition: left 0.6s ease;
+    transition: left 0.7s ease;
+    pointer-events: none;
   }
 
   .project:hover::before { left: 100%; }
 
   .project:hover {
     border-color: #fff;
-    transform: translateY(-5px);
-    box-shadow: 0 10px 40px rgba(255,255,255,0.1);
+    box-shadow: 0 20px 60px rgba(255,255,255,0.12);
   }
 
   .project .tag {
-    font-size: 0.7rem;
-    color: #888;
-    letter-spacing: 0.2em;
-    margin-bottom: 15px;
+    font-size: 0.68rem;
+    color: #777;
+    letter-spacing: 0.22em;
+    margin-bottom: 16px;
     display: block;
   }
 
@@ -323,26 +385,30 @@
 
   .project p {
     font-size: 0.9rem;
-    color: #888;
+    color: #999;
+    line-height: 1.7;
   }
 
   .project .open {
-    margin-top: 20px;
-    font-size: 0.75rem;
+    margin-top: 22px;
+    font-size: 0.72rem;
     color: #fff;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.18em;
     display: inline-block;
     border-bottom: 1px solid #444;
     padding-bottom: 2px;
+    transition: border-color 0.3s;
   }
+
+  .project:hover .open { border-color: #fff; }
 
   /* ===== МОДАЛКА ===== */
   .modal-bg {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(5px);
+    background: rgba(0,0,0,0.88);
+    backdrop-filter: blur(8px);
     z-index: 1000;
     display: none;
     justify-content: center;
@@ -356,49 +422,49 @@
   .modal {
     background: #0a0a0a;
     border: 1px solid #333;
-    max-width: 600px;
+    max-width: 620px;
     width: 100%;
-    padding: 45px 35px;
+    padding: 50px 40px;
     position: relative;
-    animation: modalIn 0.4s ease;
+    animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes modalIn {
-    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    from { opacity: 0; transform: scale(0.92) translateY(30px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
 
   .modal h3 {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    letter-spacing: 0.05em;
+    font-size: 1.9rem;
+    margin-bottom: 22px;
+    letter-spacing: 0.04em;
   }
 
-  .modal p { margin-bottom: 15px; }
+  .modal p { margin-bottom: 15px; color: #bbb; }
 
   .modal .close {
     position: absolute;
-    top: 15px; right: 20px;
-    font-size: 1.5rem;
+    top: 18px; right: 22px;
+    font-size: 1.6rem;
     color: #888;
     background: none;
     border: none;
     cursor: none;
     font-family: inherit;
-    transition: color 0.3s;
+    transition: color 0.3s, transform 0.3s;
   }
 
-  .modal .close:hover { color: #fff; }
+  .modal .close:hover { color: #fff; transform: rotate(90deg); }
 
   /* ===== КОНТАКТЫ ===== */
   .contacts { list-style: none; }
 
-  .contacts li { margin-bottom: 15px; }
+  .contacts li { margin-bottom: 18px; font-size: 1rem; }
 
   .contacts a {
     color: #fff;
     text-decoration: none;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     border-bottom: 1px solid #444;
     padding-bottom: 3px;
     transition: all 0.3s ease;
@@ -406,61 +472,90 @@
 
   .contacts a:hover {
     border-color: #fff;
-    text-shadow: 0 0 15px rgba(255,255,255,0.7);
+    text-shadow: 0 0 18px rgba(255,255,255,0.8);
+    letter-spacing: 0.02em;
   }
 
   footer {
     text-align: center;
-    padding: 40px 20px;
+    padding: 50px 20px 40px;
     color: #555;
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    border-top: 1px solid #1a1a1a;
+    margin-top: 40px;
+  }
+
+  /* ===== КНОПКА НАВЕРХ ===== */
+  .to-top {
+    position: fixed;
+    bottom: 30px; right: 30px;
+    width: 48px; height: 48px;
+    border: 1px solid #fff;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: none;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s, transform 0.4s, background 0.3s;
+    font-family: inherit;
+    backdrop-filter: blur(6px);
+  }
+
+  .to-top.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .to-top:hover {
+    background: #fff;
+    color: #000;
+    transform: translateY(-5px);
   }
 
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: #000; }
-  ::-webkit-scrollbar-thumb { background: #333; }
-  ::-webkit-scrollbar-thumb:hover { background: #666; }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; }
+  ::-webkit-scrollbar-thumb:hover { background: #555; }
 
   /* ===== МОБИЛКА ===== */
-  @media (max-width: 700px) {
+  @media (max-width: 760px) {
     body { cursor: auto; }
-    .cursor { display: none; }
-    nav { padding: 15px 20px; }
+    .cursor-dot, .cursor-ring { display: none; }
+    nav { padding: 14px 20px; }
     nav ul {
       position: fixed;
       top: 0; right: -100%;
-      width: 70%; height: 100vh;
+      width: 75%; height: 100vh;
       background: #000;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 40px;
-      transition: right 0.4s ease;
-      border-left: 1px solid #222;
+      gap: 35px;
+      transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      border-left: 1px solid #1a1a1a;
     }
     nav ul.open { right: 0; }
-    nav ul a { font-size: 1.2rem; }
-    .burger {
-      display: block;
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 1.5rem;
-      cursor: pointer;
-      z-index: 101;
-      font-family: inherit;
-    }
-    .btn { cursor: pointer; }
-    .project, .skills li, .modal .close { cursor: pointer; }
+    nav ul a { font-size: 1.1rem; }
+    .burger { display: block; cursor: pointer; }
+    .btn, .project, .skills li, .modal .close, .to-top { cursor: pointer; }
+    .project { transform: none !important; }
   }
 </style>
 </head>
 <body>
 
-<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
 <div class="progress" id="progress"></div>
 <canvas id="matrix"></canvas>
+
+<button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <div class="content">
 
@@ -469,8 +564,10 @@
     <div class="logo">ДИРЕКТОР</div>
     <ul id="navMenu">
       <li><a href="#about">Обо мне</a></li>
+      <li><a href="#services">Услуги</a></li>
       <li><a href="#skills">Навыки</a></li>
       <li><a href="#projects">Проекты</a></li>
+      <li><a href="#process">Процесс</a></li>
       <li><a href="#contacts">Контакты</a></li>
     </ul>
     <button class="burger" id="burger">☰</button>
@@ -478,11 +575,11 @@
 
   <!-- HERO -->
   <div class="hero">
-    <h1>ДИРЕКТОР</h1>
+    <h1 id="heroTitle">ДИРЕКТОР</h1>
     <div class="typed" id="typed"></div>
     <div class="hero-buttons">
-      <a href="#projects" class="btn">Смотреть проекты</a>
-      <a href="#contacts" class="btn">Связаться</a>
+      <a href="#projects" class="btn" onclick="playClick()"><span>Смотреть проекты</span></a>
+      <a href="#contacts" class="btn" onclick="playClick()"><span>Связаться</span></a>
     </div>
     <div class="scroll-hint">▼ СКРОЛЛ ▼</div>
   </div>
@@ -494,10 +591,32 @@
     <p style="margin-top:20px;">Мой подход: не шаблоны, а ощущение. Код должен не просто работать — он должен звучать.</p>
 
     <div class="facts">
-      <div class="fact"><span class="num">∞</span><span class="label">ИДЕЙ</span></div>
-      <div class="fact"><span class="num">24/7</span><span class="label">НА ВАЙБЕ</span></div>
-      <div class="fact"><span class="num">7к</span><span class="label">MMR В DOTA</span></div>
-      <div class="fact"><span class="num">100%</span><span class="label">РУЧНОЙ КОД</span></div>
+      <div class="fact"><span class="num" data-target="999">0</span><span class="label">ИДЕЙ В ГОЛОВЕ</span></div>
+      <div class="fact"><span class="num" data-target="24">0</span><span class="label">ЧАСА НА ВАЙБЕ</span></div>
+      <div class="fact"><span class="num" data-target="7">0</span><span class="label">К MMR В DOTA</span></div>
+      <div class="fact"><span class="num" data-target="100">0</span><span class="label">% РУЧНОЙ КОД</span></div>
+    </div>
+  </section>
+
+  <!-- УСЛУГИ -->
+  <section id="services">
+    <h2>УСЛУГИ</h2>
+    <div class="projects">
+      <div class="project tilt">
+        <span class="tag">// 01</span>
+        <h3>Лендинг</h3>
+        <p>Сайт-визитка с анимацией, адаптивом и чёткой структурой. Под ключ — от идеи до готового макета.</p>
+      </div>
+      <div class="project tilt">
+        <span class="tag">// 02</span>
+        <h3>Анимации</h3>
+        <p>Скролл-эффекты, интерактив, микро-анимации, canvas. Сайт, который живёт, а не просто существует.</p>
+      </div>
+      <div class="project tilt">
+        <span class="tag">// 03</span>
+        <h3>Адаптив</h3>
+        <p>Корректная работа на телефоне, планшете и десктопе. Без косяков, без «а на телефоне сломалось».</p>
+      </div>
     </div>
   </section>
 
@@ -509,8 +628,10 @@
       <li>HTML / CSS</li>
       <li>JavaScript</li>
       <li>Анимации</li>
-      <li>Веб-дизайн</li>
+      <li>Web-дизайн</li>
       <li>Работа с ИИ</li>
+      <li>Canvas API</li>
+      <li>Адаптив</li>
       <li>Dota 2</li>
     </ul>
   </section>
@@ -519,19 +640,19 @@
   <section id="projects">
     <h2>ПРОЕКТЫ</h2>
     <div class="projects">
-      <div class="project" onclick="openModal('p1')">
+      <div class="project tilt" onclick="openModal('p1')">
         <span class="tag">// 001</span>
         <h3>Матричное портфолио</h3>
-        <p>Сайт, который ты сейчас смотришь. Чёрно-белый, с анимацией.</p>
+        <p>Сайт, который ты сейчас смотришь. Чёрно-белый, с анимацией, canvas и интерактивом.</p>
         <span class="open">ПОДРОБНЕЕ →</span>
       </div>
-      <div class="project" onclick="openModal('p2')">
+      <div class="project tilt" onclick="openModal('p2')">
         <span class="tag">// 002</span>
         <h3>Проект #2</h3>
         <p>Скоро здесь появится описание. Пока в разработке.</p>
         <span class="open">ПОДРОБНЕЕ →</span>
       </div>
-      <div class="project" onclick="openModal('p3')">
+      <div class="project tilt" onclick="openModal('p3')">
         <span class="tag">// 003</span>
         <h3>Проект #3</h3>
         <p>Скоро здесь появится описание. Пока в разработке.</p>
@@ -540,13 +661,52 @@
     </div>
   </section>
 
+  <!-- ПРОЦЕСС -->
+  <section id="process">
+    <h2>ПРОЦЕСС</h2>
+    <div class="projects">
+      <div class="project">
+        <span class="tag">// ШАГ 1</span>
+        <h3>Бриф</h3>
+        <p>Обсуждаем задачу, цели, аудиторию. Понимаю, что нужно именно тебе.</p>
+      </div>
+      <div class="project">
+        <span class="tag">// ШАГ 2</span>
+        <h3>Концепция</h3>
+        <p>Показываю 2–3 варианта стиля. Ты выбираешь направление.</p>
+      </div>
+      <div class="project">
+        <span class="tag">// ШАГ 3</span>
+        <h3>Дизайн</h3>
+        <p>Отрисовка в Figma с анимацией и интерактивом. Макет готов к вёрстке.</p>
+      </div>
+      <div class="project">
+        <span class="tag">// ШАГ 4</span>
+        <h3>Передача</h3>
+        <p>Отдаю макет верстальщику (или верстаю сам) с комментариями.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- СЕЙЧАС РАБОТАЮ -->
+  <section id="now">
+    <h2>СЕЙЧАС РАБОТАЮ НАД</h2>
+    <ul class="skills">
+      <li>Прокачка JavaScript</li>
+      <li>Анимации на Canvas</li>
+      <li>Собираю портфолио</li>
+      <li>Изучаю Figma</li>
+      <li>Dota 2 (7к MMR 😎)</li>
+    </ul>
+  </section>
+
   <!-- КОНТАКТЫ -->
   <section id="contacts">
     <h2>КОНТАКТЫ</h2>
     <ul class="contacts">
-      <li>Telegram: <a href="#">@твой_ник</a></li>
-      <li>GitHub: <a href="#">github.com/твой_ник</a></li>
-      <li>Email: <a href="#">твоя@почта.com</a></li>
+      <li>Telegram: <a href="https://t.me/director_lenvivya" target="_blank">@director_lenvivya</a></li>
+      <li>GitHub: <a href="https://github.com/aaa345-bit" target="_blank">github.com/aaa345-bit</a></li>
+      <li>Email: <a href="mailto:mnecaev881@gmail.com">mnecaev881@gmail.com</a></li>
     </ul>
   </section>
 
@@ -565,7 +725,7 @@
 </div>
 
 <script>
-  // ===== МАТРИЦА =====
+  /* ===== МАТРИЦА ===== */
   const canvas = document.getElementById('matrix');
   const ctx = canvas.getContext('2d');
 
@@ -602,56 +762,116 @@
   }
   setInterval(drawMatrix, 50);
 
-  // ===== ПЕЧАТАЮЩИЙСЯ ТЕКСТ =====
-  const text = 'вайбкодер / дизайнер / игрок в доту';
+  /* ===== РАСШИФРОВКА ИМЕНИ ===== */
+  const heroTitle = document.getElementById('heroTitle');
+  const finalText = 'ДИРЕКТОР';
+  const glyphs = '!<>-_\\/[]{}—=+*^?#01АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+
+  function decodeText(el, finalStr, duration = 1400) {
+    const start = performance.now();
+    const len = finalStr.length;
+    function frame(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const revealed = Math.floor(progress * len);
+      let out = '';
+      for (let i = 0; i < len; i++) {
+        if (i < revealed) out += finalStr[i];
+        else out += glyphs[Math.floor(Math.random() * glyphs.length)];
+      }
+      el.textContent = out;
+      if (progress < 1) requestAnimationFrame(frame);
+      else el.textContent = finalStr;
+    }
+    requestAnimationFrame(frame);
+  }
+  setTimeout(() => decodeText(heroTitle, finalText), 300);
+
+  /* ===== ПЕЧАТАЮЩИЙСЯ ТЕКСТ ===== */
+  const typedText = 'вайбкодер / дизайнер / игрок в доту';
   const typedEl = document.getElementById('typed');
   let idx = 0;
 
   function type() {
-    if (idx < text.length) {
-      typedEl.textContent += text.charAt(idx);
+    if (idx < typedText.length) {
+      typedEl.textContent += typedText.charAt(idx);
       idx++;
-      setTimeout(type, 70);
+      setTimeout(type, 65);
     } else {
-      // цикл: стираем и печатаем заново
       setTimeout(() => {
         typedEl.textContent = '';
         idx = 0;
         type();
-      }, 3000);
+      }, 3200);
     }
   }
-  setTimeout(type, 800);
+  setTimeout(type, 1500);
 
-  // ===== ПОЯВЛЕНИЕ СЕКЦИЙ =====
+  /* ===== ПОЯВЛЕНИЕ СЕКЦИЙ ===== */
   const sections = document.querySelectorAll('section');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) entry.target.classList.add('visible');
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // анимируем счётчики внутри
+        entry.target.querySelectorAll('.num[data-target]').forEach(runCounter);
+      }
     });
   }, { threshold: 0.15 });
   sections.forEach(s => observer.observe(s));
 
-  // ===== КУРСОР =====
-  const cursor = document.getElementById('cursor');
+  /* ===== СЧЁТЧИКИ ===== */
+  function runCounter(el) {
+    if (el.dataset.done) return;
+    el.dataset.done = '1';
+    const target = +el.dataset.target;
+    const dur = 1400;
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.floor(eased * target);
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ===== КУРСОР ===== */
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
   document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx + 'px';
+    dot.style.top = my + 'px';
   });
 
-  document.querySelectorAll('a, .project, .skills li, .btn, .burger, .close, .fact').forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('big'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+  function animateRing() {
+    rx += (mx - rx) * 0.18;
+    ry += (my - ry) * 0.18;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, .project, .skills li, .btn, .burger, .close, .fact, .to-top').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('big'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('big'));
   });
 
-  // ===== ПРОГРЕСС-БАР =====
+  /* ===== ПРОГРЕСС + КНОПКА НАВЕРХ ===== */
   const progress = document.getElementById('progress');
+  const toTop = document.getElementById('toTop');
   window.addEventListener('scroll', () => {
     const h = document.documentElement.scrollHeight - window.innerHeight;
     progress.style.width = (window.scrollY / h * 100) + '%';
+    if (window.scrollY > 500) toTop.classList.add('show');
+    else toTop.classList.remove('show');
   });
 
-  // ===== МОБИЛЬНОЕ МЕНЮ =====
+  /* ===== МОБИЛЬНОЕ МЕНЮ ===== */
   const burger = document.getElementById('burger');
   const navMenu = document.getElementById('navMenu');
   burger.addEventListener('click', () => navMenu.classList.toggle('open'));
@@ -659,12 +879,12 @@
     a.addEventListener('click', () => navMenu.classList.remove('open'));
   });
 
-  // ===== МОДАЛКИ =====
+  /* ===== МОДАЛКИ ===== */
   const projectsData = {
     p1: {
       title: 'Матричное портфолио',
-      text: 'Личный сайт-портфолио в стиле «Матрица». Чёрно-белая палитра, падающие цифры на canvas, кастомный курсор, модальные окна, адаптив под мобильные.',
-      text2: 'Стек: HTML, CSS, JavaScript (Canvas API, IntersectionObserver). Сделано вручную, без фреймворков.'
+      text: 'Личный сайт-портфолио в стиле «Матрица». Чёрно-белая палитра, падающие цифры на canvas, кастомный курсор с кольцом, модальные окна, 3D-наклон карточек, счётчики и адаптив под мобильные.',
+      text2: 'Стек: HTML, CSS, JavaScript (Canvas API, IntersectionObserver, Web Audio). Сделано вручную, без фреймворков. Живёт тут же — можно потыкать.'
     },
     p2: {
       title: 'Проект #2',
@@ -679,6 +899,7 @@
   };
 
   function openModal(id) {
+    playClick();
     const data = projectsData[id];
     document.getElementById('modalTitle').textContent = data.title;
     document.getElementById('modalText').textContent = data.text;
@@ -694,6 +915,37 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') document.getElementById('modalBg').classList.remove('active');
   });
+
+  /* ===== 3D-НАКЛОН КАРТОЧЕК ===== */
+  document.querySelectorAll('.project.tilt').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-6px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+
+  /* ===== ЗВУК КЛИКА ===== */
+  let audioCtx;
+  function playClick() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 800;
+      gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.06);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.06);
+    } catch (e) {}
+  }
 </script>
 
 </body>
