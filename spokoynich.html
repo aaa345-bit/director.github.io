@@ -160,7 +160,6 @@
   .fact .num { display: block; font-size: 1.6rem; color: #c8b496; margin-bottom: 8px; }
   .fact .label { font-size: 0.65rem; color: var(--text-soft); letter-spacing: 0.2em; }
 
-  /* ===== VIDEO (Twitch clips) ===== */
   .video-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px; margin-top: 35px;
@@ -202,6 +201,123 @@
     font-size: 0.95rem; color: #c8b8a0;
     letter-spacing: 0.05em;
   }
+
+  /* ===== CHRONICLE ===== */
+  .chronicle-item {
+    margin-bottom: 70px;
+  }
+  .chronicle-photo {
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #050505;
+    cursor: none;
+    position: relative;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1.2s ease, transform 1.2s ease, border-color 0.4s, box-shadow 0.4s;
+  }
+  .chronicle-item.visible .chronicle-photo {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .chronicle-photo:hover {
+    border-color: var(--accent);
+    box-shadow: 0 20px 60px rgba(200, 180, 150, 0.15);
+  }
+  .chronicle-photo img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    filter: sepia(0.15) brightness(0.92);
+  }
+  .chronicle-photo:hover img {
+    transform: scale(1.03);
+    filter: sepia(0) brightness(1);
+  }
+  .chronicle-quote {
+    text-align: center;
+    padding: 35px 20px 0;
+    font-size: clamp(0.95rem, 2vw, 1.15rem);
+    color: #c8b8a0;
+    font-style: italic;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1.2s ease 0.3s, transform 1.2s ease 0.3s;
+  }
+  .chronicle-item.visible .chronicle-quote {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ===== LIGHTBOX ===== */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 5, 0.96);
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    cursor: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .lightbox.show {
+    display: flex;
+    opacity: 1;
+  }
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border: 1px solid var(--border);
+    box-shadow: 0 0 60px rgba(200, 180, 150, 0.2);
+    animation: lightboxIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes lightboxIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .lightbox .lightbox-close {
+    position: absolute;
+    top: 25px; right: 25px;
+    width: 44px; height: 44px;
+    border: 1px solid var(--border);
+    background: rgba(10, 9, 8, 0.8);
+    color: #c8b496;
+    font-size: 1.3rem;
+    cursor: none;
+    font-family: inherit;
+    transition: all 0.3s;
+  }
+  .lightbox .lightbox-close:hover {
+    border-color: #c8b496;
+    color: #fff;
+  }
+  .lightbox .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px; height: 50px;
+    border: 1px solid var(--border);
+    background: rgba(10, 9, 8, 0.8);
+    color: #c8b496;
+    font-size: 1.4rem;
+    cursor: none;
+    font-family: inherit;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox .lightbox-nav:hover { border-color: #c8b496; color: #fff; }
+  .lightbox .lightbox-prev { left: 25px; }
+  .lightbox .lightbox-next { right: 25px; }
 
   .moments {
     display: flex; flex-direction: column;
@@ -255,7 +371,6 @@
   .tl-title { font-size: 1rem; color: var(--text); margin-bottom: 6px; }
   .tl-desc { font-size: 0.85rem; color: var(--text-dim); }
 
-  /* ===== FORM ===== */
   .memory-form {
     margin-top: 35px;
     display: flex; flex-direction: column;
@@ -330,7 +445,6 @@
   }
   .memory-form .form-success.show { opacity: 1; }
 
-  /* ===== SHARE ===== */
   .share-row {
     display: flex; gap: 12px; flex-wrap: wrap;
     margin-top: 30px;
@@ -381,8 +495,13 @@
     section { padding: 65px 20px; }
     .hero h1 { letter-spacing: 0.08em; }
     .audio-btn { top: 15px; right: 15px; width: 38px; height: 38px; }
-    .quote-card, .moment, .video-card, .share-btn, .memory-form button { cursor: pointer; }
+    .quote-card, .moment, .video-card, .share-btn, .memory-form button, .chronicle-photo { cursor: pointer; }
     .memory-form input, .memory-form textarea { cursor: text; }
+    .chronicle-item { margin-bottom: 50px; }
+    .chronicle-quote { padding-top: 25px; }
+    .lightbox .lightbox-prev { left: 10px; }
+    .lightbox .lightbox-next { right: 10px; }
+    .lightbox .lightbox-close { top: 15px; right: 15px; }
   }
 </style>
 </head>
@@ -420,6 +539,40 @@
     <p>Он болел раком лимфоузлов. Знал о диагнозе, но продолжал выходить в эфир, пока хватало сил. Последний стрим провёл в конце ноября 2024 года.</p>
     <p class="quote">«Я не боюсь смерти. Я когда лечился, мне приходилось много страдать. Я не хочу больше страдать, никогда не хочу в жизни пережить что-то подобное».<span class="author">— Максим, из стрима</span></p>
     <p>31 декабря 2024 года он написал в Telegram: <em>«Не болеть и больше радоваться»</em>. Это было его последнее сообщение, написанное им самим.</p>
+  </section>
+
+  <!-- CHRONICLE -->
+  <section id="chronicle">
+    <h2>ХРОНИКА</h2>
+    <p style="font-size:0.9rem; color:#8a847a; margin-bottom:35px;">Несколько мгновений — как листаешь его жизнь.</p>
+
+    <div class="chronicle-item">
+      <div class="chronicle-photo" onclick="openLightbox(0)">
+        <img src="https://i.pinimg.com/736x/c3/a6/42/c3a64271a0b737c6f37592e5b047af90.jpg" alt="Максим" loading="lazy">
+      </div>
+      <div class="chronicle-quote">«Ну чё, живой ещё?»</div>
+    </div>
+
+    <div class="chronicle-item">
+      <div class="chronicle-photo" onclick="openLightbox(1)">
+        <img src="https://i.pinimg.com/736x/48/d2/82/48d282de76588aac39758ca6a60b3bd8.jpg" alt="Максим" loading="lazy">
+      </div>
+      <div class="chronicle-quote">«Чайник уже вскипел»</div>
+    </div>
+
+    <div class="chronicle-item">
+      <div class="chronicle-photo" onclick="openLightbox(2)">
+        <img src="https://i.pinimg.com/736x/95/8f/6d/958f6d35adfda810168650ef3f236f62.jpg" alt="Максим" loading="lazy">
+      </div>
+      <div class="chronicle-quote">«Я не сдаюсь, я просто отдыхаю»</div>
+    </div>
+
+    <div class="chronicle-item">
+      <div class="chronicle-photo" onclick="openLightbox(3)">
+        <img src="https://i.pinimg.com/736x/8a/20/b1/8a20b18a3ab2c886c5346251cddefd79.jpg" alt="Максим" loading="lazy">
+      </div>
+      <div class="chronicle-quote">«Не болеть и больше радоваться»</div>
+    </div>
   </section>
 
   <!-- NUMBERS -->
@@ -470,7 +623,7 @@
     </div>
   </section>
 
-  <!-- VIDEOS (Twitch clips) -->
+  <!-- VIDEOS -->
   <section id="videos">
     <h2>МОМЕНТЫ</h2>
     <p style="font-size:0.85rem; color:#8a847a; margin-bottom:20px;">Настоящие клипы с его стримов. Нажми — играет прямо здесь.</p>
@@ -612,6 +765,14 @@
   <p style="font-size:0.6rem; margin-top:15px;">«Стрим хороший был... буду продолжать в том же духе»</p>
 </footer>
 
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-nav lightbox-prev" onclick="prevPhoto(event)">‹</button>
+  <img id="lightboxImg" src="" alt="Максим">
+  <button class="lightbox-nav lightbox-next" onclick="nextPhoto(event)">›</button>
+</div>
+
 <script>
   /* ===== PRELOADER ===== */
   const preBar = document.getElementById('preBar');
@@ -688,7 +849,7 @@
   }
   animateRing();
 
-  document.querySelectorAll('a, .moment, .fact, .quote-card, .video-card, .tl-item, .share-btn').forEach(el => {
+  document.querySelectorAll('a, .moment, .fact, .quote-card, .video-card, .tl-item, .share-btn, .chronicle-photo').forEach(el => {
     el.addEventListener('mouseenter', () => ring.classList.add('big'));
     el.addEventListener('mouseleave', () => ring.classList.remove('big'));
   });
@@ -720,6 +881,55 @@
     }
     requestAnimationFrame(tick);
   }
+
+  /* ===== CHRONICLE ===== */
+  const chronicleItems = document.querySelectorAll('.chronicle-item');
+  const chronicleObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+  chronicleItems.forEach(item => chronicleObserver.observe(item));
+
+  /* ===== LIGHTBOX ===== */
+  const photos = [
+    'https://i.pinimg.com/736x/c3/a6/42/c3a64271a0b737c6f37592e5b047af90.jpg',
+    'https://i.pinimg.com/736x/48/d2/82/48d282de76588aac39758ca6a60b3bd8.jpg',
+    'https://i.pinimg.com/736x/95/8f/6d/958f6d35adfda810168650ef3f236f62.jpg',
+    'https://i.pinimg.com/736x/8a/20/b1/8a20b18a3ab2c886c5346251cddefd79.jpg'
+  ];
+  let currentPhoto = 0;
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+
+  function openLightbox(index) {
+    currentPhoto = index;
+    lightboxImg.src = photos[index];
+    lightbox.classList.add('show');
+  }
+  function closeLightbox(e) {
+    if (e && e.target !== e.currentTarget && e.target.tagName !== 'BUTTON') return;
+    if (e && e.target.id === 'lightboxImg') return;
+    lightbox.classList.remove('show');
+  }
+  function nextPhoto(e) {
+    if (e) e.stopPropagation();
+    currentPhoto = (currentPhoto + 1) % photos.length;
+    lightboxImg.src = photos[currentPhoto];
+  }
+  function prevPhoto(e) {
+    if (e) e.stopPropagation();
+    currentPhoto = (currentPhoto - 1 + photos.length) % photos.length;
+    lightboxImg.src = photos[currentPhoto];
+  }
+  document.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('show')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') nextPhoto();
+    if (e.key === 'ArrowLeft') prevPhoto();
+  });
 
   /* ===== AUDIO ===== */
   let audioCtx;
