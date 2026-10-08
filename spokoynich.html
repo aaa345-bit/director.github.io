@@ -202,33 +202,24 @@
     letter-spacing: 0.05em;
   }
 
-  /* ===== CHRONICLE ===== */
-  .chronicle-item {
-    margin-bottom: 70px;
-  }
+  .chronicle-item { margin-bottom: 70px; }
   .chronicle-photo {
-    width: 100%;
-    overflow: hidden;
+    width: 100%; overflow: hidden;
     border: 1px solid var(--border);
-    background: #050505;
-    cursor: none;
-    position: relative;
-    opacity: 0;
+    background: #050505; cursor: none;
+    position: relative; opacity: 0;
     transform: translateY(30px);
     transition: opacity 1.2s ease, transform 1.2s ease, border-color 0.4s, box-shadow 0.4s;
   }
   .chronicle-item.visible .chronicle-photo {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1; transform: translateY(0);
   }
   .chronicle-photo:hover {
     border-color: var(--accent);
     box-shadow: 0 20px 60px rgba(200, 180, 150, 0.15);
   }
   .chronicle-photo img {
-    width: 100%;
-    height: auto;
-    display: block;
+    width: 100%; height: auto; display: block;
     transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     filter: sepia(0.15) brightness(0.92);
   }
@@ -237,45 +228,30 @@
     filter: sepia(0) brightness(1);
   }
   .chronicle-quote {
-    text-align: center;
-    padding: 35px 20px 0;
+    text-align: center; padding: 35px 20px 0;
     font-size: clamp(0.95rem, 2vw, 1.15rem);
-    color: #c8b8a0;
-    font-style: italic;
-    letter-spacing: 0.05em;
-    opacity: 0;
+    color: #c8b8a0; font-style: italic;
+    letter-spacing: 0.05em; opacity: 0;
     transform: translateY(20px);
     transition: opacity 1.2s ease 0.3s, transform 1.2s ease 0.3s;
   }
   .chronicle-item.visible .chronicle-quote {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1; transform: translateY(0);
   }
 
-  /* ===== LIGHTBOX ===== */
   .lightbox {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: rgba(5, 5, 5, 0.96);
     backdrop-filter: blur(10px);
-    z-index: 10000;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 20px;
-    cursor: none;
-    opacity: 0;
-    transition: opacity 0.3s;
+    z-index: 10000; display: none;
+    justify-content: center; align-items: center;
+    padding: 40px 20px; cursor: none;
+    opacity: 0; transition: opacity 0.3s;
   }
-  .lightbox.show {
-    display: flex;
-    opacity: 1;
-  }
+  .lightbox.show { display: flex; opacity: 1; }
   .lightbox img {
-    max-width: 90vw;
-    max-height: 85vh;
-    object-fit: contain;
-    border: 1px solid var(--border);
+    max-width: 90vw; max-height: 85vh;
+    object-fit: contain; border: 1px solid var(--border);
     box-shadow: 0 0 60px rgba(200, 180, 150, 0.2);
     animation: lightboxIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -284,36 +260,25 @@
     to { transform: scale(1); opacity: 1; }
   }
   .lightbox .lightbox-close {
-    position: absolute;
-    top: 25px; right: 25px;
+    position: absolute; top: 25px; right: 25px;
     width: 44px; height: 44px;
     border: 1px solid var(--border);
     background: rgba(10, 9, 8, 0.8);
-    color: #c8b496;
-    font-size: 1.3rem;
-    cursor: none;
-    font-family: inherit;
+    color: #c8b496; font-size: 1.3rem;
+    cursor: none; font-family: inherit;
     transition: all 0.3s;
   }
-  .lightbox .lightbox-close:hover {
-    border-color: #c8b496;
-    color: #fff;
-  }
+  .lightbox .lightbox-close:hover { border-color: #c8b496; color: #fff; }
   .lightbox .lightbox-nav {
-    position: absolute;
-    top: 50%;
+    position: absolute; top: 50%;
     transform: translateY(-50%);
     width: 50px; height: 50px;
     border: 1px solid var(--border);
     background: rgba(10, 9, 8, 0.8);
-    color: #c8b496;
-    font-size: 1.4rem;
-    cursor: none;
-    font-family: inherit;
+    color: #c8b496; font-size: 1.4rem;
+    cursor: none; font-family: inherit;
     transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
   }
   .lightbox .lightbox-nav:hover { border-color: #c8b496; color: #fff; }
   .lightbox .lightbox-prev { left: 25px; }
@@ -399,10 +364,7 @@
     color: #5a554d;
     letter-spacing: 0.05em;
   }
-  .memory-form textarea {
-    min-height: 130px;
-    line-height: 1.7;
-  }
+  .memory-form textarea { min-height: 130px; line-height: 1.7; }
   .memory-form button {
     background: transparent;
     border: 1px solid #c8b496;
@@ -463,6 +425,102 @@
     box-shadow: 0 0 20px rgba(200, 180, 150, 0.15);
   }
 
+  /* ===== CANDLE ===== */
+  .candle-widget {
+    position: fixed;
+    bottom: 90px;
+    right: 30px;
+    width: 90px;
+    background: rgba(10, 9, 8, 0.85);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    padding: 18px 10px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    z-index: 600;
+    cursor: none;
+    transition: border-color 0.4s, box-shadow 0.4s, transform 0.3s;
+    user-select: none;
+  }
+  .candle-widget:hover {
+    border-color: #c8b496;
+    box-shadow: 0 0 30px rgba(200, 180, 150, 0.2);
+    transform: translateY(-3px);
+  }
+  .candle-widget.lit {
+    border-color: #ffb86b;
+    box-shadow: 0 0 40px rgba(255, 184, 107, 0.4);
+  }
+  .candle-flame {
+    position: relative;
+    width: 18px;
+    height: 26px;
+    margin-bottom: 2px;
+    opacity: 0.15;
+    transition: opacity 0.5s;
+  }
+  .candle-widget.lit .candle-flame {
+    opacity: 1;
+    animation: flameFlicker 0.15s infinite alternate;
+  }
+  @keyframes flameFlicker {
+    0% { transform: scaleY(1) scaleX(1) translateY(0); }
+    100% { transform: scaleY(1.08) scaleX(0.95) translateY(-1px); }
+  }
+  .flame-inner {
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 20px;
+    background: linear-gradient(180deg, #fff8e0 0%, #ffb86b 40%, #ff7a2b 100%);
+    border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+    box-shadow: 0 0 15px rgba(255, 184, 107, 0.9), 0 0 30px rgba(255, 122, 43, 0.5);
+  }
+  .flame-glow {
+    position: absolute;
+    bottom: -10px; left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(255, 184, 107, 0.3) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .candle-body {
+    width: 14px;
+    height: 22px;
+    background: linear-gradient(180deg, #d4c4a8 0%, #8a7a60 100%);
+    border-radius: 2px;
+    box-shadow: inset -2px 0 3px rgba(0,0,0,0.3);
+  }
+  .candle-label {
+    font-size: 0.55rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-align: center;
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+  .candle-widget.lit .candle-label { color: #ffb86b; }
+  .candle-count {
+    font-size: 0.9rem;
+    color: #c8b496;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-align: center;
+    line-height: 1.1;
+  }
+  .candle-count-label {
+    display: block;
+    font-size: 0.55rem;
+    color: var(--text-soft);
+    letter-spacing: 0.15em;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
   footer {
     text-align: center; padding: 70px 20px;
     border-top: 1px solid var(--border); margin-top: 60px;
@@ -495,13 +553,19 @@
     section { padding: 65px 20px; }
     .hero h1 { letter-spacing: 0.08em; }
     .audio-btn { top: 15px; right: 15px; width: 38px; height: 38px; }
-    .quote-card, .moment, .video-card, .share-btn, .memory-form button, .chronicle-photo { cursor: pointer; }
+    .quote-card, .moment, .video-card, .share-btn, .memory-form button, .chronicle-photo, .candle-widget { cursor: pointer; }
     .memory-form input, .memory-form textarea { cursor: text; }
     .chronicle-item { margin-bottom: 50px; }
     .chronicle-quote { padding-top: 25px; }
     .lightbox .lightbox-prev { left: 10px; }
     .lightbox .lightbox-next { right: 10px; }
     .lightbox .lightbox-close { top: 15px; right: 15px; }
+    .candle-widget {
+      width: 74px; bottom: 80px; right: 15px;
+      padding: 14px 8px 10px;
+    }
+    .candle-label { font-size: 0.5rem; }
+    .candle-count { font-size: 0.8rem; }
   }
 </style>
 </head>
@@ -518,6 +582,18 @@
 <canvas id="particlesCanvas"></canvas>
 
 <button class="audio-btn" id="audioBtn" onclick="toggleAudio()">🔇</button>
+
+<!-- CANDLE -->
+<div class="candle-widget" id="candleWidget">
+  <div class="candle-flame" id="candleFlame">
+    <div class="flame-glow"></div>
+    <div class="flame-inner"></div>
+  </div>
+  <div class="candle-body"></div>
+  <div class="candle-label">ЗАЖГИ СВЕЧУ</div>
+  <div class="candle-count"><span id="candleCount">…</span> <span class="candle-count-label">свечей</span></div>
+</div>
+
 <button class="to-top" id="toTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <div class="content">
@@ -849,7 +925,7 @@
   }
   animateRing();
 
-  document.querySelectorAll('a, .moment, .fact, .quote-card, .video-card, .tl-item, .share-btn, .chronicle-photo').forEach(el => {
+  document.querySelectorAll('a, .moment, .fact, .quote-card, .video-card, .tl-item, .share-btn, .chronicle-photo, .candle-widget').forEach(el => {
     el.addEventListener('mouseenter', () => ring.classList.add('big'));
     el.addEventListener('mouseleave', () => ring.classList.remove('big'));
   });
@@ -1046,6 +1122,61 @@
     const url = encodeURIComponent(window.location.href);
     window.open('https://vk.com/share.php?url=' + url, '_blank');
   }
+
+  /* ===== CANDLE ===== */
+  const CANDLE_KEY = 'spokoynich_candle_v1';
+  const candleWidget = document.getElementById('candleWidget');
+  const candleCountEl = document.getElementById('candleCount');
+  let candleLit = false;
+
+  function loadCandleCount() {
+    fetch('https://api.countapi.xyz/get/spokoynich-memory-2025/candles')
+      .then(r => r.json())
+      .then(data => {
+        if (data && typeof data.value === 'number') {
+          candleCountEl.textContent = data.value;
+          localStorage.setItem(CANDLE_KEY + '_cache', data.value);
+        }
+      })
+      .catch(() => {
+        const cached = localStorage.getItem(CANDLE_KEY + '_cache');
+        candleCountEl.textContent = cached ? cached : '—';
+      });
+  }
+
+  if (localStorage.getItem(CANDLE_KEY + '_lit') === '1') {
+    candleWidget.classList.add('lit');
+    candleLit = true;
+  }
+
+  candleWidget.addEventListener('click', () => {
+    if (!candleLit) {
+      candleWidget.classList.add('lit');
+      candleLit = true;
+      localStorage.setItem(CANDLE_KEY + '_lit', '1');
+    }
+
+    candleWidget.style.boxShadow = '0 0 60px rgba(255, 184, 107, 0.9)';
+    setTimeout(() => { candleWidget.style.boxShadow = ''; }, 400);
+
+    fetch('https://api.countapi.xyz/hit/spokoynich-memory-2025/candles')
+      .then(r => r.json())
+      .then(data => {
+        if (data && typeof data.value === 'number') {
+          candleCountEl.textContent = data.value;
+          localStorage.setItem(CANDLE_KEY + '_cache', data.value);
+        }
+      })
+      .catch(() => {
+        let local = parseInt(localStorage.getItem(CANDLE_KEY + '_local') || '0') + 1;
+        localStorage.setItem(CANDLE_KEY + '_local', local);
+        const cached = parseInt(localStorage.getItem(CANDLE_KEY + '_cache') || '0') + 1;
+        localStorage.setItem(CANDLE_KEY + '_cache', cached);
+        candleCountEl.textContent = cached;
+      });
+  });
+
+  setTimeout(loadCandleCount, 800);
 
   /* ===== TO TOP ===== */
   const toTop = document.getElementById('toTop');
