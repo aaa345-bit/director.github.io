@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ШЕЛЕХОВ_ШКОЛА_6 // ДОСТУП</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green: #00ff41;
+      --green-bright: #39ff70;
+      --green-dim: #00aa2a;
+      --green-glow: rgba(0, 255, 65, 0.6);
+      --cyan: #00e5ff;
+      --amber: #ffb000;
+      --red: #ff2244;
+      --purple: #b026ff;
+      --bg: #000000;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: 'Courier New', Courier, 'Lucida Sans Typewriter', monospace;
+      color: var(--green);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ===== МАТРИЧНЫЙ ФОН ===== */
+    #matrix-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    /* ===== СКАНЛАЙНЫ ===== */
+    #scanlines {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.18) 2px,
+        rgba(0, 0, 0, 0.18) 4px
+      );
+      opacity: 0.45;
+    }
+
+    /* ===== ВИНЬЕТКА ===== */
+    #vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.85) 100%);
+    }
+
+    /* ===== ЗАГРУЗОЧНЫЙ ЭКРАН ===== */
+    #boot-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    #boot-text {
+      font-size: clamp(12px, 3.5vw, 18px);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      text-shadow: 0 0 10px var(--green), 0 0 22px var(--green-glow);
+      color: var(--green);
+      letter-spacing: 0.5px;
+    }
+
+    .boot-glitch {
+      animation: bootGlitch 0.15s infinite;
+    }
+
+    @keyframes bootGlitch {
+      0% { text-shadow: 0 0 10px var(--green), 0 0 22px var(--green-glow); }
+      50% { text-shadow: 2px 0 10px var(--cyan), -2px 0 22px var(--red); }
+      100% { text-shadow: 0 0 10px var(--green), 0 0 22px var(--green-glow); }
+    }
+
+    /* ===== ОСНОВНОЙ ИНТЕРФЕЙС ===== */
+    #main-ui {
+      display: none;
+      height: 100%;
+      width: 100%;
+      flex-direction: column;
+      padding: 8px;
+      gap: 8px;
+      position: relative;
+      z-index: 2;
+      animation: uiFadeIn 0.6s ease-out;
+    }
+
+    @keyframes uiFadeIn {
+      from { opacity: 0; transform: scale(1.02); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Верхняя строка */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: clamp(8px, 2.2vw, 12px);
+      border-bottom: 1px solid var(--green);
+      padding-bottom: 4px;
+      flex-shrink: 0;
+      text-shadow: 0 0 8px var(--green);
+      letter-spacing: 0.5px;
+      gap: 6px;
+    }
+
+    .top-bar .blink {
+      animation: blink 1s step-end infinite;
+      color: var(--red);
+      text-shadow: 0 0 10px var(--red);
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      margin-right: 4px;
+      animation: pulse 1.5s infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* Рабочая область */
+    .workspace {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Левая колонка */
+    .button-panel {
+      width: 36%;
+      min-width: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 2px;
+    }
+
+    .file-btn {
+      background: rgba(0, 20, 0, 0.85);
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 8px 6px;
+      font-family: inherit;
+      font-size: clamp(9px, 2.2vw, 13px);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-shadow: 0 0 6px var(--green);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 0;
+      position: relative;
+      letter-spacing: 0.3px;
+    }
+
+    .file-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.15), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+
+    .file-btn:hover::before {
+      transform: translateX(100%);
+    }
+
+    .file-btn:active,
+    .file-btn:hover {
+      background: var(--green);
+      color: #000;
+      text-shadow: none;
+      box-shadow: 0 0 22px var(--green-glow), 0 0 44px rgba(0, 255, 65, 0.25);
+      transform: translateX(2px);
+    }
+
+    .file-btn[data-color="cyan"] { border-color: var(--cyan); color: var(--cyan); text-shadow: 0 0 6px var(--cyan); }
+    .file-btn[data-color="cyan"]:hover { background: var(--cyan); color: #000; box-shadow: 0 0 22px rgba(0, 229, 255, 0.6); }
+    .file-btn[data-color="amber"] { border-color: var(--amber); color: var(--amber); text-shadow: 0 0 6px var(--amber); }
+    .file-btn[data-color="amber"]:hover { background: var(--amber); color: #000; box-shadow: 0 0 22px rgba(255, 176, 0, 0.6); }
+    .file-btn[data-color="purple"] { border-color: var(--purple); color: var(--purple); text-shadow: 0 0 6px var(--purple); }
+    .file-btn[data-color="purple"]:hover { background: var(--purple); color: #000; box-shadow: 0 0 22px rgba(176, 38, 255, 0.6); }
+
+    /* Правая колонка */
+    .output-panel {
+      flex: 1;
+      border: 1px solid var(--green);
+      padding: 10px;
+      overflow-y: auto;
+      font-size: clamp(10px, 2.5vw, 14px);
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-width: 0;
+      text-shadow: 0 0 6px rgba(0, 255, 65, 0.7);
+      position: relative;
+      background: rgba(0, 10, 0, 0.65);
+      box-shadow: inset 0 0 40px rgba(0, 255, 65, 0.04);
+    }
+
+    .output-panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      animation: scanline 3s linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes scanline {
+      0% { transform: translateY(0); opacity: 0; }
+      50% { opacity: 0.8; }
+      100% { transform: translateY(400px); opacity: 0; }
+    }
+
+    .output-panel .typed-line {
+      display: block;
+      animation: lineFadeIn 0.2s ease-out;
+    }
+
+    @keyframes lineFadeIn {
+      from { opacity: 0; transform: translateY(2px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Цветовые акценты */
+    .hl-green { color: var(--green-bright); font-weight: bold; text-shadow: 0 0 12px var(--green); }
+    .hl-cyan { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
+    .hl-amber { color: var(--amber); text-shadow: 0 0 10px var(--amber); }
+    .hl-red { color: var(--red); text-shadow: 0 0 10px var(--red); }
+    .hl-purple { color: var(--purple); text-shadow: 0 0 10px var(--purple); }
+
+    /* Прогресс-бары в выводе */
+    .progress-bar {
+      display: inline-block;
+      width: 200px;
+      height: 8px;
+      background: rgba(0, 255, 65, 0.15);
+      border: 1px solid var(--green);
+      position: relative;
+      overflow: hidden;
+      vertical-align: middle;
+      margin: 0 4px;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: var(--fill, 50%);
+      background: linear-gradient(90deg, var(--green-dim), var(--green), var(--green-bright));
+      box-shadow: 0 0 10px var(--green);
+      animation: fillPulse 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes fillPulse {
+      from { opacity: 0.7; }
+      to { opacity: 1; }
+    }
+
+    /* ===== КОНСОЛЬ ===== */
+    .console-area {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--green);
+      padding: 6px 10px;
+      font-size: clamp(11px, 2.8vw, 15px);
+      background: rgba(0, 15, 0, 0.92);
+      text-shadow: 0 0 8px var(--green);
+      gap: 6px;
+      box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.05), 0 0 15px rgba(0, 255, 65, 0.15);
+      position: relative;
+    }
+
+    .console-area:focus-within {
+      box-shadow: inset 0 0 25px rgba(0, 255, 65, 0.1), 0 0 25px var(--green-glow);
+    }
+
+    .console-prompt {
+      color: var(--green-bright);
+      flex-shrink: 0;
+      font-weight: bold;
+      animation: promptGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes promptGlow {
+      0%, 100% { text-shadow: 0 0 8px var(--green); }
+      50% { text-shadow: 0 0 18px var(--green), 0 0 30px var(--green-glow); }
+    }
+
+    #console-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--green);
+      font-family: inherit;
+      font-size: inherit;
+      flex: 1;
+      min-width: 0;
+      caret-color: var(--green);
+      text-shadow: 0 0 8px var(--green);
+    }
+
+    #console-input::placeholder {
+      color: rgba(0, 255, 65, 0.3);
+    }
+
+    /* ===== ПОДВАЛ ===== */
+    .footer {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: clamp(7px, 2vw, 11px);
+      color: var(--green);
+      text-shadow: 0 0 10px var(--green);
+      letter-spacing: 1.2px;
+      padding-top: 3px;
+      border-top: 1px solid rgba(0, 255, 65, 0.3);
+      gap: 6px;
+    }
+
+    .footer .blinking {
+      animation: blink 1.2s step-end infinite;
+    }
+
+    .footer .clock {
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan);
+    }
+
+    /* ===== БАННЕР ===== */
+    #hack-banner {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      padding: 20px;
+      text-align: center;
+    }
+
+    #hack-banner .banner-text {
+      color: var(--green);
+      font-size: clamp(16px, 5vw, 32px);
+      font-weight: bold;
+      text-shadow: 0 0 20px var(--green), 0 0 40px var(--green), 0 0 80px var(--green-glow);
+      line-height: 1.6;
+      animation: blink 0.5s step-end infinite;
+      word-break: break-word;
+      border: 2px solid var(--green);
+      padding: 30px 20px;
+      max-width: 90vw;
+      box-shadow: 0 0 60px var(--green-glow), inset 0 0 60px rgba(0, 255, 65, 0.1);
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* ===== ЧАСТИЦЫ ===== */
+    .particle {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      background: var(--green);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      box-shadow: 0 0 10px var(--green);
+    }
+
+    /* Скроллбар */
+    .output-panel::-webkit-scrollbar,
+    .button-panel::-webkit-scrollbar { width: 4px; }
+    .output-panel::-webkit-scrollbar-track,
+    .button-panel::-webkit-scrollbar-track { background: #000; }
+    .output-panel::-webkit-scrollbar-thumb,
+    .button-panel::-webkit-scrollbar-thumb {
+      background: var(--green);
+      border-radius: 2px;
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    /* ===== АДАПТИВ ===== */
+    @media (max-width: 600px) {
+      #main-ui { padding: 6px; gap: 6px; }
+      .workspace { flex-direction: column; }
+      .button-panel {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 4px;
+        max-height: 80px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.4);
+        scrollbar-width: thin;
+      }
+      .file-btn {
+        flex: 0 0 auto;
+        font-size: 9px;
+        padding: 7px 8px;
+        text-align: center;
+        white-space: nowrap;
+        line-height: 1.3;
+      }
+      .output-panel { font-size: 11px; padding: 8px; }
+      .top-bar { font-size: 8px; }
+      .footer { font-size: 7px; }
+      .console-area { padding: 5px 8px; font-size: 12px; }
+      .progress-bar { width: 100px; }
+    }
+
+    @media (max-width: 380px) {
+      .file-btn { font-size: 8px; padding: 6px 6px; }
+      .output-panel { font-size: 10px; }
+      .progress-bar { width: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="matrix-bg"></canvas>
+  <div id="scanlines"></div>
+  <div id="vignette"></div>
+
+  <div id="boot-screen">
+    <div id="boot-text"></div>
+  </div>
+
+  <div id="hack-banner">
+    <div class="banner-text">
+      ВЗЛОМ УСПЕШЕН.<br>ОЦЕНКА 5 АВТОМАТОМ<br>ПО ИНФОРМАТИКЕ<br>ВНЕСЕНА В ЖУРНАЛ.
+    </div>
+  </div>
+
+  <div id="main-ui">
+    <div class="top-bar">
+      <span><span class="status-dot"></span>TERMINAL_v4.0.1</span>
+      <span class="blink">● REC</span>
+      <span>SH_SCHOOL_6 // SECURE</span>
+    </div>
+
+    <div class="workspace">
+      <div class="button-panel">
+        <button class="file-btn" data-file="status" data-color="green">[STATUS_MAIN.log]</button>
+        <button class="file-btn" data-file="teachers" data-color="green">[TEACHERS_DOSSIER.sys]</button>
+        <button class="file-btn" data-file="students" data-color="cyan">[STUDENTS_DATA.db]</button>
+        <button class="file-btn" data-file="rosta" data-color="amber">[PROJECT_ROSTA.bin]</button>
+        <button class="file-btn" data-file="honor" data-color="amber">[HONOR_ROLL.dat]</button>
+        <button class="file-btn" data-file="infra" data-color="cyan">[INFRASTRUCTURE.cfg]</button>
+        <button class="file-btn" data-file="canteen" data-color="purple">[CANTEEN.sys]</button>
+        <button class="file-btn" data-file="library" data-color="purple">[LIBRARY.dat]</button>
+        <button class="file-btn" data-file="clubs" data-color="amber">[CLUBS.exe]</button>
+        <button class="file-btn" data-file="security" data-color="green">[SECURITY.log]</button>
+      </div>
+      <div class="output-panel" id="output-panel">
+        <span class="typed-line">[>] <span class="hl-green">ДОБРО ПОЖАЛОВАТЬ В ТЕРМИНАЛ ШКОЛЫ №6.</span></span>
+        <span class="typed-line">[>] ВЫБЕРИТЕ ФАЙЛ ДЛЯ ДЕШИФРОВКИ ИЛИ ВВЕДИТЕ КОМАНДУ НИЖЕ.</span>
+        <span class="typed-line">[>] ДОСТУПНЫЕ КОМАНДЫ: <span class="hl-cyan">help</span>, <span class="hl-cyan">clear</span>, <span class="hl-red">5</span></span>
+      </div>
+    </div>
+
+    <div class="console-area">
+      <span class="console-prompt">[ > ]</span>
+      <input type="text" id="console-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="ВВЕДИТЕ КОМАНДУ...">
+    </div>
+
+    <div class="footer">
+      <span class="blinking">SYSTEM SECURE</span>
+      <span class="clock" id="clock">--:--:--</span>
+      <span class="blinking">CODED BY AAA345-BIT</span>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ===== АУДИО (Web Audio API) =====
+      let audioCtx = null;
+      let soundEnabled = true;
+
+      function initAudio() {
+        if (audioCtx) return;
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch(e) { soundEnabled = false; }
+      }
+
+      function beep(freq = 800, duration = 0.02, type = 'square', volume = 0.02) {
+        if (!soundEnabled || !audioCtx) return;
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.value = freq;
+          gain.gain.value = volume;
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
+      }
+
+      // ===== МАТРИЧНЫЙ ФОН =====
+      const canvas = document.getElementById('matrix-bg');
+      const ctx = canvas.getContext('2d');
+      let isMobile = window.innerWidth < 600;
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        isMobile = window.innerWidth < 600;
+      }
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>/\\[]{}#$%&*';
+      const fontSize = isMobile ? 12 : 14;
+      let columns = Math.floor(canvas.width / fontSize);
+      let drops = Array(columns).fill(1);
+
+      let lastFrame = 0;
+      function drawMatrix(timestamp) {
+        // Троттлинг для производительности
+        if (timestamp - lastFrame < (isMobile ? 60 : 33)) {
+          requestAnimationFrame(drawMatrix);
+          return;
+        }
+        lastFrame = timestamp;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          // Плавное затухание по высоте
+          const alpha = Math.min(1, drops[i] / 30);
+          ctx.fillStyle = `rgba(0, 255, 65, ${alpha})`;
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+        requestAnimationFrame(drawMatrix);
+      }
+      requestAnimationFrame(drawMatrix);
+
+      // ===== ЗАГРУЗОЧНЫЙ ЭКРАН =====
+      const bootScreen = document.getElementById('boot-screen');
+      const bootText = document.getElementById('boot-text');
+      const mainUI = document.getElementById('main-ui');
+
+      const bootLines = [
+        '> INITIALIZING SECURE CONNECTION...',
+        '> CONNECTING TO SHELEKHOV_SCHOOL_6_SERVER...',
+        '> BYPASSING FIREWALL [OK]',
+        '> DECRYPTING RSA-4096 KEY...',
+        '> EXTRACTING SECRET_FILES...',
+        '> LOADING TEACHERS_DOSSIER.sys...',
+        '> LOADING STUDENTS_DATA.db...',
+        '> ACCESS GRANTED.',
+        '',
+        '> ЗАГРУЗКА ТЕРМИНАЛА...'
+      ];
+
+      let bootLineIndex = 0;
+      let bootCharIndex = 0;
+
+      function typeBoot() {
+        if (bootLineIndex >= bootLines.length) {
+          setTimeout(() => {
+            bootScreen.style.opacity = '0';
+            bootScreen.style.transition = 'opacity 0.4s';
+            setTimeout(() => {
+              bootScreen.style.display = 'none';
+              mainUI.style.display = 'flex';
+              setTimeout(() => document.getElementById('console-input').focus(), 100);
+            }, 400);
+          }, 300);
+          return;
+        }
+
+        const currentLine = bootLines[bootLineIndex];
+        if (bootCharIndex <= currentLine.length) {
+          bootText.textContent = bootLines.slice(0, bootLineIndex).join('\n') +
+            (bootLineIndex > 0 ? '\n' : '') +
+            currentLine.slice(0, bootCharIndex) + '█';
+          bootCharIndex++;
+          // Звук печати каждые 3 символа
+          if (bootCharIndex % 3 === 0) beep(1200, 0.008, 'square', 0.008);
+          setTimeout(typeBoot, 14);
+        } else {
+          bootLineIndex++;
+          bootCharIndex = 0;
+          setTimeout(typeBoot, 90);
+        }
+      }
+
+      // Инициализация аудио при первом взаимодействии
+      document.addEventListener('click', initAudio, { once: true });
+      document.addEventListener('touchstart', initAudio, { once: true });
+      document.addEventListener('keydown', initAudio, { once: true });
+
+      typeBoot();
+
+      // ===== ЧАСЫ =====
+      const clockEl = document.getElementById('clock');
+      function updateClock() {
+        const d = new Date();
+        const pad = n => n.toString().padStart(2, '0');
+        clockEl.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // ===== ДАННЫЕ =====
+      const DATA = {
+        status: `[>] ДЕШИФРОВКА: STATUS_MAIN.log
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ПОЛНОЕ ЮРИДИЧЕСКОЕ НАЗВАНИЕ:
+Муниципальное казённое общеобразовательное
+учреждение Шелеховского района
+"Средняя общеобразовательная школа № 6"
+(МКОУ ШР "СОШ № 6")
+
+АДРЕС:
+666032, Иркутская область, г. Шелехов,
+квартал 18, дом 39
+
+ДИРЕКТОР:
+Дворянская Елена Александровна
+(Почётный работник общего образования РФ)
+
+КОНТАКТЫ:
+• Тел: 8(39550) 4-11-67
+• Email: shelschool6@mail.ru
+• Сайт: sh6-shelexov-r138.gosweb.gosuslugi.ru
+
+ИСТОРИЯ:
+• 28 августа 1969 г. — открытие школы
+  (решение исполкома №239)
+• 1990 г. — новое трёхэтажное здание
+• Выпущено 1700+ учеников с аттестатом
+  о среднем (полном) общем образовании
+
+СТАТУС: <span class="hl-green">АКТИВНА</span> ● ОБНОВЛЕНО 2025
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] КОНЕЦ ФАЙЛА`,
+
+        teachers: `[>] БАЗА ДАННЫХ СОТРУДНИКОВ
+[>] УРОВЕНЬ ДОСТУПА: <span class="hl-red">ЗАСЕКРЕЧЕНО</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="hl-cyan">▌ АДМИНИСТРАЦИЯ:</span>
+• Дворянская Елена Александровна — директор
+• Серебренникова Людмила Степановна —
+  заместитель директора по УВР
+• Комогорцева Ольга Александровна —
+  заместитель директора по ВР
+• Проходанова Светлана Владимировна —
+  заместитель директора по УВР
+
+<span class="hl-cyan">▌ УЧИТЕЛЯ (из официальных документов):</span>
+• Ализаде Ирада Мирановна — физкультура
+• Асташина Елизавета Евгеньевна —
+  история, обществознание
+• Головнёва Анастасия Александровна —
+  английский язык
+• Гржебовская Оксана Евгеньевна — математика
+• Зорина Галина Петровна — информатика
+• Ковкова Елена Михайловна — физика
+• Серебренникова Людмила Степановна —
+  русский язык и литература
+• Максимова Марина Ивановна — география
+• Леонидов Валерий Анатольевич — ОБЖ
+• Ястребчикова Елена Петровна —
+  воспитательная работа
+• Ласточкина А.М. — молодой специалист
+• Кириллова Екатерина Алексеевна —
+  молодой специалист
+• Афонина Олеся Николаевна —
+  русский язык и литература
+• Белова Екатерина Олеговна — английский
+• Варина Анна Ивановна — музыка
+• Жигульский Алексей Александрович —
+  физика (внешн. совместитель)
+• Красноруцкая Анна Алексеевна —
+  физкультура, ОБЗР
+• Кулик Татьяна Владимировна —
+  математика, соц. педагог
+• Лушникова Татьяна Борисовна —
+  начальные классы
+• Макарова Жанна Борисовна —
+  начальные классы, логопед
+• Мамаева Галина Николаевна —
+  биология, химия
+• Свитина Раиса Сергеевна —
+  история, обществознание
+• Фальман Ольга Николаевна —
+  английский, история
+• Фисак Инга Юрьевна — начальные классы
+• Шкуратова Юлия Павловна —
+  советник по воспитанию
+• Якушкина Олеся Евгеньевна — информатика
+• Камышанова Наталья Николаевна — математика
+• Емельянов Константин Александрович —
+  информатика
+• Гудаева Яна Алексеевна — английский
+• Глущук Алексей Григорьевич — ОБЗР
+• Кузакова Е.Г. — педагог-организатор
+• Кузьмина А.В. — педагог-организатор
+
+<span class="hl-amber">▌ КВАЛИФИКАЦИЯ:</span>
+• Высшая категория: <span class="hl-green">13</span> учителей
+• Первая категория: <span class="hl-green">18</span> учителей
+
+<span class="hl-red">ВСЕГО ПЕДАГОГОВ: 63 человека</span>
+(2025-2026 учебный год)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] БАЗА ЗАСЕКРЕЧЕНА. ДОСТУП ОГРАНИЧЕН.`,
+
+        students: `[>] ДЕШИФРОВКА: STUDENTS_DATA.db
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="hl-cyan">▌ ОБЩАЯ ЧИСЛЕННОСТЬ: <span class="hl-green">960</span> учеников</span>
+<span class="hl-cyan">▌ КОЛИЧЕСТВО КЛАССОВ: <span class="hl-green">38</span></span>
+
+ПО СТУПЕНЯМ ОБУЧЕНИЯ:
+• Начальная (1-4 кл.):   <span class="hl-green">426</span> чел / 17 кл
+  <span class="progress-bar" style="--fill:44%"></span> 44%
+• Основная (5-9 кл.):    <span class="hl-green">478</span> чел / 19 кл
+  <span class="progress-bar" style="--fill:50%"></span> 50%
+• Старшая (10-11 кл.):   <span class="hl-green">56</span> чел / 2 кл
+  <span class="progress-bar" style="--fill:6%"></span> 6%
+
+<span class="hl-amber">СРЕДНЯЯ НАПОЛНЯЕМОСТЬ КЛАССА: 29 чел</span>
+
+<span class="hl-cyan">▌ УСПЕВАЕМОСТЬ (2024-2025):</span>
+• Отличники:      <span class="hl-green">71</span> ученик
+• Хорошисты:      <span class="hl-green">212</span> учеников
+• На "4" и "5":   <span class="hl-green">555</span> обучающихся
+  <span class="progress-bar" style="--fill:58%"></span> 58%
+
+<span class="hl-amber">▌ МЕДАЛИСТЫ 2025:</span>
+• Золото: <span class="hl-amber">2</span> выпускника
+• Серебро: <span class="hl-amber">2</span> выпускника
+
+<span class="hl-cyan">▌ ПОСТУПЛЕНИЕ В ВУЗЫ:</span>
+• <span class="hl-green">18</span> выпускников
+• ВУЗы: ИГУ, БГУ, ИрНИТУ, ИрГУПС
+
+СРЕДНИЙ БАЛЛ ЕГЭ 2025: <span class="hl-green">48.0</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] ДАННЫЕ ОБНОВЛЕНЫ: 2025-2026 уч.год`,
+
+        rosta: `[>] ДЕШИФРОВКА: PROJECT_ROSTA.bin
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="hl-amber">▌ ЦЕНТР "ТОЧКА РОСТА"</span>
+
+ОТКРЫТ: 29 сентября 2020 г.
+в рамках нацпроекта "Образование"
+
+<span class="hl-cyan">▌ НАПРАВЛЕНИЯ:</span>
+• Робототехника
+• Шахматное образование
+• 3D-моделирование
+• Программирование (IT)
+• Медиатворчество
+• Проектная деятельность
+• Кружок "Спасатель" / Школа МЧС
+• Виртуальная реальность
+
+<span class="hl-cyan">▌ ОБОРУДОВАНИЕ:</span>
+• 3D-принтеры
+• Квадрокоптеры
+• Шлемы виртуальной реальности
+• Цифровые лаборатории
+• Шахматная гостиная
+• Медиазона для фото/видеосъёмки
+
+<span class="hl-amber">▌ ОХВАТ:</span>
+• 100% учащихся — новые методы
+  <span class="progress-bar" style="--fill:100%"></span>
+• 70% — дополнительные программы
+  <span class="progress-bar" style="--fill:70%"></span>
+
+<span class="hl-cyan">▌ РУКОВОДИТЕЛИ КРУЖКОВ:</span>
+• Сомеройнен Д.Г. — "Школа МЧС"
+• Медведева В.С. — "Школа МЧС"
+• Зуб Лариса Викторовна — театр. студия
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] КОНЕЦ ФАЙЛА`,
+
+        honor: `[>] ДЕШИФРОВКА: HONOR_ROLL.dat
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="hl-amber">▌ ДОСКА ПОЧЁТА</span>
+
+<span class="hl-green">40+ МЕДАЛИСТОВ</span>
+за историю школы № 6
+
+<span class="hl-cyan">▌ 2025 ГОД:</span>
+• <span class="hl-amber">2</span> выпускника — золотая медаль
+• <span class="hl-amber">2</span> выпускника — серебряная медаль
+
+<span class="hl-cyan">▌ РЕЗУЛЬТАТЫ ЕГЭ 2025:</span>
+• Средний балл: <span class="hl-green">48.0</span>
+• Поступили в вузы: <span class="hl-green">18</span> выпускников
+• ВУЗы: ИГУ, БГУ, ИрНИТУ, ИрГУПС и др.
+
+<span class="hl-cyan">▌ ВСЕГО ВЫПУЩЕНО:</span>
+<span class="hl-green">1700+</span> учеников с аттестатом
+о среднем (полном) общем образовании
+
+ШКОЛА ГОРДИТСЯ СВОИМИ
+ВЫПУСКНИКАМИ И ПЕДАГОГАМИ.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] КОНЕЦ ФАЙЛА`,
+
+        infra: `[>] ДЕШИФРОВКА: INFRASTRUCTURE.cfg
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="hl-cyan">▌ МАТЕРИАЛЬНО-ТЕХНИЧЕСКАЯ БАЗА</span>
+
+<span class="hl-amber">▌ ЗДАНИЕ:</span>
+• Трёхэтажное здание школы
+• Год постройки: <span class="hl-green">1990</span>
+• Адрес: квартал 18, дом 39
+
+<span class="hl-cyan">▌ УЧЕБНЫЕ ПОМЕЩЕНИЯ:</span>
+• Мастерские
+• Столярная мастерская
+• Лыжная база
+• Спортивная детская площадка
+• Спортивный комплекс ГТО
+• Пришкольный участок
+• Цветник
+• <span class="hl-green">Минералогический музей</span>
+
+<span class="hl-cyan">▌ БИБЛИОТЕКА:</span>
+• Открыта в 1969 году
+• Обслуживает: учащихся, учителей,
+  техперсонал, родителей
+• Режим работы: 8:30 - 15:00
+
+<span class="hl-cyan">▌ СТОЛОВАЯ:</span>
+• Аутсорсинг с 01.01.2024
+• ООО "Комбинат питания" г. Иркутск
+• Две смены питания
+• Горячее питание для всех учащихся
+
+<span class="hl-cyan">▌ СПОРТИВНЫЙ КЛУБ:</span>
+• "Чемпион"
+• Секции и кружки дополнительного
+  образования
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] КОНЕЦ ФАЙЛА`,
+
+        canteen: `[>] ДЕШИФРОВКА: CANTEEN.sys
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="hl-purple">▌ ОРГАНИЗАЦИЯ ПИТАНИЯ</span>
+
+<span class="hl-cyan">▌ ОПЕРАТОР:</span>
+ООО "Комбинат питания" г. Иркутск
+(аутсорсинг с 01.01.2024)
+
+<span class="hl-cyan">▌ РЕЖИМ РАБОТЫ:</span>
+• Две смены питания
+• Горячее питание для всех учащихся
+• Буфетная продукция
+
+<span class="hl-cyan">▌ ОХВАТ ПИТАНИЕМ:</span>
+• Горячее питание: <span class="hl-green">100%</span>
+  <span class="progress-bar" style="--fill:100%"></span>
+• Льготное питание:
+  <span class="progress-bar" style="--fill:35%"></span>
+  ~35% обучающихся
+
+<span class="hl-cyan">▌ КАТЕГОРИИ ЛЬГОТНИКОВ:</span>
+• Дети из многодетных семей
+• Дети из малообеспеченных семей
+• Дети с ОВЗ
+• Воспитанники центра помощи детям
+
+<span class="hl-amber">▌ МЕНЮ:</span>
+• 10-дневное цикличное меню
+• Соответствие СанПиН 2.3/2.4.3590-20
+• Витаминизация блюд
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] КОНЕЦ ФАЙЛА`,
+
+        library: `[>] ДЕШИФРОВКА: LIBRARY.dat
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="hl-purple">▌ БИБЛИОТЕКА ШКОЛЫ №6</span>
+
+<span class="hl-cyan">▌ ИСТОРИЯ:</span>
+• Открыта в <span class="hl-green">1969</span> году
+• Работает с момента основания школы
+
+<span class="hl-cyan">▌ ОБСЛУЖИВАЕТ:</span>
+• Учащихся
+• Учителей
+• Технический персонал
+• Родителей
+
+<span class="hl-cyan">▌ ФОНД:</span>
+• Учебники и учебные пособия
+• Художественная литература
+• Справочная литература
+• Периодические издания
+• Электронные ресурсы
+
+<span class="hl-cyan">▌ РЕЖИМ РАБОТЫ:</span>
+• Понедельник - Пятница: 8:30 - 15:00
+• Суббота, Воскресенье: выходной
+
+<span class="hl-amber">▌ МЕРОПРИЯТИЯ:</span>
+• Библиотечные уроки
+• Книжные выставки
+• Литературные викторины
+• Акции "Подари книгу"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] КОНЕЦ ФАЙЛА`,
+
+        clubs: `[>] ДЕШИФРОВКА: CLUBS.exe
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="hl-amber">▌ ДОПОЛНИТЕЛЬНОЕ ОБРАЗОВАНИЕ</span>
+
+<span class="hl-cyan">▌ СПОРТИВНЫЙ КЛУБ "ЧЕМПИОН":</span>
+• Волейбол
+• Баскетбол
+• Футбол
+• Лыжная подготовка
+• ГТО-комплекс
+
+<span class="hl-cyan">▌ ЦЕНТР "ТОЧКА РОСТА":</span>
+• Робототехника
+• 3D-моделирование
+• Программирование
+• Шахматы
+• Медиатворчество
+
+<span class="hl-cyan">▌ ТВОРЧЕСКИЕ СТУДИИ:</span>
+• Театральная студия
+• Музыкальная студия
+• Изостудия
+
+<span class="hl-cyan">▌ ПАТРИОТИЧЕСКОЕ ВОСПИТАНИЕ:</span>
+• Кружок "Спасатель"
+• Школа МЧС
+• Отряд юнармии
+
+<span class="hl-cyan">▌ ПРОЕКТНАЯ ДЕЯТЕЛЬНОСТЬ:</span>
+• Индивидуальные проекты 9-11 кл
+• Научные исследования
+• Конференции и олимпиады
+
+<span class="hl-amber">▌ ОХВАТ ДО:</span>
+<span class="progress-bar" style="--fill:70%"></span> 70%
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] КОНЕЦ ФАЙЛА`,
+
+        security: `[>] ДЕШИФРОВКА: SECURITY.log
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="hl-green">▌ СИСТЕМА БЕЗОПАСНОСТИ ШКОЛЫ</span>
+
+<span class="hl-cyan">▌ ФИЗИЧЕСКАЯ ЗАЩИТА:</span>
+• Пропускной режим
+• Пост охраны 24/7
+• Тревожная кнопка
+• Система видеонаблюдения
+
+<span class="hl-cyan">▌ ПОЖАРНАЯ БЕЗОПАСНОСТЬ:</span>
+• АПС (автоматическая пожарная сигнализация)
+• Система оповещения
+• Планы эвакуации
+• Огнетушители
+
+<span class="hl-cyan">▌ ИНФОРМАЦИОННАЯ БЕЗОПАСНОСТЬ:</span>
+• Контент-фильтрация трафика
+• Защита персональных данных
+• Обучение кибербезопасности
+
+<span class="hl-cyan">▌ АНТИТЕРРОРИСТИЧЕСКАЯ ЗАЩИТА:</span>
+• Паспорт безопасности
+• Инструктажи с персоналом
+• Учебные тревоги
+
+<span class="hl-amber">▌ ПСИХОЛОГИЧЕСКАЯ СЛУЖБА:</span>
+• Педагог-психолог
+• Социальный педагог
+• Служба медиации
+
+СТАТУС: <span class="hl-green">● СИСТЕМА РАБОТАЕТ</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] КОНЕЦ ФАЙЛА`
+      };
+
+      // ===== ПЕЧАТНАЯ МАШИНКА =====
+      const outputPanel = document.getElementById('output-panel');
+      let typingTimer = null;
+      let isTyping = false;
+
+      function typeText(text, element, speed = 8) {
+        if (typingTimer) clearTimeout(typingTimer);
+        isTyping = true;
+        let i = 0;
+        element.textContent = '';
+
+        function tick() {
+          if (i < text.length) {
+            element.textContent += text[i];
+            i++;
+            outputPanel.scrollTop = outputPanel.scrollHeight;
+            // Звук каждые 5 символов
+            if (i % 5 === 0) beep(1400, 0.006, 'square', 0.006);
+            typingTimer = setTimeout(tick, speed);
+          } else {
+            typingTimer = null;
+            isTyping = false;
+            outputPanel.scrollTop = outputPanel.scrollHeight;
+          }
+        }
+        tick();
+      }
+
+      function appendOutput(htmlText) {
+        // Для HTML-контента используем innerHTML после типизации
+        const line = document.createElement('span');
+        line.className = 'typed-line';
+        outputPanel.appendChild(line);
+
+        // Извлекаем чистый текст для печати, затем вставляем HTML
+        const temp = document.createElement('div');
+        temp.innerHTML = htmlText;
+        const plainText = temp.textContent;
+
+        let i = 0;
+        isTyping = true;
+        function tick() {
+          if (i < plainText.length) {
+            // Печатаем посимвольно из plainText
+            i++;
+            // Каждый символ — пересобираем HTML с обрезкой
+            const partial = plainText.slice(0, i);
+            // Простой подход: просто textContent, но с сохранением HTML в конце
+            line.textContent = partial;
+            outputPanel.scrollTop = outputPanel.scrollHeight;
+            if (i % 5 === 0) beep(1400, 0.006, 'square', 0.006);
+            typingTimer = setTimeout(tick, 6);
+          } else {
+            // Вставляем HTML с цветами
+            line.innerHTML = htmlText;
+            typingTimer = null;
+            isTyping = false;
+            outputPanel.scrollTop = outputPanel.scrollHeight;
+          }
+        }
+        tick();
+      }
+
+      function clearOutput() {
+        if (typingTimer) clearTimeout(typingTimer);
+        isTyping = false;
+        outputPanel.innerHTML = '';
+      }
+
+      // ===== ЧАСТИЦЫ =====
+      function spawnParticles(x, y, count = 8) {
+        for (let i = 0; i < count; i++) {
+          const p = document.createElement('div');
+          p.className = 'particle';
+          p.style.left = x + 'px';
+          p.style.top = y + 'px';
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 30 + Math.random() * 60;
+          const dx = Math.cos(angle) * dist;
+          const dy = Math.sin(angle) * dist;
+          document.body.appendChild(p);
+          p.animate([
+            { transform: 'translate(0,0) scale(1)', opacity: 1 },
+            { transform: `translate(${dx}px, ${dy}px) scale(0)`, opacity: 0 }
+          ], { duration: 600, easing: 'cubic-bezier(0, 0.5, 0.5, 1)' })
+          .onfinish = () => p.remove();
+        }
+      }
+
+      // ===== КНОПКИ =====
+      document.querySelectorAll('.file-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          const key = this.dataset.file;
+          if (DATA[key]) {
+            beep(600, 0.04, 'square', 0.03);
+            const rect = this.getBoundingClientRect();
+            spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 6);
+            clearOutput();
+            appendOutput(DATA[key]);
+          }
+        });
+      });
+
+      // ===== КОНСОЛЬ + ИСТОРИЯ КОМАНД =====
+      const consoleInput = document.getElementById('console-input');
+      const cmdHistory = [];
+      let historyIndex = -1;
+
+      const COMMANDS = ['help', 'clear', 'status', 'teachers', 'students', 'rosta', 'honor', 'infra', 'canteen', 'library', 'clubs', 'security', '5', 'about', 'matrix', 'sound'];
+
+      consoleInput.addEventListener('keydown', function(e) {
+        // История команд
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (cmdHistory.length > 0) {
+            historyIndex = Math.min(historyIndex + 1, cmdHistory.length - 1);
+            this.value = cmdHistory[historyIndex];
+          }
+          return;
+        }
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (historyIndex > 0) {
+            historyIndex--;
+            this.value = cmdHistory[historyIndex];
+          } else {
+            historyIndex = -1;
+            this.value = '';
+          }
+          return;
+        }
+
+        // Tab-автодополнение
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const val = this.value.trim().toLowerCase();
+          if (!val) return;
+          const matches = COMMANDS.filter(c => c.startsWith(val));
+          if (matches.length === 1) {
+            this.value = matches[0];
+          } else if (matches.length > 1) {
+            appendOutput(`[>] СОВПАДЕНИЯ: <span class="hl-cyan">${matches.join(', ')}</span>`);
+          }
+          return;
+        }
+
+        if (e.key === 'Enter') {
+          const cmd = this.value.trim().toLowerCase();
+          this.value = '';
+
+          if (cmd) {
+            cmdHistory.unshift(cmd);
+            if (cmdHistory.length > 20) cmdHistory.pop();
+            historyIndex = -1;
+            beep(800, 0.03, 'square', 0.025);
+          }
+
+          handleCommand(cmd);
+        }
+      });
+
+      function handleCommand(cmd) {
+        const aliases = {
+          's': 'status', 't': 'teachers', 'st': 'students',
+          'h': 'help', 'c': 'clear', 'r': 'rosta',
+          'inf': 'infra', 'caf': 'canteen', 'lib': 'library'
+        };
+        cmd = aliases[cmd] || cmd;
+
+        if (cmd === 'help') {
+          clearOutput();
+          appendOutput(`[>] ДОСТУПНЫЕ КОМАНДЫ:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<span class="hl-cyan">help</span>      — список команд
+<span class="hl-cyan">clear</span>     — очистка экрана
+<span class="hl-cyan">status</span>    — информация о школе
+<span class="hl-cyan">teachers</span>  — база данных учителей
+<span class="hl-cyan">students</span>  — статистика учеников
+<span class="hl-cyan">rosta</span>     — центр "Точка роста"
+<span class="hl-cyan">honor</span>     — медалисты
+<span class="hl-cyan">infra</span>     — инфраструктура
+<span class="hl-cyan">canteen</span>   — организация питания
+<span class="hl-cyan">library</span>   — библиотека
+<span class="hl-cyan">clubs</span>     — дополнительное образование
+<span class="hl-cyan">security</span>  — безопасность
+<span class="hl-cyan">about</span>     — о терминале
+<span class="hl-cyan">matrix</span>    — вкл/выкл матрицу
+<span class="hl-cyan">sound</span>     — вкл/выкл звук
+<span class="hl-red">5</span>         — СЕКРЕТНАЯ КОМАНДА
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] ПОДСКАЗКА: ↑↓ — история, Tab — автодополнение`);
+
+        } else if (cmd === 'clear') {
+          clearOutput();
+
+        } else if (cmd === 'status') {
+          clearOutput(); appendOutput(DATA.status);
+        } else if (cmd === 'teachers') {
+          clearOutput(); appendOutput(DATA.teachers);
+        } else if (cmd === 'students') {
+          clearOutput(); appendOutput(DATA.students);
+        } else if (cmd === 'rosta') {
+          clearOutput(); appendOutput(DATA.rosta);
+        } else if (cmd === 'honor') {
+          clearOutput(); appendOutput(DATA.honor);
+        } else if (cmd === 'infra') {
+          clearOutput(); appendOutput(DATA.infra);
+        } else if (cmd === 'canteen') {
+          clearOutput(); appendOutput(DATA.canteen);
+        } else if (cmd === 'library') {
+          clearOutput(); appendOutput(DATA.library);
+        } else if (cmd === 'clubs') {
+          clearOutput(); appendOutput(DATA.clubs);
+        } else if (cmd === 'security') {
+          clearOutput(); appendOutput(DATA.security);
+
+        } else if (cmd === 'about') {
+          clearOutput();
+          appendOutput(`[>] О ТЕРМИНАЛЕ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Терминал школы №6 г. Шелехова
+Версия: <span class="hl-green">v4.0.1</span>
+Разработчик: <span class="hl-amber">AAA345-BIT</span>
+Год: 2025
+
+Это интерактивная страница-терминал,
+созданная для демонстрации информации
+о МКОУ ШР "СОШ №6" г. Шелехова.
+
+Все данные взяты из официальных
+источников школы.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[>] Спасибо за использование!`);
+
+        } else if (cmd === 'matrix') {
+          matrixRunning = !matrixRunning;
+          if (matrixRunning) {
+            requestAnimationFrame(drawMatrix);
+            appendOutput(`[>] МАТРИЦА: <span class="hl-green">ВКЛЮЧЕНА</span>`);
+          } else {
+            appendOutput(`[>] МАТРИЦА: <span class="hl-red">ОТКЛЮЧЕНА</span>`);
+          }
+
+        } else if (cmd === 'sound') {
+          soundEnabled = !soundEnabled;
+          appendOutput(`[>] ЗВУК: ${soundEnabled ? '<span class="hl-green">ВКЛЮЧЁН</span>' : '<span class="hl-red">ОТКЛЮЧЁН</span>'}`);
+
+        } else if (cmd === '5') {
+          beep(1200, 0.1, 'sawtooth', 0.05);
+          setTimeout(() => beep(1600, 0.15, 'sawtooth', 0.05), 100);
+          const banner = document.getElementById('hack-banner');
+          banner.style.display = 'flex';
+          // Частицы по всему экрану
+          for (let i = 0; i < 30; i++) {
+            setTimeout(() => {
+              spawnParticles(
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerHeight,
+                4
+              );
+            }, i * 40);
+          }
+          setTimeout(() => { banner.style.display = 'none'; }, 4000);
+
+        } else if (cmd === '') {
+          // пусто
+
+        } else {
+          beep(200, 0.15, 'sawtooth', 0.04);
+          appendOutput(`[>] <span class="hl-red">ОШИБКА:</span> КОМАНДА "${cmd}" НЕ РАСПОЗНАНА.
+[>] ВВЕДИТЕ "<span class="hl-cyan">help</span>" ДЛЯ СПИСКА КОМАНД.`);
+        }
+      }
+
+      // ===== ФОКУС =====
+      document.getElementById('main-ui').addEventListener('click', function(e) {
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+          consoleInput.focus();
+        }
+      });
+
+      // ===== ЗАПРЕТ ЗУМА =====
+      document.addEventListener('gesturestart', e => e.preventDefault());
+      document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
+
+      // ===== ОБРАБОТКА НЕВИДИМОСТИ (пауза матрицы) =====
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          matrixRunning = false;
+        } else {
+          matrixRunning = true;
+          requestAnimationFrame(drawMatrix);
+        }
+      });
+
+    })();
+  </script>
+</body>
+</html>
