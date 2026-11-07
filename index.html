@@ -1,466 +1,237 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ДИРЕКТОР // 7K MMR</title>
-<style>
-  :root{
-    --bg:#000;
-    --fg:#0f0;
-    --dim:#0a5a0a;
-    --glow:#0f0;
-    --danger:#f00;
-    --font: 'Courier New', monospace;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{background:var(--bg);color:var(--fg);font-family:var(--font);min-height:100%}
-  body{padding:20px;overflow-x:hidden}
-  a{color:var(--fg)}
-  section{margin:60px 0;max-width:1100px;margin-left:auto;margin-right:auto}
-  h2{
-    font-size:1.6rem;letter-spacing:2px;margin-bottom:24px;text-transform:uppercase;
-    border-left:3px solid var(--fg);padding-left:12px;
-    text-shadow:0 0 8px var(--glow);
-  }
-
-  /* ===== HERO / HEADER ===== */
-  header{max-width:1100px;margin:0 auto;padding:20px 0;text-align:center}
-  .logo{font-size:2.4rem;letter-spacing:8px;text-shadow:0 0 12px var(--glow)}
-  .subtitle{color:var(--dim);margin-top:6px;letter-spacing:3px;font-size:.85rem}
-
-  /* ===== PROJECTS ===== */
-  .projects-grid{
-    display:grid;gap:22px;
-    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  }
-  .project-card{
-    position:relative;
-    background:linear-gradient(145deg,rgba(0,20,0,.6),rgba(0,0,0,.9));
-    border:1px solid var(--dim);
-    padding:22px;
-    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-    overflow:hidden;
-    cursor:default;
-  }
-  .project-card::before{
-    content:"";position:absolute;inset:0;
-    background:radial-gradient(circle at var(--mx,50%) var(--my,50%),
-              rgba(0,255,0,.18),transparent 60%);
-    opacity:0;transition:opacity .3s ease;pointer-events:none;
-  }
-  .project-card:hover{
-    transform:translateY(-6px);
-    border-color:var(--fg);
-    box-shadow:0 0 18px rgba(0,255,0,.55),0 0 42px rgba(0,255,0,.25) inset;
-  }
-  .project-card:hover::before{opacity:1}
-  .project-num{
-    color:var(--dim);font-size:.75rem;letter-spacing:3px;
-  }
-  .project-title{
-    font-size:1.15rem;margin:8px 0 12px;letter-spacing:1px;
-    text-shadow:0 0 6px rgba(0,255,0,.5);
-  }
-  .project-desc{font-size:.85rem;line-height:1.55;color:#9f9;opacity:.85}
-  .project-tags{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
-  .tag{
-    font-size:.7rem;padding:3px 8px;border:1px solid var(--dim);
-    color:#7f7;letter-spacing:1px;
-  }
-
-  /* ===== TERMINAL ===== */
-  .terminal{
-    background:#010;
-    border:1px solid var(--dim);
-    box-shadow:0 0 22px rgba(0,255,0,.18) inset;
-    padding:16px;min-height:280px;display:flex;flex-direction:column;
-  }
-  #termOut{
-    flex:1;overflow-y:auto;max-height:340px;line-height:1.5;font-size:.9rem;
-    white-space:pre-wrap;word-break:break-word;
-  }
-  #termOut .dim{color:var(--dim)}
-  .term-input-row{display:flex;gap:8px;margin-top:10px;align-items:center}
-  .term-prompt{color:var(--fg);text-shadow:0 0 4px var(--glow)}
-  #termIn{
-    flex:1;background:transparent;border:none;outline:none;color:var(--fg);
-    font-family:var(--font);font-size:.9rem;caret-color:var(--fg);
-  }
-
-  /* ===== MATRIX CANVAS ===== */
-  #matrixCanvas{
-    position:fixed;inset:0;width:100%;height:100%;
-    z-index:9999;pointer-events:none;background:rgba(0,0,0,.92);
-    opacity:0;transition:opacity .4s ease;
-  }
-  #matrixCanvas.active{opacity:1}
-
-  /* ===== CONTACT FORM ===== */
-  .contact-form{
-    display:flex;flex-direction:column;gap:12px;max-width:520px;
-  }
-  .contact-form input,
-  .contact-form textarea{
-    background:#010;border:1px solid var(--dim);color:var(--fg);
-    font-family:var(--font);padding:10px;outline:none;transition:border-color .2s;
-    resize:vertical;
-  }
-  .contact-form input:focus,
-  .contact-form textarea:focus{border-color:var(--fg);box-shadow:0 0 8px rgba(0,255,0,.35)}
-  .contact-form button{
-    background:transparent;color:var(--fg);border:1px solid var(--fg);
-    padding:12px;letter-spacing:3px;cursor:pointer;font-family:var(--font);
-    transition:background .2s, color .2s, box-shadow .2s;
-  }
-  .contact-form button:hover{
-    background:var(--fg);color:#000;box-shadow:0 0 18px var(--glow);
-  }
-  .contact-form button:disabled{opacity:.5;cursor:wait}
-
-  /* ===== TOAST ===== */
-  #toast{
-    position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:#010;border:1px solid var(--fg);color:var(--fg);
-    padding:14px 24px;font-size:.9rem;letter-spacing:1px;
-    box-shadow:0 0 22px rgba(0,255,0,.45);z-index:10000;
-    opacity:0;pointer-events:none;transition:opacity .3s, transform .3s;
-  }
-  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  #toast.error{border-color:var(--danger);color:var(--danger);box-shadow:0 0 22px rgba(255,0,0,.45)}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ДИРЕКТОР — вайбкодер / portfolio</title>
+    <style>
+        * { box-sizing: border-box; scroll-behavior: smooth; }
+        body { background-color: #000; color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 0; overflow-x: hidden; }
+        canvas#matrix-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+        .content-layer { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        header { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        h1 { font-size: 4rem; letter-spacing: 5px; margin: 0; text-shadow: 0 0 10px #fff; }
+        .subtitle { color: #888; margin-top: 10px; font-size: 1.2rem; }
+        section { padding: 50px 0; border-bottom: 1px solid #222; }
+        h2 { font-size: 2rem; color: #fff; border-left: 4px solid #fff; padding-left: 15px; text-transform: uppercase; margin-bottom: 30px; }
+        .grid { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card { background: rgba(10, 10, 10, 0.9); border: 1px solid #333; padding: 25px; flex: 1; min-width: 250px; transition: 0.3s; }
+        .card:hover { border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.1); transform: translateY(-3px); }
+        .btn { background: #fff; color: #000; padding: 12px 30px; font-weight: bold; border: none; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-top: 15px; }
+        .btn:hover { background: #888; box-shadow: 0 0 15px #fff; }
+        .tags span { display: inline-block; border: 1px solid #444; padding: 3px 8px; font-size: 0.8rem; margin: 5px 5px 0 0; color: #888; }
+        #game-box { border: 1px dashed #444; padding: 20px; text-align: center; position: relative; height: 280px; overflow: hidden; background: #050505; }
+        .game-num { position: absolute; cursor: pointer; font-weight: bold; font-size: 1.6rem; user-select: none; }
+        #terminal-box { background: #050505; border: 1px solid #333; padding: 20px; height: 320px; overflow-y: auto; text-align: left; }
+        .term-input-line { display: flex; margin-top: 15px; }
+        .term-input-line input { background: transparent; border: none; color: #00ff66; font-family: inherit; font-size: 1rem; width: 100%; outline: none; }
+        .text-green { color: #00ff66; text-shadow: 0 0 5px #00ff66; }
+        input[type="text"], textarea { width: 100%; background: #0a0a0a; border: 1px solid #333; padding: 12px; color: #fff; font-family: inherit; margin-bottom: 15px; }
+    </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">ДИРЕКТОР</div>
-  <div class="subtitle">7K MMR // MID // CARRY</div>
-</header>
+    <canvas id="matrix-bg"></canvas>
 
-<!-- ============ PROJECTS ============ -->
-<section id="projects">
-  <h2>// Проекты</h2>
-  <div class="projects-grid">
+    <div class="content-layer">
+        <header>
+            <h1>ДИРЕКТОР</h1>
+            <div class="subtitle">7K MMR // MID // CARRY // AI-WAYBCODING</div>
+            <button class="btn" onclick="document.getElementById('contacts').scrollIntoView();">Связаться</button>
+        </header>
 
-    <article class="project-card">
-      <div class="project-num">PROJECT #001</div>
-      <div class="project-title">Матричное портфолио</div>
-      <p class="project-desc">
-        Личный сайт с интерактивным терминалом, встроенной мини-игрой
-        и полностью адаптивным матричным дизайном.
-      </p>
-      <div class="project-tags">
-        <span class="tag">HTML</span><span class="tag">CSS</span>
-        <span class="tag">Vanilla JS</span><span class="tag">Canvas</span>
-      </div>
-    </article>
+        <section id="about">
+            <h2>// ОБО МНЕ</h2>
+            <p>Вайбкодер. Делаю сайты, которые живут и дышат. Люблю анимацию, чистый код и хороший вайб. В свободное время — Dota 2. Код должен не просто работать — он должен звучать.</p>
+            <div class="grid" style="margin-top:25px;">
+                <div class="card"><h3>0 ИДЕЙ В ГОЛОВЕ</h3></div>
+                <div class="card"><h3>24/7 НА ВАЙБЕ</h3></div>
+                <div class="card"><h3>7.0К MMR В DOTA</h3></div>
+                <div class="card"><h3>0% РУЧНОЙ КОД</h3></div>
+            </div>
+        </section>
 
-    <article class="project-card">
-      <div class="project-num">PROJECT #002</div>
-      <div class="project-title">Образовательный портал школы</div>
-      <p class="project-desc">
-        Многостраничный структурированный сайт с расписанием,
-        базой документов и адаптивной вёрсткой под все устройства.
-      </p>
-      <div class="project-tags">
-        <span class="tag">Multi-page</span><span class="tag">Адаптив</span>
-        <span class="tag">UI/UX</span>
-      </div>
-    </article>
+        <section id="services">
+            <h2>// УСЛУГИ</h2>
+            <div class="grid">
+                <div class="card"><h3>01 / Лендинг</h3><p>Сайт-визитка с кастомной анимацией, адаптивом и четкой структурой под ключ.</p></div>
+                <div class="card"><h3>02 / Интерактив</h3><p>Скролл-эффекты, микро-анимации, Canvas. Сайт, который реагирует на действия.</p></div>
+                <div class="card"><h3>03 / Адаптив</h3><p>Идеальное отображение на смартфонах, планшетах и компьютерах.</p></div>
+            </div>
+        </section>
 
-    <article class="project-card">
-      <div class="project-num">PROJECT #003</div>
-      <div class="project-title">Мемориальный промо-сайт</div>
-      <p class="project-desc">
-        Интерактивный storytelling-лендинг памяти с аккуратной работой
-        с графикой, текстом и галереей.
-      </p>
-      <div class="project-tags">
-        <span class="tag">Storytelling</span><span class="tag">Gallery</span>
-        <span class="tag">Motion</span>
-      </div>
-    </article>
+        <section id="projects">
+            <h2>// ПРОЕКТЫ</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>#001 Матричное портфолио</h3>
+                    <p>Сайт, который ты сейчас смотришь. С мини-игрой, терминалом и кастомной логикой.</p>
+                    <div class="tags"><span>HTML</span><span>CSS</span><span>Vanilla JS</span><span>Canvas</span></div>
+                </div>
+                <div class="card">
+                    <h3>#002 Портал Школы</h3>
+                    <p>Многостраничный структурированный сайт с базой документов, расписанием и адаптивной версткой.</p>
+                    <div class="tags"><span>Multi-page</span><span>Адаптив</span><span>UI/UX</span></div>
+                </div>
+                <div class="card">
+                    <h3>#003 Сайт Памяти</h3>
+                    <p>Интерактивный Storytelling-лендинг памяти с аккуратной и уважительной работой с текстом.</p>
+                    <div class="tags"><span>Storytelling</span><span>Gallery</span><span>Motion</span></div>
+                </div>
+            </div>
+        </section>
 
-  </div>
-</section>
+        <section id="mini-game">
+            <h2>// МИНИ-ИГРА</h2>
+            <p>Лови белые цифры мышкой. Красные — штраф! Кликни СТАРТ для начала.</p>
+            <div id="game-box">
+                <div style="margin-bottom: 15px;">СЧЁТ: <span id="score">0</span> | РЕКОРД: <span id="high-score">0</span></div>
+                <button class="btn" id="start-game-btn" onclick="startGame()">СТАРТ</button>
+            </div>
+        </section>
 
-<!-- ============ TERMINAL ============ -->
-<section id="terminal-section">
-  <h2>// Терминал</h2>
-  <div class="terminal">
-    <div id="termOut"></div>
-    <div class="term-input-row">
-      <span class="term-prompt">director@matrix:~$</span>
-      <input id="termIn" autocomplete="off" spellcheck="false" placeholder="введи help..."/>
+        <section id="terminal">
+            <h2>// ТЕРМИНАЛ</h2>
+            <p>Попробуй команды: help, about, dota, prices, matrix, hack, 7k</p>
+            <div id="terminal-box">
+                <div class="text-green">Директор ОС v2.0 — терминал загружен успешно.</div>
+                <div class="text-green">Введи 'help' для вывода списка команд.</div>
+                <div id="terminal-output"></div>
+                <div class="term-input-line">
+                    <span class="text-green">director@portfolio:~$&nbsp;</span>
+                    <input type="text" id="term-input" onkeydown="handleCommand(event)" autocomplete="off">
+                </div>
+            </div>
+        </section>
+
+        <section id="prices">
+            <h2>// ЦЕНЫ</h2>
+            <div class="grid">
+                <div class="card"><h3>Лендинг</h3><p style="font-size:1.5rem;font-weight:bold;">от 10 000 ₽</p><p>Одностраничный сайт, адаптив, базовая анимация, срок 3-5 дней.</p></div>
+                <div class="card"><h3>Анимированный</h3><p style="font-size:1.5rem;font-weight:bold;">от 25 000 ₽</p><p>Многостраничник, сложные скролл-эффекты, Canvas, полный интерактив.</p></div>
+            </div>
+        </section>
+
+        <section id="contacts">
+            <h2>// КОНТАКТЫ</h2>
+            <div class="card">
+                <p>Оставь заявку, и бот перенаправит её мне в Telegram моментально!</p>
+                <input type="text" id="client-name" placeholder="Твое имя / ник">
+                <textarea id="client-msg" rows="4" placeholder="Твой телеграм для связи или описание задачи"></textarea>
+                <button class="btn" onclick="sendTelegramOrder()">ОТПРАВИТЬ ЗАЯВКУ</button>
+                <p id="form-status" style="margin-top: 15px; font-weight: bold;"></p>
+            </div>
+        </section>
     </div>
-  </div>
-</section>
+    <script>
+        /* 1. МАТРИЧНЫЙ ФОН */
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+        window.addEventListener('resize', () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; });
 
-<!-- ============ CONTACT ============ -->
-<section id="contact">
-  <h2>// Заявка</h2>
-  <form class="contact-form" id="orderForm" novalidate>
-    <input type="text"  name="name"     placeholder="Имя / ник" required />
-    <input type="text"  name="contact"  placeholder="Telegram / Email / телефон" required />
-    <textarea name="message" rows="4" placeholder="Что нужно сделать?"></textarea>
-    <button type="submit" id="submitBtn">ОТПРАВИТЬ ЗАЯВКУ</button>
-  </form>
-</section>
+        const alphabet = '01'.split('');
+        const fontSize = 16;
+        const columns = width / fontSize;
+        const rainDrops = Array.from({ length: columns }).fill(1);
+        let matrixMode = false, matrixInterval;
 
-<!-- Canvas для матрицы -->
-<canvas id="matrixCanvas"></canvas>
-<!-- Toast -->
-<div id="toast"></div>
+        function drawMatrix() {
+            ctx.fillStyle = matrixMode ? 'rgba(0, 0, 0, 0.02)' : 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = matrixMode ? '#00ff66' : '#222';
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet[Math.floor(Math.random() * alphabet.length)];
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                if (rainDrops[i] * fontSize > height && Math.random() > 0.975) rainDrops[i] = 0;
+                rainDrops[i]++;
+            }
+        }
+        matrixInterval = setInterval(drawMatrix, 30);
 
-<script>
-/* =========================================================
-   0. НАСТРОЙКИ TELEGRAM
-   ========================================================= */
-const TG_TOKEN   = "9258074369:AAEqmd2ndVxUlzJsFuSghn2F-1WR6xJBXNA";
-const TG_CHAT_ID = "ВСТАВЬ_СЮДА_СВОЙ_ID_ИЗ_USERINFOBOT"; // <-- числовой ID
+        /* 2. МИНИ ИГРА */
+        let score = 0, highScore = 0, gameActive = false, gameTimer;
+        function startGame() {
+            if(gameActive) return;
+            gameActive = true; score = 0;
+            document.getElementById('score').innerText = score;
+            document.getElementById('start-game-btn').style.display = 'none';
+            gameTimer = setInterval(spawnNumber, 700);
+            setTimeout(stopGame, 15000);
+        }
+        function spawnNumber() {
+            if(!gameActive) return;
+            const num = document.createElement('div'), isGood = Math.random() > 0.3;
+            num.className = 'game-num'; num.innerText = Math.floor(Math.random() * 9);
+            num.style.color = isGood ? '#fff' : '#ff0055';
+            num.style.left = Math.random() * (document.getElementById('game-box').clientWidth - 30) + 'px';
+            num.style.top = Math.random() * (document.getElementById('game-box').clientHeight - 70) + 40 + 'px';
+            num.onclick = () => {
+                score = isGood ? score + 10 : Math.max(0, score - 15);
+                document.getElementById('score').innerText = score; num.remove();
+            };
+            document.getElementById('game-box').appendChild(num);
+            setTimeout(() => { num.remove(); }, 1800);
+        }
+        function stopGame() {
+            gameActive = false; clearInterval(gameTimer);
+            document.querySelectorAll('.game-num').forEach(n => n.remove());
+            document.getElementById('start-game-btn').style.display = 'inline-block';
+            if(score > highScore) { highScore = score; document.getElementById('high-score').innerText = highScore; }
+            alert('Игра окончена! Твой результат: ' + score);
+        }
 
-/* =========================================================
-   1. PROJECT CARD — подсветка за курсором
-   ========================================================= */
-document.querySelectorAll('.project-card').forEach(card=>{
-  card.addEventListener('mousemove', e=>{
-    const r = card.getBoundingClientRect();
-    card.style.setProperty('--mx', (e.clientX-r.left)+'px');
-    card.style.setProperty('--my', (e.clientY-r.top)+'px');
-  });
-});
+        /* 3. ПРОКАЧАННЫЙ ТЕРМИНАЛ */
+        const output = document.getElementById('terminal-output');
+        function handleCommand(e) {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('term-input'), cmd = input.value.trim().toLowerCase();
+                input.value = '';
+                output.innerHTML += `<div><span style="color:#666">director@portfolio:~$</span> ${cmd}</div>`;
+                if (cmd === 'help') {
+                    output.innerHTML += `<div>Команды: <b>about</b>, <b>dota</b>, <b>prices</b>, <b>matrix</b>, <b>hack</b>, <b>7k</b></div>`;
+                } else if (cmd === 'about') {
+                    output.innerHTML += `<div>Директор. Вайбкодер. Делаю сайты на ИИ быстрее, чем летит стрела Мираны.</div>`;
+                } else if (cmd === 'dota') {
+                    output.innerHTML += `<div>Зафиксировано: 7000 MMR. Чистый Керри/Мид пул. Киберспортивный вайб.</div>`;
+                } else if (cmd === 'prices') {
+                    output.innerHTML += `<div>Лендинги от 10к, интерактивные многостраничники от 25к. Оплата на детскую карту.</div>`;
+                } else if (cmd === '7k') {
+                    output.innerHTML += `<div class="text-green">Ранг: Титан. Запредельный уровень скилла. Слабакам сайты не делаю.</div>`;
+                } else if (cmd === 'matrix') {
+                    output.innerHTML += `<div class="text-green">Запуск протокола Цифрового Шторма на 5 секунд...</div>`;
+                    matrixMode = true; clearInterval(matrixInterval); matrixInterval = setInterval(drawMatrix, 10);
+                    setTimeout(() => {
+                        matrixMode = false; clearInterval(matrixInterval); matrixInterval = setInterval(drawMatrix, 30);
+                        output.innerHTML += `<div>Шторм утих. Система стабилизирована.</div>`;
+                    }, 5000);
+                } else if (cmd === 'hack') {
+                    let lines = ["Подключение к серверам Пентагона...", "Обход файрвола... 45%", "Обход файрвола... 100%", "ДОСТУП ПРЕДОСТАВЛЕН. Добро пожаловать, ДИРЕКТОР."];
+                    lines.forEach((line, i) => { setTimeout(() => { output.innerHTML += `<div class="text-green">${line}</div>`; document.getElementById('terminal-box').scrollTop = document.getElementById('terminal-box').scrollHeight; }, i * 500); });
+                } else if (cmd !== '') {
+                    output.innerHTML += `<div>Команда не найдена. Введи 'help'.</div>`;
+                }
+                document.getElementById('terminal-box').scrollTop = document.getElementById('terminal-box').scrollHeight;
+            }
+        }
 
-/* =========================================================
-   2. TERMINAL
-   ========================================================= */
-const termOut = document.getElementById('termOut');
-const termIn  = document.getElementById('termIn');
-
-function printLine(text, cls=''){
-  const line = document.createElement('div');
-  if(cls) line.className = cls;
-  line.textContent = text;
-  termOut.appendChild(line);
-  termOut.scrollTop = termOut.scrollHeight;
-}
-function printSlow(lines, delay=180){
-  return lines.reduce((p, line) => p.then(()=> new Promise(res=>{
-    printLine(line);
-    setTimeout(res, delay);
-  })), Promise.resolve());
-}
-
-// приветствие
-printLine('MATRIX TERMINAL v2.0');
-printLine('Введи "help" для списка команд.', 'dim');
-printLine('');
-
-function handleCommand(raw){
-  const cmd = raw.trim().toLowerCase();
-  if(!cmd) return;
-
-  switch(cmd){
-    case 'help':
-      printLine('Доступные команды:');
-      printLine('  help     — список команд');
-      printLine('  about    — информация об авторе');
-      printLine('  projects — список проектов');
-      printLine('  contact  — как связаться');
-      printLine('  matrix   — ☠ запустить дождь из Матрицы');
-      printLine('  hack     — ☠ взломать Пентагон (шутка)');
-      printLine('  7k       — ☠ секретная пасхалка про MMR');
-      printLine('  clear    — очистить терминал');
-      break;
-
-    case 'about':
-      printLine('ДИРЕКТОР — fullstack-разработчик, 7K MMR в Dota 2.');
-      printLine('Делаю сайты, лендинги и интерактив на чистом стеке.');
-      break;
-
-    case 'projects':
-      printLine('001 — Матричное портфолио');
-      printLine('002 — Образовательный портал школы');
-      printLine('003 — Мемориальный промо-сайт');
-      break;
-
-    case 'contact':
-      printLine('Telegram: @director   |   Email: director@matrix.dev');
-      break;
-
-    case 'clear':
-      termOut.innerHTML = '';
-      break;
-
-    case 'matrix':
-      printLine('Инициализация Матрицы...');
-      runMatrixRain();
-      break;
-
-    case 'hack':
-      runHackSequence();
-      break;
-
-    case '7k':
-      run7kSequence();
-      break;
-
-    default:
-      printLine(`Команда не найдена: ${cmd}. Введи "help".`, 'dim');
-  }
-}
-
-termIn.addEventListener('keydown', e=>{
-  if(e.key === 'Enter'){
-    const value = termIn.value;
-    printLine('director@matrix:~$ ' + value);
-    handleCommand(value);
-    termIn.value = '';
-  }
-});
-
-/* ---------- MATRIX RAIN ---------- */
-const canvas = document.getElementById('matrixCanvas');
-const ctx = canvas.getContext('2d');
-let matrixAnim = null, matrixTimer = null;
-
-function sizeCanvas(){
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', ()=>{ if(canvas.classList.contains('active')) sizeCanvas(); });
-
-function runMatrixRain(duration = 5000){
-  if(matrixAnim) return; // не запускаем дважды
-  sizeCanvas();
-  canvas.classList.add('active');
-
-  const chars = 'アィウェオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const fontSize = 16;
-  const cols = Math.floor(canvas.width / fontSize);
-  const drops = Array(cols).fill(1);
-
-  function draw(){
-    ctx.fillStyle = 'rgba(0,0,0,0.08)';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = '#0f0';
-    ctx.font = fontSize + 'px monospace';
-    for(let i=0;i<drops.length;i++){
-      const ch = chars[Math.floor(Math.random()*chars.length)];
-      ctx.fillText(ch, i*fontSize, drops[i]*fontSize);
-      if(drops[i]*fontSize > canvas.height && Math.random() > 0.975){
-        drops[i] = 0;
-      }
-      drops[i]++;
-    }
-    matrixAnim = requestAnimationFrame(draw);
-  }
-  draw();
-
-  clearTimeout(matrixTimer);
-  matrixTimer = setTimeout(()=>{
-    cancelAnimationFrame(matrixAnim);
-    matrixAnim = null;
-    canvas.classList.remove('active');
-    printLine('Матрица стабилизирована. Добро пожаловать обратно, Директор.');
-  }, duration);
-}
-
-/* ---------- HACK ---------- */
-async function runHackSequence(){
-  const lines = [
-    'Подключение к серверам Пентагона...',
-    'Обход брандмауэра... 30%',
-    'Обход брандмауэра... 70%',
-    'Обход брандмауэра... 100%',
-    'Поиск уязвимостей...',
-    'ДОСТУП РАЗРЕШЕН. Добро пожаловать, Директор.'
-  ];
-  for(const l of lines){
-    printLine(l);
-    await new Promise(r => setTimeout(r, 220 + Math.random()*160));
-  }
-}
-
-/* ---------- 7K ---------- */
-async function run7kSequence(){
-  const lines = [
-    '>> СКАНИРОВАНИЕ ПРОФИЛЯ DOTA 2...',
-    'Ранг: Божество / Титан.',
-    'Позиция: Мид / Керри.',
-    'Зафиксирован запредельный уровень скилла.',
-    'MMR: 7000+. Лоу-ммр детектор: не обнаружено.',
-    '>> Закажи сайт у Директора, если не лоу-ммр.'
-  ];
-  for(const l of lines){
-    printLine(l);
-    await new Promise(r => setTimeout(r, 260));
-  }
-}
-
-/* =========================================================
-   3. CONTACT FORM → TELEGRAM
-   ========================================================= */
-const form = document.getElementById('orderForm');
-const submitBtn = document.getElementById('submitBtn');
-const toast = document.getElementById('toast');
-
-function showToast(msg, isError = false){
-  toast.textContent = msg;
-  toast.classList.toggle('error', isError);
-  toast.classList.add('show');
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(()=> toast.classList.remove('show'), 3500);
-}
-
-form.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-
-  const data = new FormData(form);
-  const name    = (data.get('name')    || '').toString().trim();
-  const contact = (data.get('contact') || '').toString().trim();
-  const message = (data.get('message') || '').toString().trim();
-
-  if(!name || !contact){
-    showToast('⚠ Заполни имя и контакт', true);
-    return;
-  }
-
-  const text =
-    '🔔 НОВАЯ ЗАЯВКА С САЙТА\n\n' +
-    `👤 Имя: ${name}\n` +
-    `📞 Контакт: ${contact}\n` +
-    `💬 Сообщение: ${message || '—'}\n` +
-    `🕒 ${new Date().toLocaleString('ru-RU')}`;
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'ОТПРАВКА...';
-
-  try{
-    const res = await fetch(
-      `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: TG_CHAT_ID,
-          text,
-          parse_mode: 'HTML'
-        })
-      }
-    );
-    const json = await res.json();
-    if(!json.ok) throw new Error(json.description || 'Telegram error');
-
-    showToast('✓ Заявка отправлена! Свяжусь в течение дня.');
-    form.reset();
-  }catch(err){
-    console.error(err);
-    showToast('✗ Ошибка отправки. Попробуй ещё раз.', true);
-  }finally{
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'ОТПРАВИТЬ ЗАЯВКУ';
-  }
-});
-</script>
+        /* 4. TELEGRAM API ДЛЯ ЗАЯВОК */
+        function sendTelegramOrder() {
+            const name = document.getElementById('client-name').value.trim(), msg = document.getElementById('client-msg').value.trim(), status = document.getElementById('form-status');
+            if(!name || !msg) { status.style.color = '#ff0055'; status.innerText = 'Заполни поля, бро!'; return; }
+            status.style.color = '#fff'; status.innerText = 'Отправка пакетов данных...';
+            const token = '9258074369:AAEqmd2ndVxUlzJsFuSghn2F-1WR6xJBXNA', chatId = '919532679'; 
+            const text = `🚀 ЗАЯВКА С САЙТА!\n\n👤 Имя: ${name}\n💬 Контакты: ${msg}`;
+            fetch(`https://telegram.org{token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`)
+            .then(res => {
+                if(res.ok) {
+                    status.style.color = '#00ff66'; status.innerText = '✓ Заявка улетела в Telegram Директора!';
+                    document.getElementById('client-name').value = ''; document.getElementById('client-msg').value = '';
+                } else { status.style.color = '#ff0055'; status.innerText = 'Ошибка API. Запусти бота в ТГ!'; }
+            }).catch(() => { status.style.color = '#ff0055'; status.innerText = 'Ошибка сети.'; });
+        }
+    </script>
 </body>
 </html>
