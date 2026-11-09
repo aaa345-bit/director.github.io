@@ -1,237 +1,1071 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ДИРЕКТОР — вайбкодер / portfolio</title>
-    <style>
-        * { box-sizing: border-box; scroll-behavior: smooth; }
-        body { background-color: #000; color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 0; overflow-x: hidden; }
-        canvas#matrix-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
-        .content-layer { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 40px 20px; }
-        header { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        h1 { font-size: 4rem; letter-spacing: 5px; margin: 0; text-shadow: 0 0 10px #fff; }
-        .subtitle { color: #888; margin-top: 10px; font-size: 1.2rem; }
-        section { padding: 50px 0; border-bottom: 1px solid #222; }
-        h2 { font-size: 2rem; color: #fff; border-left: 4px solid #fff; padding-left: 15px; text-transform: uppercase; margin-bottom: 30px; }
-        .grid { display: flex; gap: 20px; flex-wrap: wrap; }
-        .card { background: rgba(10, 10, 10, 0.9); border: 1px solid #333; padding: 25px; flex: 1; min-width: 250px; transition: 0.3s; }
-        .card:hover { border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.1); transform: translateY(-3px); }
-        .btn { background: #fff; color: #000; padding: 12px 30px; font-weight: bold; border: none; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-top: 15px; }
-        .btn:hover { background: #888; box-shadow: 0 0 15px #fff; }
-        .tags span { display: inline-block; border: 1px solid #444; padding: 3px 8px; font-size: 0.8rem; margin: 5px 5px 0 0; color: #888; }
-        #game-box { border: 1px dashed #444; padding: 20px; text-align: center; position: relative; height: 280px; overflow: hidden; background: #050505; }
-        .game-num { position: absolute; cursor: pointer; font-weight: bold; font-size: 1.6rem; user-select: none; }
-        #terminal-box { background: #050505; border: 1px solid #333; padding: 20px; height: 320px; overflow-y: auto; text-align: left; }
-        .term-input-line { display: flex; margin-top: 15px; }
-        .term-input-line input { background: transparent; border: none; color: #00ff66; font-family: inherit; font-size: 1rem; width: 100%; outline: none; }
-        .text-green { color: #00ff66; text-shadow: 0 0 5px #00ff66; }
-        input[type="text"], textarea { width: 100%; background: #0a0a0a; border: 1px solid #333; padding: 12px; color: #fff; font-family: inherit; margin-bottom: 15px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ДИРЕКТОР // портфолио</title>
+  <style>
+    /* ========== RESET & GLOBAL ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: #050505;
+      color: #ffffff;
+      overflow-x: hidden;
+      min-height: 100vh;
+      cursor: none; /* hide default cursor for custom glow */
+    }
+
+    /* custom cursor glow overlay */
+    .cursor-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: soft-light;
+      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 35%, transparent 65%);
+      transition: background 0.08s ease-out;
+      will-change: background;
+    }
+
+    /* но возвращаем курсор для удобства кликов, но оставляем glow */
+    body, a, button, input, textarea, .clickable {
+      cursor: none;
+    }
+
+    /* canvas background */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* ========== GLASS HEADER + PROGRESS ========== */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: #ffffff;
+      width: 0%;
+      z-index: 1000;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+      transition: width 0.1s linear;
+    }
+
+    .glass-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 900;
+      background: rgba(5, 5, 5, 0.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: auto;
+    }
+
+    .logo {
+      font-weight: 900;
+      letter-spacing: 6px;
+      font-size: 1.2rem;
+      color: #ffffff;
+      text-transform: uppercase;
+      border-left: 3px solid #ffffff;
+      padding-left: 1rem;
+    }
+
+    nav {
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    nav a {
+      color: #aaaaaa;
+      text-decoration: none;
+      font-weight: 500;
+      letter-spacing: 2px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      transition: color 0.2s, text-shadow 0.2s;
+      position: relative;
+    }
+
+    nav a:hover {
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+    }
+
+    /* ========== MAIN CONTENT LAYER ========== */
+    main {
+      position: relative;
+      z-index: 10;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 6rem 2rem 4rem;
+      pointer-events: auto;
+    }
+
+    section {
+      margin-bottom: 8rem;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ========== TYPOGRAPHY ========== */
+    h1 {
+      font-size: clamp(4rem, 15vw, 9rem);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      position: relative;
+      display: inline-block;
+      color: #ffffff;
+      text-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+    }
+
+    .subhead {
+      font-size: 1.2rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 2.5rem;
+      font-weight: 300;
+      border-left: 2px solid #333;
+      padding-left: 1.5rem;
+    }
+
+    /* marquee */
+    .marquee-wrap {
+      overflow: hidden;
+      white-space: nowrap;
+      border-top: 1px solid #222;
+      border-bottom: 1px solid #222;
+      padding: 1rem 0;
+      margin: 2rem 0 3rem;
+      background: rgba(255, 255, 255, 0.02);
+      width: 100%;
+      position: relative;
+    }
+
+    .marquee {
+      display: inline-block;
+      animation: scrollMarquee 22s linear infinite;
+      font-size: 1rem;
+      letter-spacing: 4px;
+      color: #aaa;
+      font-weight: 300;
+    }
+
+    .marquee span {
+      margin: 0 2rem;
+      display: inline-block;
+    }
+
+    @keyframes scrollMarquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: transparent;
+      border: 1.5px solid #ffffff;
+      color: #ffffff;
+      padding: 1.2rem 3rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(5px);
+      background: rgba(255,255,255,0.02);
+      cursor: none;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background: #ffffff;
+      color: #050505;
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+      border-color: #ffffff;
+    }
+
+    .btn-outline {
+      border-color: #333;
+      color: #bbb;
+    }
+
+    .btn-outline:hover {
+      border-color: #fff;
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      box-shadow: 0 0 30px rgba(255,255,255,0.2);
+    }
+
+    /* ========== CARDS & STATS ========== */
+    .stats-grid, .projects-grid, .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+      backdrop-filter: blur(5px);
+    }
+
+    .stat-card:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
+      transform: translateY(-4px);
+    }
+
+    .stat-number {
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #888;
+      margin-top: 0.75rem;
+    }
+
+    /* ========== PROJECT CARDS (3D TILT) ========== */
+    .project-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2.5rem 1.8rem;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.1s ease-out;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+      will-change: transform;
+      backdrop-filter: blur(4px);
+    }
+
+    .project-card:hover {
+      border-color: #ffffff;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 60px rgba(255, 255, 255, 0.1);
+    }
+
+    .project-id {
+      font-size: 0.8rem;
+      color: #666;
+      letter-spacing: 3px;
+      margin-bottom: 1.5rem;
+    }
+
+    .project-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .project-desc {
+      color: #888;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* ========== CALCULATOR ========== */
+    .calc-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+      margin-top: 3rem;
+    }
+
+    .calc-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .calc-option {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid #222;
+      transition: all 0.25s;
+      user-select: none;
+      cursor: none;
+    }
+
+    .calc-option:hover {
+      border-color: #555;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .calc-option.active {
+      border-color: #ffffff;
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+    }
+
+    .calc-check {
+      width: 24px;
+      height: 24px;
+      border: 1.5px solid #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: transparent;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .calc-option.active .calc-check {
+      background: #ffffff;
+      color: #000;
+      border-color: #ffffff;
+    }
+
+    .calc-label {
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .calc-price {
+      margin-left: auto;
+      font-weight: 700;
+      color: #aaa;
+    }
+
+    .calc-total {
+      text-align: right;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      border-top: 1px solid #222;
+      padding-top: 2rem;
+      transition: all 0.3s;
+    }
+
+    /* ========== TERMINAL ========== */
+    .terminal {
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      padding: 2rem;
+      font-family: 'Courier New', monospace;
+      border-radius: 4px;
+      box-shadow: 0 0 60px rgba(0, 255, 102, 0.03);
+      margin-top: 3rem;
+    }
+
+    .terminal-header {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .terminal-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #333;
+    }
+
+    .terminal-output {
+      color: #00ff66;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      min-height: 180px;
+      max-height: 280px;
+      overflow-y: auto;
+      margin-bottom: 1.5rem;
+      padding-right: 0.5rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .terminal-input-line {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-top: 1px solid #1f1f1f;
+      padding-top: 1rem;
+    }
+
+    .terminal-prompt {
+      color: #00ff66;
+      font-weight: 700;
+    }
+
+    .terminal-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #00ff66;
+      font-family: inherit;
+      font-size: 1rem;
+      flex: 1;
+      caret-color: #00ff66;
+    }
+
+    .terminal-input::placeholder {
+      color: #2a5a2a;
+    }
+
+    /* ========== MINI GAME ========== */
+    .game-area {
+      background: #0a0a0a;
+      border: 1px solid #222;
+      padding: 2rem;
+      margin-top: 2rem;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      color: #888;
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+    }
+
+    .game-field {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: #050505;
+      border: 1px dashed #222;
+      overflow: hidden;
+      border-radius: 2px;
+    }
+
+    .pixel {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: #ffffff;
+      box-shadow: 0 0 20px #fff, 0 0 40px rgba(255,255,255,0.4);
+      border-radius: 1px;
+      transition: left 0.06s linear, top 0.06s linear;
+      cursor: none;
+      z-index: 5;
+    }
+
+    .game-stats {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ========== CONTACT FORM ========== */
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 600px;
+      margin-top: 2.5rem;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      background: transparent;
+      border: 1px solid #222;
+      padding: 1.2rem 1.5rem;
+      color: #fff;
+      font-size: 1rem;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      outline: none;
+      font-family: inherit;
+      cursor: none;
+    }
+
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      border-color: #fff;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
+    }
+
+    .contact-form textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .submit-btn {
+      align-self: flex-start;
+      padding: 1.2rem 4rem;
+    }
+
+    .success-msg {
+      color: #00ff66;
+      font-weight: 600;
+      letter-spacing: 2px;
+      opacity: 0;
+      transition: opacity 0.4s;
+      margin-top: 1rem;
+    }
+
+    .success-msg.show {
+      opacity: 1;
+    }
+
+    /* ========== MISC ========== */
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    .section-sub {
+      color: #666;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      margin-bottom: 2rem;
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0a0a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  </style>
 </head>
 <body>
+  <!-- progress bar -->
+  <div class="progress-bar" id="progressBar"></div>
 
-    <canvas id="matrix-bg"></canvas>
+  <!-- cursor glow -->
+  <div class="cursor-glow" id="cursorGlow"></div>
 
-    <div class="content-layer">
-        <header>
-            <h1>ДИРЕКТОР</h1>
-            <div class="subtitle">7K MMR // MID // CARRY // AI-WAYBCODING</div>
-            <button class="btn" onclick="document.getElementById('contacts').scrollIntoView();">Связаться</button>
-        </header>
+  <!-- canvas background -->
+  <canvas id="bg-canvas"></canvas>
 
-        <section id="about">
-            <h2>// ОБО МНЕ</h2>
-            <p>Вайбкодер. Делаю сайты, которые живут и дышат. Люблю анимацию, чистый код и хороший вайб. В свободное время — Dota 2. Код должен не просто работать — он должен звучать.</p>
-            <div class="grid" style="margin-top:25px;">
-                <div class="card"><h3>0 ИДЕЙ В ГОЛОВЕ</h3></div>
-                <div class="card"><h3>24/7 НА ВАЙБЕ</h3></div>
-                <div class="card"><h3>7.0К MMR В DOTA</h3></div>
-                <div class="card"><h3>0% РУЧНОЙ КОД</h3></div>
-            </div>
-        </section>
+  <!-- glass header -->
+  <header class="glass-header">
+    <div class="logo">ДИРЕКТОР</div>
+    <nav>
+      <a href="#about">Обо мне</a>
+      <a href="#projects">Проекты</a>
+      <a href="#calculator">Калькулятор</a>
+      <a href="#terminal">Терминал</a>
+      <a href="#contacts">Контакты</a>
+    </nav>
+  </header>
 
-        <section id="services">
-            <h2>// УСЛУГИ</h2>
-            <div class="grid">
-                <div class="card"><h3>01 / Лендинг</h3><p>Сайт-визитка с кастомной анимацией, адаптивом и четкой структурой под ключ.</p></div>
-                <div class="card"><h3>02 / Интерактив</h3><p>Скролл-эффекты, микро-анимации, Canvas. Сайт, который реагирует на действия.</p></div>
-                <div class="card"><h3>03 / Адаптив</h3><p>Идеальное отображение на смартфонах, планшетах и компьютерах.</p></div>
-            </div>
-        </section>
+  <main>
+    <!-- HERO -->
+    <section id="hero" class="visible" style="opacity:1; transform:translateY(0);">
+      <h1 id="glitchTitle">ДИРЕКТОР</h1>
+      <div class="subhead">ВЕБ-РАЗРАБОТКА // ИНТЕРАКТИВ // AI-КОДИНГ</div>
+      <div class="marquee-wrap">
+        <div class="marquee">
+          <span>HTML5</span><span>CSS3</span><span>JAVASCRIPT</span><span>CANVAS API</span><span>TELEGRAM BOTS</span><span>UI/UX</span>
+          <span>HTML5</span><span>CSS3</span><span>JAVASCRIPT</span><span>CANVAS API</span><span>TELEGRAM BOTS</span><span>UI/UX</span>
+        </div>
+      </div>
+      <div class="btn-group">
+        <a href="#calculator" class="btn">Рассчитать стоимость</a>
+        <a href="#terminal" class="btn btn-outline">Запустить терминал</a>
+      </div>
+    </section>
 
-        <section id="projects">
-            <h2>// ПРОЕКТЫ</h2>
-            <div class="grid">
-                <div class="card">
-                    <h3>#001 Матричное портфолио</h3>
-                    <p>Сайт, который ты сейчас смотришь. С мини-игрой, терминалом и кастомной логикой.</p>
-                    <div class="tags"><span>HTML</span><span>CSS</span><span>Vanilla JS</span><span>Canvas</span></div>
-                </div>
-                <div class="card">
-                    <h3>#002 Портал Школы</h3>
-                    <p>Многостраничный структурированный сайт с базой документов, расписанием и адаптивной версткой.</p>
-                    <div class="tags"><span>Multi-page</span><span>Адаптив</span><span>UI/UX</span></div>
-                </div>
-                <div class="card">
-                    <h3>#003 Сайт Памяти</h3>
-                    <p>Интерактивный Storytelling-лендинг памяти с аккуратной и уважительной работой с текстом.</p>
-                    <div class="tags"><span>Storytelling</span><span>Gallery</span><span>Motion</span></div>
-                </div>
-            </div>
-        </section>
+    <!-- ABOUT / STATS -->
+    <section id="about">
+      <div class="section-title">Обо мне</div>
+      <div class="section-sub">цифры и факты</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number">100%</div><div class="stat-label">Адаптив</div></div>
+        <div class="stat-card"><div class="stat-number">24/7</div><div class="stat-label">На связи</div></div>
+        <div class="stat-card"><div class="stat-number">от 2 дней</div><div class="stat-label">Срок запуска</div></div>
+        <div class="stat-card"><div class="stat-number">0₽</div><div class="stat-label">Предоплата для старта</div></div>
+      </div>
+    </section>
 
-        <section id="mini-game">
-            <h2>// МИНИ-ИГРА</h2>
-            <p>Лови белые цифры мышкой. Красные — штраф! Кликни СТАРТ для начала.</p>
-            <div id="game-box">
-                <div style="margin-bottom: 15px;">СЧЁТ: <span id="score">0</span> | РЕКОРД: <span id="high-score">0</span></div>
-                <button class="btn" id="start-game-btn" onclick="startGame()">СТАРТ</button>
-            </div>
-        </section>
+    <!-- PROJECTS -->
+    <section id="projects">
+      <div class="section-title">Проекты</div>
+      <div class="section-sub">избранные работы</div>
+      <div class="projects-grid">
+        <div class="project-card tilt">
+          <div class="project-id">#001</div>
+          <div class="project-title">Матричное портфолио</div>
+          <div class="project-desc">Интерактивный сайт с Canvas, терминалом и мини-игрой. Полное погружение в цифровую эстетику.</div>
+        </div>
+        <div class="project-card tilt">
+          <div class="project-id">#002</div>
+          <div class="project-title">Кофейня: меню и доставка</div>
+          <div class="project-desc">Корзина товаров и мгновенная отправка заказов в Telegram бариста. Быстро, удобно, стильно.</div>
+        </div>
+        <div class="project-card tilt">
+          <div class="project-id">#003</div>
+          <div class="project-title">Образовательный портал</div>
+          <div class="project-desc">Многостраничный информационный ресурс со сложной структурой и продвинутой навигацией.</div>
+        </div>
+      </div>
+    </section>
 
-        <section id="terminal">
-            <h2>// ТЕРМИНАЛ</h2>
-            <p>Попробуй команды: help, about, dota, prices, matrix, hack, 7k</p>
-            <div id="terminal-box">
-                <div class="text-green">Директор ОС v2.0 — терминал загружен успешно.</div>
-                <div class="text-green">Введи 'help' для вывода списка команд.</div>
-                <div id="terminal-output"></div>
-                <div class="term-input-line">
-                    <span class="text-green">director@portfolio:~$&nbsp;</span>
-                    <input type="text" id="term-input" onkeydown="handleCommand(event)" autocomplete="off">
-                </div>
-            </div>
-        </section>
+    <!-- CALCULATOR -->
+    <section id="calculator">
+      <div class="section-title">Калькулятор стоимости</div>
+      <div class="section-sub">выберите нужные опции</div>
+      <div class="calc-container">
+        <div class="calc-options" id="calcOptions">
+          <div class="calc-option" data-price="5000">
+            <div class="calc-check">✓</div>
+            <div class="calc-label">Одностраничный лендинг</div>
+            <div class="calc-price">+5000₽</div>
+          </div>
+          <div class="calc-option" data-price="2000">
+            <div class="calc-check">✓</div>
+            <div class="calc-label">Корзина / Прием заказов в Telegram</div>
+            <div class="calc-price">+2000₽</div>
+          </div>
+          <div class="calc-option" data-price="3000">
+            <div class="calc-check">✓</div>
+            <div class="calc-label">Сложные анимации и Canvas</div>
+            <div class="calc-price">+3000₽</div>
+          </div>
+          <div class="calc-option" data-price="2000">
+            <div class="calc-check">✓</div>
+            <div class="calc-label">Срочность за 48 часов</div>
+            <div class="calc-price">+2000₽</div>
+          </div>
+        </div>
+        <div class="calc-total" id="calcTotal">0 ₽</div>
+      </div>
+    </section>
 
-        <section id="prices">
-            <h2>// ЦЕНЫ</h2>
-            <div class="grid">
-                <div class="card"><h3>Лендинг</h3><p style="font-size:1.5rem;font-weight:bold;">от 10 000 ₽</p><p>Одностраничный сайт, адаптив, базовая анимация, срок 3-5 дней.</p></div>
-                <div class="card"><h3>Анимированный</h3><p style="font-size:1.5rem;font-weight:bold;">от 25 000 ₽</p><p>Многостраничник, сложные скролл-эффекты, Canvas, полный интерактив.</p></div>
-            </div>
-        </section>
+    <!-- STEPS -->
+    <section id="steps">
+      <div class="section-title">Этапы работы</div>
+      <div class="section-sub">от идеи до запуска</div>
+      <div class="steps-grid">
+        <div class="stat-card"><div class="stat-number">01.</div><div class="stat-label">Идея и бриф</div></div>
+        <div class="stat-card"><div class="stat-number">02.</div><div class="stat-label">Сборка прототипа</div></div>
+        <div class="stat-card"><div class="stat-number">03.</div><div class="stat-label">Тест на вашем устройстве</div></div>
+        <div class="stat-card"><div class="stat-number">04.</div><div class="stat-label">Оплата по факту</div></div>
+      </div>
+    </section>
 
-        <section id="contacts">
-            <h2>// КОНТАКТЫ</h2>
-            <div class="card">
-                <p>Оставь заявку, и бот перенаправит её мне в Telegram моментально!</p>
-                <input type="text" id="client-name" placeholder="Твое имя / ник">
-                <textarea id="client-msg" rows="4" placeholder="Твой телеграм для связи или описание задачи"></textarea>
-                <button class="btn" onclick="sendTelegramOrder()">ОТПРАВИТЬ ЗАЯВКУ</button>
-                <p id="form-status" style="margin-top: 15px; font-weight: bold;"></p>
-            </div>
-        </section>
-    </div>
-    <script>
-        /* 1. МАТРИЧНЫЙ ФОН */
-        const canvas = document.getElementById('matrix-bg');
-        const ctx = canvas.getContext('2d');
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-        window.addEventListener('resize', () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; });
+    <!-- TERMINAL -->
+    <section id="terminal">
+      <div class="section-title">Терминал</div>
+      <div class="section-sub">введите help для списка команд</div>
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dot" style="background:#ff5f56;"></div>
+          <div class="terminal-dot" style="background:#ffbd2e;"></div>
+          <div class="terminal-dot" style="background:#27c93f;"></div>
+        </div>
+        <div class="terminal-output" id="terminalOutput">
+          > Добро пожаловать в терминал ДИРЕКТОР.<br>
+          > Введите 'help' для списка команд.<br>
+          > 
+        </div>
+        <div class="terminal-input-line">
+          <span class="terminal-prompt">$</span>
+          <input type="text" class="terminal-input" id="terminalInput" placeholder="введите команду..." autocomplete="off">
+        </div>
+      </div>
+    </section>
 
-        const alphabet = '01'.split('');
-        const fontSize = 16;
-        const columns = width / fontSize;
-        const rainDrops = Array.from({ length: columns }).fill(1);
-        let matrixMode = false, matrixInterval;
+    <!-- MINI GAME -->
+    <section id="game">
+      <div class="section-title">Поймай белый пиксель</div>
+      <div class="section-sub">мини-игра на реакцию</div>
+      <div class="game-area">
+        <div class="game-stats">
+          <span>Счёт: <span id="gameScore">0</span></span>
+          <span>Рекорд: <span id="gameHigh">0</span></span>
+        </div>
+        <div class="game-field" id="gameField">
+          <div class="pixel" id="pixel"></div>
+        </div>
+      </div>
+    </section>
 
-        function drawMatrix() {
-            ctx.fillStyle = matrixMode ? 'rgba(0, 0, 0, 0.02)' : 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = matrixMode ? '#00ff66' : '#222';
-            ctx.font = fontSize + 'px monospace';
-            for (let i = 0; i < rainDrops.length; i++) {
-                const text = alphabet[Math.floor(Math.random() * alphabet.length)];
-                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
-                if (rainDrops[i] * fontSize > height && Math.random() > 0.975) rainDrops[i] = 0;
-                rainDrops[i]++;
+    <!-- CONTACTS -->
+    <section id="contacts">
+      <div class="section-title">Контакты и заявка</div>
+      <div class="section-sub">напишите мне</div>
+      <form class="contact-form" id="contactForm">
+        <input type="text" placeholder="Имя" required>
+        <input type="text" placeholder="Телеграм / Телефон" required>
+        <textarea placeholder="Задача" required></textarea>
+        <button type="submit" class="btn submit-btn" id="submitBtn">Отправить заявку</button>
+        <div class="success-msg" id="successMsg">✓ Заявка отправлена! Я свяжусь с вами.</div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    (function() {
+      'use strict';
+
+      // ========== CANVAS DIGITAL RAIN ==========
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let columns = [];
+      const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF';
+      let speedMultiplier = 1;
+      let speedTimeout = null;
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        const colCount = Math.floor(width / 24);
+        columns = [];
+        for (let i = 0; i < colCount; i++) {
+          columns.push({
+            x: i * 24,
+            y: Math.random() * height,
+            speed: 0.5 + Math.random() * 1.5,
+            opacity: 0.15 + Math.random() * 0.45,
+            char: chars[Math.floor(Math.random() * chars.length)]
+          });
+        }
+      }
+
+      function drawCanvas() {
+        ctx.fillStyle = 'rgba(5, 5, 5, 0.08)';
+        ctx.fillRect(0, 0, width, height);
+
+        for (let col of columns) {
+          ctx.fillStyle = `rgba(255, 255, 255, ${col.opacity})`;
+          ctx.font = '16px "Courier New", monospace';
+          ctx.fillText(col.char, col.x, col.y);
+          col.y += col.speed * speedMultiplier;
+          if (col.y > height + 20) {
+            col.y = -20;
+            col.char = chars[Math.floor(Math.random() * chars.length)];
+            col.opacity = 0.15 + Math.random() * 0.45;
+          }
+          // occasionally change char
+          if (Math.random() < 0.02) {
+            col.char = chars[Math.floor(Math.random() * chars.length)];
+          }
+        }
+        requestAnimationFrame(drawCanvas);
+      }
+
+      resizeCanvas();
+      drawCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      // expose speed control for terminal
+      window.__matrixSpeed = function(mult, duration) {
+        speedMultiplier = mult;
+        if (speedTimeout) clearTimeout(speedTimeout);
+        speedTimeout = setTimeout(() => { speedMultiplier = 1; }, duration);
+      };
+
+      // ========== CURSOR GLOW ==========
+      const cursorGlow = document.getElementById('cursorGlow');
+      document.addEventListener('mousemove', (e) => {
+        cursorGlow.style.setProperty('--mouse-x', e.clientX + 'px');
+        cursorGlow.style.setProperty('--mouse-y', e.clientY + 'px');
+      });
+
+      // ========== SCROLL PROGRESS ==========
+      const progressBar = document.getElementById('progressBar');
+      window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = pct + '%';
+      });
+
+      // ========== INTERSECTION OBSERVER ==========
+      const sections = document.querySelectorAll('section:not(#hero)');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.15 });
+      sections.forEach(s => observer.observe(s));
+
+      // ========== GLITCH / SCRAMBLE TEXT ==========
+      const glitchTitle = document.getElementById('glitchTitle');
+      const originalText = 'ДИРЕКТОР';
+      const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+      let scrambleInterval = null;
+
+      function scrambleText() {
+        let iteration = 0;
+        clearInterval(scrambleInterval);
+        scrambleInterval = setInterval(() => {
+          glitchTitle.textContent = originalText
+            .split('')
+            .map((char, index) => {
+              if (index < iteration) return originalText[index];
+              return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+            })
+            .join('');
+          iteration += 1 / 3;
+          if (iteration >= originalText.length) {
+            clearInterval(scrambleInterval);
+            glitchTitle.textContent = originalText;
+          }
+        }, 35);
+      }
+
+      // initial scramble on load
+      setTimeout(scrambleText, 300);
+      glitchTitle.addEventListener('mouseenter', scrambleText);
+
+      // ========== 3D TILT ON PROJECT CARDS ==========
+      const tiltCards = document.querySelectorAll('.tilt');
+      tiltCards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = ((y - centerY) / centerY) * -8;
+          const rotateY = ((x - centerX) / centerX) * 8;
+          card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
+        });
+      });
+
+      // ========== CALCULATOR ==========
+      const calcOptions = document.querySelectorAll('.calc-option');
+      const calcTotal = document.getElementById('calcTotal');
+      let totalPrice = 0;
+
+      calcOptions.forEach(opt => {
+        opt.addEventListener('click', () => {
+          opt.classList.toggle('active');
+          totalPrice = 0;
+          document.querySelectorAll('.calc-option.active').forEach(active => {
+            totalPrice += parseInt(active.dataset.price, 10);
+          });
+          calcTotal.textContent = totalPrice.toLocaleString('ru-RU') + ' ₽';
+        });
+      });
+
+      // ========== TERMINAL ==========
+      const terminalOutput = document.getElementById('terminalOutput');
+      const terminalInput = document.getElementById('terminalInput');
+      const terminalPrompt = '$ ';
+
+      function appendTerminal(text) {
+        terminalOutput.innerHTML += text + '<br>';
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+      }
+
+      const commands = {
+        help() {
+          appendTerminal('> Доступные команды:');
+          appendTerminal('  help    - список команд');
+          appendTerminal('  about   - информация об авторе');
+          appendTerminal('  stack   - используемые технологии');
+          appendTerminal('  matrix  - ускорить падающие цифры на 5 секунд');
+          appendTerminal('  hack    - запустить анимацию взлома');
+          appendTerminal('  clear   - очистить терминал');
+        },
+        about() {
+          appendTerminal('> ДИРЕКТОР — веб-разработчик, специализация:');
+          appendTerminal('  интерактивные сайты, Canvas, Telegram-боты, AI-кодинг.');
+          appendTerminal('  Работаю быстро, качественно, без предоплаты.');
+        },
+        stack() {
+          appendTerminal('> HTML5, CSS3, JavaScript (Vanilla), Canvas API, Telegram Bot API, Node.js (базово), Figma.');
+        },
+        matrix() {
+          appendTerminal('> Ускорение цифрового дождя на 5 секунд...');
+          window.__matrixSpeed(6, 5000);
+        },
+        hack() {
+          appendTerminal('> Запуск взлома...');
+          let percent = 0;
+          const hackInterval = setInterval(() => {
+            percent += Math.floor(Math.random() * 12) + 3;
+            if (percent >= 100) {
+              percent = 100;
+              clearInterval(hackInterval);
+              appendTerminal(`> Взлом завершён: ${percent}% [OK]`);
+              appendTerminal('> Доступ получен. Добро пожаловать, ДИРЕКТОР.');
+            } else {
+              appendTerminal(`> Взлом... ${percent}%`);
             }
+          }, 180);
+        },
+        clear() {
+          terminalOutput.innerHTML = '> Терминал очищен.<br>> ';
         }
-        matrixInterval = setInterval(drawMatrix, 30);
+      };
 
-        /* 2. МИНИ ИГРА */
-        let score = 0, highScore = 0, gameActive = false, gameTimer;
-        function startGame() {
-            if(gameActive) return;
-            gameActive = true; score = 0;
-            document.getElementById('score').innerText = score;
-            document.getElementById('start-game-btn').style.display = 'none';
-            gameTimer = setInterval(spawnNumber, 700);
-            setTimeout(stopGame, 15000);
+      terminalInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const cmd = terminalInput.value.trim().toLowerCase();
+          terminalInput.value = '';
+          if (cmd === '') return;
+          appendTerminal(terminalPrompt + cmd);
+          if (commands[cmd]) {
+            commands[cmd]();
+          } else {
+            appendTerminal(`> Команда не найдена: "${cmd}". Введите 'help'.`);
+          }
         }
-        function spawnNumber() {
-            if(!gameActive) return;
-            const num = document.createElement('div'), isGood = Math.random() > 0.3;
-            num.className = 'game-num'; num.innerText = Math.floor(Math.random() * 9);
-            num.style.color = isGood ? '#fff' : '#ff0055';
-            num.style.left = Math.random() * (document.getElementById('game-box').clientWidth - 30) + 'px';
-            num.style.top = Math.random() * (document.getElementById('game-box').clientHeight - 70) + 40 + 'px';
-            num.onclick = () => {
-                score = isGood ? score + 10 : Math.max(0, score - 15);
-                document.getElementById('score').innerText = score; num.remove();
-            };
-            document.getElementById('game-box').appendChild(num);
-            setTimeout(() => { num.remove(); }, 1800);
-        }
-        function stopGame() {
-            gameActive = false; clearInterval(gameTimer);
-            document.querySelectorAll('.game-num').forEach(n => n.remove());
-            document.getElementById('start-game-btn').style.display = 'inline-block';
-            if(score > highScore) { highScore = score; document.getElementById('high-score').innerText = highScore; }
-            alert('Игра окончена! Твой результат: ' + score);
-        }
+      });
 
-        /* 3. ПРОКАЧАННЫЙ ТЕРМИНАЛ */
-        const output = document.getElementById('terminal-output');
-        function handleCommand(e) {
-            if (e.key === 'Enter') {
-                const input = document.getElementById('term-input'), cmd = input.value.trim().toLowerCase();
-                input.value = '';
-                output.innerHTML += `<div><span style="color:#666">director@portfolio:~$</span> ${cmd}</div>`;
-                if (cmd === 'help') {
-                    output.innerHTML += `<div>Команды: <b>about</b>, <b>dota</b>, <b>prices</b>, <b>matrix</b>, <b>hack</b>, <b>7k</b></div>`;
-                } else if (cmd === 'about') {
-                    output.innerHTML += `<div>Директор. Вайбкодер. Делаю сайты на ИИ быстрее, чем летит стрела Мираны.</div>`;
-                } else if (cmd === 'dota') {
-                    output.innerHTML += `<div>Зафиксировано: 7000 MMR. Чистый Керри/Мид пул. Киберспортивный вайб.</div>`;
-                } else if (cmd === 'prices') {
-                    output.innerHTML += `<div>Лендинги от 10к, интерактивные многостраничники от 25к. Оплата на детскую карту.</div>`;
-                } else if (cmd === '7k') {
-                    output.innerHTML += `<div class="text-green">Ранг: Титан. Запредельный уровень скилла. Слабакам сайты не делаю.</div>`;
-                } else if (cmd === 'matrix') {
-                    output.innerHTML += `<div class="text-green">Запуск протокола Цифрового Шторма на 5 секунд...</div>`;
-                    matrixMode = true; clearInterval(matrixInterval); matrixInterval = setInterval(drawMatrix, 10);
-                    setTimeout(() => {
-                        matrixMode = false; clearInterval(matrixInterval); matrixInterval = setInterval(drawMatrix, 30);
-                        output.innerHTML += `<div>Шторм утих. Система стабилизирована.</div>`;
-                    }, 5000);
-                } else if (cmd === 'hack') {
-                    let lines = ["Подключение к серверам Пентагона...", "Обход файрвола... 45%", "Обход файрвола... 100%", "ДОСТУП ПРЕДОСТАВЛЕН. Добро пожаловать, ДИРЕКТОР."];
-                    lines.forEach((line, i) => { setTimeout(() => { output.innerHTML += `<div class="text-green">${line}</div>`; document.getElementById('terminal-box').scrollTop = document.getElementById('terminal-box').scrollHeight; }, i * 500); });
-                } else if (cmd !== '') {
-                    output.innerHTML += `<div>Команда не найдена. Введи 'help'.</div>`;
-                }
-                document.getElementById('terminal-box').scrollTop = document.getElementById('terminal-box').scrollHeight;
+      // ========== MINI GAME ==========
+      const gameField = document.getElementById('gameField');
+      const pixel = document.getElementById('pixel');
+      const gameScoreEl = document.getElementById('gameScore');
+      const gameHighEl = document.getElementById('gameHigh');
+      let score = 0;
+      let highScore = localStorage.getItem('directorHighScore') ? parseInt(localStorage.getItem('directorHighScore')) : 0;
+      gameHighEl.textContent = highScore;
+
+      function movePixel() {
+        const fieldRect = gameField.getBoundingClientRect();
+        const maxX = fieldRect.width - 22;
+        const maxY = fieldRect.height - 22;
+        const x = Math.random() * maxX;
+        const y = Math.random() * maxY;
+        pixel.style.left = x + 'px';
+        pixel.style.top = y + 'px';
+      }
+
+      function resetGame() {
+        score = 0;
+        gameScoreEl.textContent = score;
+        movePixel();
+      }
+
+      pixel.addEventListener('click', (e) => {
+        e.stopPropagation();
+        score++;
+        gameScoreEl.textContent = score;
+        if (score > highScore) {
+          highScore = score;
+          gameHighEl.textContent = highScore;
+          localStorage.setItem('directorHighScore', highScore);
+        }
+        movePixel();
+      });
+
+      // initial move
+      movePixel();
+      // periodic auto-move if user is idle (makes game slightly harder)
+      setInterval(() => {
+        if (Math.random() < 0.3) movePixel();
+      }, 2000);
+
+      // ========== CONTACT FORM ==========
+      const contactForm = document.getElementById('contactForm');
+      const successMsg = document.getElementById('successMsg');
+      const submitBtn = document.getElementById('submitBtn');
+
+      contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        submitBtn.textContent = 'Отправка...';
+        submitBtn.disabled = true;
+        setTimeout(() => {
+          submitBtn.textContent = 'Отправлено ✓';
+          successMsg.classList.add('show');
+          contactForm.reset();
+          setTimeout(() => {
+            submitBtn.textContent = 'Отправить заявку';
+            submitBtn.disabled = false;
+          }, 2000);
+        }, 800);
+      });
+
+      // ========== SMOOTH SCROLL FOR NAV ==========
+      document.querySelectorAll('nav a, .btn[href^="#"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+          const href = link.getAttribute('href');
+          if (href && href.startsWith('#')) {
+            e.preventDefault();
+            const target = document.querySelector(href);
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-        }
+          }
+        });
+      });
 
-        /* 4. TELEGRAM API ДЛЯ ЗАЯВОК */
-        function sendTelegramOrder() {
-            const name = document.getElementById('client-name').value.trim(), msg = document.getElementById('client-msg').value.trim(), status = document.getElementById('form-status');
-            if(!name || !msg) { status.style.color = '#ff0055'; status.innerText = 'Заполни поля, бро!'; return; }
-            status.style.color = '#fff'; status.innerText = 'Отправка пакетов данных...';
-            const token = '9258074369:AAEqmd2ndVxUlzJsFuSghn2F-1WR6xJBXNA', chatId = '919532679'; 
-            const text = `🚀 ЗАЯВКА С САЙТА!\n\n👤 Имя: ${name}\n💬 Контакты: ${msg}`;
-            fetch(`https://telegram.org{token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`)
-            .then(res => {
-                if(res.ok) {
-                    status.style.color = '#00ff66'; status.innerText = '✓ Заявка улетела в Telegram Директора!';
-                    document.getElementById('client-name').value = ''; document.getElementById('client-msg').value = '';
-                } else { status.style.color = '#ff0055'; status.innerText = 'Ошибка API. Запусти бота в ТГ!'; }
-            }).catch(() => { status.style.color = '#ff0055'; status.innerText = 'Ошибка сети.'; });
-        }
-    </script>
+      // ========== ENSURE CANVAS RESIZE ON MOBILE ==========
+      window.addEventListener('orientationchange', () => {
+        setTimeout(resizeCanvas, 200);
+      });
+
+      // ========== PREVENT CURSOR NONE ON INPUTS? No, keep custom cursor ==========
+      // But allow text selection
+      document.querySelectorAll('input, textarea').forEach(el => {
+        el.style.cursor = 'none'; // still custom
+      });
+
+      // fine — everything is set.
+    })();
+  </script>
 </body>
 </html>
