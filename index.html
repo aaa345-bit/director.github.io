@@ -18,17 +18,17 @@
       color: #ffffff;
       overflow-x: hidden;
       min-height: 100vh;
-      cursor: none; /* hide default cursor for custom glow */
+      cursor: default; /* нормальный курсор */
     }
 
-    /* custom cursor glow overlay */
+    /* custom cursor glow overlay — только визуальный слой, клики не перехватывает */
     .cursor-glow {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      pointer-events: none;
+      pointer-events: none; /* не перекрывает клики */
       z-index: 9999;
       mix-blend-mode: soft-light;
       background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 35%, transparent 65%);
@@ -36,9 +36,26 @@
       will-change: background;
     }
 
-    /* но возвращаем курсор для удобства кликов, но оставляем glow */
-    body, a, button, input, textarea, .clickable {
-      cursor: none;
+    /* курсор-указатель для всех интерактивных элементов */
+    a,
+    button,
+    input,
+    textarea,
+    .clickable,
+    .btn,
+    .stat-card,
+    .project-card,
+    .calc-option,
+    .pixel,
+    nav a,
+    .logo {
+      cursor: pointer;
+    }
+
+    /* для полей ввода оставляем текстовый курсор */
+    input,
+    textarea {
+      cursor: text;
     }
 
     /* canvas background */
@@ -213,7 +230,7 @@
       overflow: hidden;
       backdrop-filter: blur(5px);
       background: rgba(255,255,255,0.02);
-      cursor: none;
+      cursor: pointer;
       text-decoration: none;
       display: inline-block;
       text-align: center;
@@ -253,6 +270,7 @@
       text-align: center;
       transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
       backdrop-filter: blur(5px);
+      cursor: pointer;
     }
 
     .stat-card:hover {
@@ -287,6 +305,7 @@
       perspective: 1000px;
       will-change: transform;
       backdrop-filter: blur(4px);
+      cursor: pointer;
     }
 
     .project-card:hover {
@@ -337,7 +356,7 @@
       border: 1px solid #222;
       transition: all 0.25s;
       user-select: none;
-      cursor: none;
+      cursor: pointer;
     }
 
     .calc-option:hover {
@@ -450,6 +469,7 @@
       font-size: 1rem;
       flex: 1;
       caret-color: #00ff66;
+      cursor: text;
     }
 
     .terminal-input::placeholder {
@@ -493,7 +513,7 @@
       box-shadow: 0 0 20px #fff, 0 0 40px rgba(255,255,255,0.4);
       border-radius: 1px;
       transition: left 0.06s linear, top 0.06s linear;
-      cursor: none;
+      cursor: pointer;
       z-index: 5;
     }
 
@@ -522,7 +542,7 @@
       transition: border-color 0.25s, box-shadow 0.25s;
       outline: none;
       font-family: inherit;
-      cursor: none;
+      cursor: text;
     }
 
     .contact-form input:focus,
@@ -539,6 +559,7 @@
     .submit-btn {
       align-self: flex-start;
       padding: 1.2rem 4rem;
+      cursor: pointer;
     }
 
     .success-msg {
@@ -1056,12 +1077,6 @@
       // ========== ENSURE CANVAS RESIZE ON MOBILE ==========
       window.addEventListener('orientationchange', () => {
         setTimeout(resizeCanvas, 200);
-      });
-
-      // ========== PREVENT CURSOR NONE ON INPUTS? No, keep custom cursor ==========
-      // But allow text selection
-      document.querySelectorAll('input, textarea').forEach(el => {
-        el.style.cursor = 'none'; // still custom
       });
 
       // fine — everything is set.
