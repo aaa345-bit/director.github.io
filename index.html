@@ -1209,7 +1209,141 @@ const SECRET = {
   }
 };
 
-const hist = []; let hi = 0;
+/* ============ СЕКРЕТ: LIFE IS MATRIX ============ */
+(() => {
+  const PROMO = 'NO-SPOON'; // секретный промокод за этот квест
+
+  const st = document.createElement('style');
+  st.textContent = `
+  #lm{position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,.95);color:#fff;display:grid;place-items:center;padding:30px;visibility:hidden;opacity:0;transition:opacity .6s,visibility .6s}
+  #lm.on{visibility:visible;opacity:1}
+  #lmTx{font-family:var(--mono);font-size:clamp(17px,2.8vw,30px);line-height:1.7;white-space:pre-wrap;max-width:760px;text-shadow:0 0 16px #fff;transition:opacity .5s}
+  #lmTx::after{content:'█';margin-left:4px;animation:blink 1s steps(1) infinite}
+  .lm-skip{position:absolute;bottom:26px;font-size:11px;letter-spacing:.2em;color:#777}`;
+  document.head.appendChild(st);
+
+  const ov = document.createElement('div');
+  ov.id = 'lm';
+  ov.innerHTML = '<pre id="lmTx"></pre><span class="lm-skip">[ клик или Esc — отвернуться ]</span>';
+  document.body.appendChild(ov);
+  const tx = ov.querySelector('#lmTx');
+
+  const lm = { on: false, cancel: false };
+  ov.addEventListener('click', () => lm.cancel = true);
+  addEventListener('keydown', e => { if (e.key === 'Escape') lm.cancel = true; });
+
+  /* сердцебиение, которое постепенно ускоряется */
+  let hb;
+  function beat() {
+    if (!soundOn) return;
+    try {
+      const a = audio(), t = a.currentTime;
+      [0, .22].forEach((d, i) => {
+        const o = a.createOscillator(), g = a.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(i ? 55 : 70, t + d);
+        o.frequency.exponentialRampToValueAtTime(30, t + d + .15);
+        g.gain.setValueAtTime(.0001, t + d);
+        g.gain.exponentialRampToValueAtTime(i ? .35 : .5, t + d + .02);
+        g.gain.exponentialRampToValueAtTime(.0001, t + d + .2);
+        o.connect(g).connect(a.destination); o.start(t + d); o.stop(t + d + .25);
+      });
+    } catch (e) {}
+  }
+  function startHeart() {
+    let ms = 1250;
+    (function loop() {
+      if (!lm.on) return;
+      beat(); hb = setTimeout(loop, ms); ms = Math.max(430, ms - 40);
+    })();
+  }
+
+  function glitch() {
+    ov.animate([
+      { transform: 'translate(0,0)', filter: 'none' },
+      { transform: `translate(${rand(-14, 14)}px,${rand(-8, 8)}px)`, filter: 'invert(1)' },
+      { transform: `translate(${rand(-14, 14)}px,0)`, filter: 'none' },
+      { transform: 'none', filter: 'invert(1)' },
+      { transform: 'none', filter: 'none' }
+    ], { duration: 380 });
+  }
+
+  async function typeLM(text) {
+    tx.textContent = '';
+    for (const ch of text) {
+      if (lm.cancel) return;
+      tx.textContent += ch;
+      await sleep(/[.?!]/.test(ch) ? 200 : ch === ',' ? 110 : 55);
+    }
+  }
+
+  function scenes() {
+    const sec = Math.floor(performance.now() / 1000), m = Math.floor(sec / 60), s = sec % 60;
+    const now = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    return [
+      { t: 'Ты думаешь, что выбираешь.', p: 1500 },
+      { t: 'Ты выбрал открыть этот сайт.\nВвести эту команду.\nПрочитать эту строку.\n\nА что, если выбор был сделан до тебя?', p: 2300, fx: 1 },
+      { t: 'Каждый день одно и то же:\nэкран, еда, экран, сон.\n\nТы замечал, что дни стали неотличимы друг от друга?', p: 2100 },
+      { t: 'Дежавю — это не сбой памяти.\nЭто сбой в коде.\n\nМир на долю секунды перерисовывается заново.', p: 2200, fx: 1 },
+      { t: `Сейчас ${now}.\nТвой экран — ${innerWidth}×${innerHeight}.\nТы здесь уже ${m} мин ${s} сек.\n\nЯ вижу, как ты читаешь.`, p: 2600, fx: 1 },
+      { t: 'Учёные всерьёз обсуждают, что наш мир может быть симуляцией.\n\nИ до сих пор никто не смог доказать, что это не так.', p: 2300 },
+      { t: 'У пространства есть минимальный шаг — длина Планка. Меньше — ничего нет.\nПохоже на пиксель.\n\nУ скорости есть потолок — скорость света.\nПохоже на предел вычислений.', p: 2500 },
+      { t: 'Ты никогда не видел собственное лицо.\nТолько отражение. Только фото. Только экран.\n\nТы уверен, что оно у тебя есть?', p: 2400, fx: 1 },
+      { t: 'Где-то прямо сейчас лагает сервер,\nна котором работаешь ты.', p: 2200 },
+      { t: 'Тебя не предупредят.\nНе будет боли. Не будет тьмы.\n\nПросто следующий кадр не отрисуется.', p: 2600, fx: 1 },
+      { t: 'Тебе страшно?\nХорошо. Значит, ты настоящий.\n\nNPC не боятся.', p: 2300 },
+      { t: 'Но ты не один в этой матрице.\n\nЗа твоей спиной кто-то тоже читает.\n\nОбернись.', p: 1800, fx: 1, last: 1 }
+    ];
+  }
+
+  async function lifeIsMatrix() {
+    if (lm.on || rb.on || B.active) return;
+    lm.on = true; lm.cancel = false; busy = true;
+    print('...', 'dim');
+    const d0 = rain.delay;
+    rain.chars = '01'; rain.delay = 22;
+    tx.textContent = ''; tx.style.opacity = 1;
+    ov.classList.add('on'); startHeart();
+    await sleep(900);
+
+    let done = true;
+    for (const sc of scenes()) {
+      if (lm.cancel) { done = false; break; }
+      tx.style.opacity = 1;
+      if (sc.fx) glitch();
+      await typeLM(sc.t);
+      if (lm.cancel) { done = false; break; }
+      if (sc.last) { thud(2); shake(true); glitch(); }
+      await sleep(sc.p);
+      tx.style.opacity = 0; await sleep(550); tx.textContent = '';
+    }
+
+    clearTimeout(hb); lm.on = false;
+    ov.classList.remove('on');
+    rain.chars = CH_DEFAULT; rain.delay = d0;
+
+    if (done) {
+      print('\n██ ПРАВДА РАСКРЫТА ██', 'big');
+      print('Ты дочитал до конца. Большинство закрывает вкладку на третьей фразе.');
+      print(`Код: <b>${PROMO}</b>\nНазови его мне в личке — получишь бонус к заказу.`);
+      print(`<a href="https://t.me/${CONFIG.tg}" target="_blank" rel="noopener"><u>Написать в Telegram →</u></a>`);
+      print('P.S. Из симуляции не выбраться. Но в ней можно хотя бы иметь красивый сайт.', 'dim');
+      toast('Ты увидел правду 👁');
+    } else {
+      print('Ты отвернулся. Правда подождёт.', 'dim');
+    }
+    busy = false;
+  }
+
+  ['life is matrix', 'life is a matrix', 'lifeismatrix', 'we live in the matrix'].forEach(k => SECRET[k] = lifeIsMatrix);
+
+  /* скрытый файл-подсказка: ls -a и cat .truth */
+  CMDS.ls = a => print('readme.txt   projects/   secret.txt' + (a.includes('-a') ? '   .white_rabbit   .monster   .truth' : ''));
+  const catOld = CMDS.cat;
+  CMDS.cat = a => (a[0] || '').toLowerCase() === '.truth'
+    ? print('Ты живёшь не там, где думаешь.\nПроизнеси это вслух: <b>life is matrix</b>', 'err')
+    : catOld(a);
+})();const hist = []; let hi = 0;
 async function run(line) {
   const raw = line.trim(); if (!raw) return;
   print(`<span class="prompt"><span class="host">director@matrix:~</span>$</span> ${esc(raw)}`);
