@@ -1,1086 +1,1101 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ДИРЕКТОР // портфолио</title>
-  <style>
-    /* ========== RESET & GLOBAL ========== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    }
-
-    body {
-      background-color: #050505;
-      color: #ffffff;
-      overflow-x: hidden;
-      min-height: 100vh;
-      cursor: default; /* нормальный курсор */
-    }
-
-    /* custom cursor glow overlay — только визуальный слой, клики не перехватывает */
-    .cursor-glow {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none; /* не перекрывает клики */
-      z-index: 9999;
-      mix-blend-mode: soft-light;
-      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.08) 35%, transparent 65%);
-      transition: background 0.08s ease-out;
-      will-change: background;
-    }
-
-    /* курсор-указатель для всех интерактивных элементов */
-    a,
-    button,
-    input,
-    textarea,
-    .clickable,
-    .btn,
-    .stat-card,
-    .project-card,
-    .calc-option,
-    .pixel,
-    nav a,
-    .logo {
-      cursor: pointer;
-    }
-
-    /* для полей ввода оставляем текстовый курсор */
-    input,
-    textarea {
-      cursor: text;
-    }
-
-    /* canvas background */
-    #bg-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      pointer-events: none;
-      opacity: 0.6;
-    }
-
-    /* ========== GLASS HEADER + PROGRESS ========== */
-    .progress-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 3px;
-      background: #ffffff;
-      width: 0%;
-      z-index: 1000;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-      transition: width 0.1s linear;
-    }
-
-    .glass-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 900;
-      background: rgba(5, 5, 5, 0.55);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      pointer-events: auto;
-    }
-
-    .logo {
-      font-weight: 900;
-      letter-spacing: 6px;
-      font-size: 1.2rem;
-      color: #ffffff;
-      text-transform: uppercase;
-      border-left: 3px solid #ffffff;
-      padding-left: 1rem;
-    }
-
-    nav {
-      display: flex;
-      gap: 2.5rem;
-    }
-
-    nav a {
-      color: #aaaaaa;
-      text-decoration: none;
-      font-weight: 500;
-      letter-spacing: 2px;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      transition: color 0.2s, text-shadow 0.2s;
-      position: relative;
-    }
-
-    nav a:hover {
-      color: #ffffff;
-      text-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
-    }
-
-    /* ========== MAIN CONTENT LAYER ========== */
-    main {
-      position: relative;
-      z-index: 10;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 6rem 2rem 4rem;
-      pointer-events: auto;
-    }
-
-    section {
-      margin-bottom: 8rem;
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
-    }
-
-    section.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* ========== TYPOGRAPHY ========== */
-    h1 {
-      font-size: clamp(4rem, 15vw, 9rem);
-      font-weight: 900;
-      line-height: 0.95;
-      letter-spacing: -0.03em;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-      position: relative;
-      display: inline-block;
-      color: #ffffff;
-      text-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
-    }
-
-    .subhead {
-      font-size: 1.2rem;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      color: #888;
-      margin-bottom: 2.5rem;
-      font-weight: 300;
-      border-left: 2px solid #333;
-      padding-left: 1.5rem;
-    }
-
-    /* marquee */
-    .marquee-wrap {
-      overflow: hidden;
-      white-space: nowrap;
-      border-top: 1px solid #222;
-      border-bottom: 1px solid #222;
-      padding: 1rem 0;
-      margin: 2rem 0 3rem;
-      background: rgba(255, 255, 255, 0.02);
-      width: 100%;
-      position: relative;
-    }
-
-    .marquee {
-      display: inline-block;
-      animation: scrollMarquee 22s linear infinite;
-      font-size: 1rem;
-      letter-spacing: 4px;
-      color: #aaa;
-      font-weight: 300;
-    }
-
-    .marquee span {
-      margin: 0 2rem;
-      display: inline-block;
-    }
-
-    @keyframes scrollMarquee {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      background: transparent;
-      border: 1.5px solid #ffffff;
-      color: #ffffff;
-      padding: 1.2rem 3rem;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      transition: all 0.25s ease;
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(5px);
-      background: rgba(255,255,255,0.02);
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      text-align: center;
-    }
-
-    .btn:hover {
-      background: #ffffff;
-      color: #050505;
-      box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
-      border-color: #ffffff;
-    }
-
-    .btn-outline {
-      border-color: #333;
-      color: #bbb;
-    }
-
-    .btn-outline:hover {
-      border-color: #fff;
-      background: rgba(255,255,255,0.05);
-      color: #fff;
-      box-shadow: 0 0 30px rgba(255,255,255,0.2);
-    }
-
-    /* ========== CARDS & STATS ========== */
-    .stats-grid, .projects-grid, .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 2rem;
-      margin-top: 3rem;
-    }
-
-    .stat-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 2.5rem 1.5rem;
-      text-align: center;
-      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
-      backdrop-filter: blur(5px);
-      cursor: pointer;
-    }
-
-    .stat-card:hover {
-      border-color: rgba(255, 255, 255, 0.3);
-      box-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
-      transform: translateY(-4px);
-    }
-
-    .stat-number {
-      font-size: 2.8rem;
-      font-weight: 800;
-      letter-spacing: -1px;
-      line-height: 1.2;
-      color: #fff;
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #888;
-      margin-top: 0.75rem;
-    }
-
-    /* ========== PROJECT CARDS (3D TILT) ========== */
-    .project-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 2.5rem 1.8rem;
-      transition: border-color 0.3s, box-shadow 0.3s, transform 0.1s ease-out;
-      transform-style: preserve-3d;
-      perspective: 1000px;
-      will-change: transform;
-      backdrop-filter: blur(4px);
-      cursor: pointer;
-    }
-
-    .project-card:hover {
-      border-color: #ffffff;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 60px rgba(255, 255, 255, 0.1);
-    }
-
-    .project-id {
-      font-size: 0.8rem;
-      color: #666;
-      letter-spacing: 3px;
-      margin-bottom: 1.5rem;
-    }
-
-    .project-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      line-height: 1.2;
-    }
-
-    .project-desc {
-      color: #888;
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
-
-    /* ========== CALCULATOR ========== */
-    .calc-container {
-      display: flex;
-      flex-direction: column;
-      gap: 2.5rem;
-      margin-top: 3rem;
-    }
-
-    .calc-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.2rem;
-    }
-
-    .calc-option {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.5rem;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid #222;
-      transition: all 0.25s;
-      user-select: none;
-      cursor: pointer;
-    }
-
-    .calc-option:hover {
-      border-color: #555;
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .calc-option.active {
-      border-color: #ffffff;
-      background: rgba(255, 255, 255, 0.06);
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-    }
-
-    .calc-check {
-      width: 24px;
-      height: 24px;
-      border: 1.5px solid #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      color: transparent;
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-
-    .calc-option.active .calc-check {
-      background: #ffffff;
-      color: #000;
-      border-color: #ffffff;
-    }
-
-    .calc-label {
-      font-weight: 500;
-      letter-spacing: 1px;
-    }
-
-    .calc-price {
-      margin-left: auto;
-      font-weight: 700;
-      color: #aaa;
-    }
-
-    .calc-total {
-      text-align: right;
-      font-size: 2.5rem;
-      font-weight: 800;
-      letter-spacing: -1px;
-      border-top: 1px solid #222;
-      padding-top: 2rem;
-      transition: all 0.3s;
-    }
-
-    /* ========== TERMINAL ========== */
-    .terminal {
-      background: #0a0a0a;
-      border: 1px solid #2a2a2a;
-      padding: 2rem;
-      font-family: 'Courier New', monospace;
-      border-radius: 4px;
-      box-shadow: 0 0 60px rgba(0, 255, 102, 0.03);
-      margin-top: 3rem;
-    }
-
-    .terminal-header {
-      display: flex;
-      gap: 0.6rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .terminal-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #333;
-    }
-
-    .terminal-output {
-      color: #00ff66;
-      font-size: 0.95rem;
-      line-height: 1.8;
-      min-height: 180px;
-      max-height: 280px;
-      overflow-y: auto;
-      margin-bottom: 1.5rem;
-      padding-right: 0.5rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .terminal-input-line {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      border-top: 1px solid #1f1f1f;
-      padding-top: 1rem;
-    }
-
-    .terminal-prompt {
-      color: #00ff66;
-      font-weight: 700;
-    }
-
-    .terminal-input {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #00ff66;
-      font-family: inherit;
-      font-size: 1rem;
-      flex: 1;
-      caret-color: #00ff66;
-      cursor: text;
-    }
-
-    .terminal-input::placeholder {
-      color: #2a5a2a;
-    }
-
-    /* ========== MINI GAME ========== */
-    .game-area {
-      background: #0a0a0a;
-      border: 1px solid #222;
-      padding: 2rem;
-      margin-top: 2rem;
-      border-radius: 4px;
-      position: relative;
-    }
-
-    .game-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-      color: #888;
-      font-size: 0.9rem;
-      letter-spacing: 2px;
-    }
-
-    .game-field {
-      position: relative;
-      width: 100%;
-      height: 300px;
-      background: #050505;
-      border: 1px dashed #222;
-      overflow: hidden;
-      border-radius: 2px;
-    }
-
-    .pixel {
-      position: absolute;
-      width: 22px;
-      height: 22px;
-      background: #ffffff;
-      box-shadow: 0 0 20px #fff, 0 0 40px rgba(255,255,255,0.4);
-      border-radius: 1px;
-      transition: left 0.06s linear, top 0.06s linear;
-      cursor: pointer;
-      z-index: 5;
-    }
-
-    .game-stats {
-      display: flex;
-      gap: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    /* ========== CONTACT FORM ========== */
-    .contact-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      max-width: 600px;
-      margin-top: 2.5rem;
-    }
-
-    .contact-form input,
-    .contact-form textarea {
-      background: transparent;
-      border: 1px solid #222;
-      padding: 1.2rem 1.5rem;
-      color: #fff;
-      font-size: 1rem;
-      transition: border-color 0.25s, box-shadow 0.25s;
-      outline: none;
-      font-family: inherit;
-      cursor: text;
-    }
-
-    .contact-form input:focus,
-    .contact-form textarea:focus {
-      border-color: #fff;
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.05);
-    }
-
-    .contact-form textarea {
-      min-height: 140px;
-      resize: vertical;
-    }
-
-    .submit-btn {
-      align-self: flex-start;
-      padding: 1.2rem 4rem;
-      cursor: pointer;
-    }
-
-    .success-msg {
-      color: #00ff66;
-      font-weight: 600;
-      letter-spacing: 2px;
-      opacity: 0;
-      transition: opacity 0.4s;
-      margin-top: 1rem;
-    }
-
-    .success-msg.show {
-      opacity: 1;
-    }
-
-    /* ========== MISC ========== */
-    .section-title {
-      font-size: 2.5rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.5rem;
-      text-transform: uppercase;
-    }
-
-    .section-sub {
-      color: #666;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-      margin-bottom: 2rem;
-    }
-
-    /* scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0a0a0a;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #333;
-      border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#000000">
+<title>ДИРЕКТОР — Создаю сайты, которые пробивают экран</title>
+<meta name="description" content="Директор — веб-разработчик. Лендинги, сайты для бизнеса, интерактив и анимации в чёрно-белом стиле.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#000; --bg-rgb:0,0,0;
+  --fg:#f4f4f4; --fg-rgb:244,244,244;
+  --dim:rgba(var(--fg-rgb),.55);
+  --line:rgba(var(--fg-rgb),.16);
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  --head:'Unbounded','JetBrains Mono',sans-serif;
+}
+body.light{ --bg:#f1f1f1; --bg-rgb:241,241,241; --fg:#050505; --fg-rgb:5,5,5; }
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{background:var(--bg);color:var(--fg);font-family:var(--mono);font-size:15px;line-height:1.6;overflow-x:hidden;transition:background .5s,color .5s}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+::selection{background:var(--fg);color:var(--bg)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:rgba(var(--fg-rgb),.35)}
+
+body.has-cursor, body.has-cursor a, body.has-cursor button{cursor:none}
+body.has-cursor .term-body{cursor:none}
+
+/* ---------- фон ---------- */
+#rain{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(var(--bg-rgb),.85) 100%)}
+.scan{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.35;background:repeating-linear-gradient(0deg,rgba(0,0,0,.2) 0 1px,transparent 1px 3px)}
+body.light .scan{opacity:.08}
+
+/* ---------- курсор ---------- */
+#cur,#dot{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;display:none;mix-blend-mode:difference}
+body.has-cursor #cur,body.has-cursor #dot{display:block}
+#cur{width:38px;height:38px;border:1px solid #fff;border-radius:50%;margin:-19px 0 0 -19px;transition:width .25s,height .25s,margin .25s,background .25s}
+#cur.big{width:70px;height:70px;margin:-35px 0 0 -35px;background:rgba(255,255,255,.9)}
+#dot{width:6px;height:6px;background:#fff;border-radius:50%;margin:-3px 0 0 -3px}
+
+/* ---------- загрузчик ---------- */
+#loader{position:fixed;inset:0;z-index:10000;background:#000;color:#fff;display:grid;place-items:center;transition:opacity .7s,visibility .7s}
+#loader.hide{opacity:0;visibility:hidden}
+.ld-box{width:min(420px,86vw)}
+#ldText{font-size:13px;min-height:90px;white-space:pre-wrap;color:#ddd}
+.ld-bar{height:2px;background:#222;margin-top:14px;overflow:hidden}
+.ld-bar i{display:block;height:100%;width:0;background:#fff;animation:ld 1.7s ease forwards}
+@keyframes ld{to{width:100%}}
+
+/* ---------- навигация ---------- */
+#progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--fg);z-index:200}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 5vw;transition:background .3s,border-color .3s;border-bottom:1px solid transparent}
+nav.solid{background:rgba(var(--bg-rgb),.75);backdrop-filter:blur(10px);border-color:var(--line)}
+.logo{font-family:var(--head);font-weight:900;letter-spacing:.05em;font-size:15px}
+.logo span{animation:blink 1s steps(1) infinite}
+.nav-links{display:flex;gap:28px;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.nav-links a{position:relative;padding:4px 0;color:var(--dim);transition:color .25s}
+.nav-links a::after{content:'';position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--fg);transition:width .3s}
+.nav-links a:hover{color:var(--fg)}
+.nav-links a:hover::after{width:100%}
+.nav-right{display:flex;align-items:center;gap:16px;font-size:12px;color:var(--dim)}
+.icon-btn{background:none;border:1px solid var(--line);color:var(--fg);width:36px;height:36px;font-size:16px;transition:.25s}
+.icon-btn:hover{background:var(--fg);color:var(--bg)}
+.burger{display:none}
+@keyframes blink{50%{opacity:0}}
+
+/* ---------- общее ---------- */
+section{position:relative;z-index:2;padding:120px 5vw}
+.container{max-width:1200px;margin:0 auto}
+.sec-head{display:flex;align-items:center;gap:18px;margin-bottom:56px}
+.sec-num{color:var(--dim);font-size:13px}
+.sec-title{font-family:var(--head);font-weight:900;font-size:clamp(26px,4.6vw,54px);letter-spacing:-.02em;line-height:1.05}
+.sec-line{flex:1;height:1px;background:var(--line)}
+.panel{background:rgba(var(--bg-rgb),.66);backdrop-filter:blur(8px);border:1px solid var(--line)}
+.rv{opacity:0;transform:translateY(34px);transition:opacity .9s ease,transform .9s ease}
+.rv.in{opacity:1;transform:none}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:16px 28px;border:1px solid var(--fg);background:var(--fg);color:var(--bg);font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:.3s}
+.btn:hover{background:transparent;color:var(--fg);box-shadow:0 0 34px rgba(var(--fg-rgb),.35)}
+.btn.ghost{background:transparent;color:var(--fg)}
+.btn.ghost:hover{background:var(--fg);color:var(--bg)}
+.btn.pulse{animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(var(--fg-rgb),.5)}70%,100%{box-shadow:0 0 0 18px rgba(var(--fg-rgb),0)}}
+
+/* ---------- HERO ---------- */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(var(--bg-rgb),.82) 0,rgba(var(--bg-rgb),.45) 45%,transparent 70%);pointer-events:none}
+.hero-in{position:relative}
+.hero .a{opacity:0;transform:translateY(24px);transition:opacity 1s,transform 1s}
+body.ready .hero .a{opacity:1;transform:none}
+body.ready .hero .a2{transition-delay:.25s}
+body.ready .hero .a3{transition-delay:.5s}
+body.ready .hero .a4{transition-delay:.75s}
+body.ready .hero .a5{transition-delay:1.1s}
+.tag{display:inline-block;border:1px solid var(--line);padding:7px 16px;font-size:11px;letter-spacing:.3em;color:var(--dim);margin-bottom:28px;background:rgba(var(--bg-rgb),.6)}
+.glitch{position:relative;display:inline-block;font-family:var(--head);font-weight:900;font-size:clamp(46px,13vw,190px);letter-spacing:-.04em;line-height:1;text-shadow:0 0 50px rgba(var(--bg-rgb),.9)}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;left:0;top:0;width:100%;overflow:hidden}
+.glitch::before{text-shadow:-3px 0 rgba(var(--fg-rgb),.6);animation:g1 3.2s infinite steps(1)}
+.glitch::after{text-shadow:3px 0 rgba(var(--fg-rgb),.6);animation:g2 2.6s infinite steps(1)}
+@keyframes g1{0%,88%,100%{clip-path:inset(0 0 100% 0);transform:none}89%{clip-path:inset(10% 0 62% 0);transform:translateX(-8px)}92%{clip-path:inset(46% 0 30% 0);transform:translateX(7px)}95%{clip-path:inset(78% 0 4% 0);transform:translateX(-4px)}}
+@keyframes g2{0%,80%,100%{clip-path:inset(100% 0 0 0);transform:none}81%{clip-path:inset(30% 0 50% 0);transform:translateX(8px)}85%{clip-path:inset(60% 0 20% 0);transform:translateX(-6px)}90%{clip-path:inset(5% 0 80% 0);transform:translateX(4px)}}
+.sub{font-size:clamp(15px,2vw,21px);margin:30px 0 40px;min-height:34px;text-shadow:0 0 20px rgba(var(--bg-rgb),1)}
+.caret{display:inline-block;width:10px;height:1.1em;background:var(--fg);vertical-align:-3px;margin-left:4px;animation:blink 1s steps(1) infinite}
+.cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.hint{margin-top:34px;font-size:11px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
+.hint kbd{border:1px solid var(--line);padding:2px 8px;margin:0 4px;background:rgba(var(--bg-rgb),.6)}
+.scroll-ind{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);width:1px;height:60px;background:linear-gradient(var(--fg),transparent);animation:sc 2s infinite}
+@keyframes sc{0%{transform:translateX(-50%) scaleY(0);transform-origin:top}50%{transform:translateX(-50%) scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:translateX(-50%) scaleY(0);transform-origin:bottom}}
+
+/* ---------- ABOUT ---------- */
+.about-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:40px}
+.about-text p{font-size:clamp(16px,1.7vw,20px);margin-bottom:22px;color:rgba(var(--fg-rgb),.85)}
+.about-text p b{color:var(--fg);border-bottom:1px solid var(--fg)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:34px}
+.stat{padding:22px 16px;text-align:center}
+.stat strong{display:block;font-family:var(--head);font-size:clamp(26px,3.4vw,42px);font-weight:900}
+.stat span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.idcard{padding:26px;position:relative;overflow:hidden}
+.idcard::after{content:'';position:absolute;left:0;right:0;height:60px;top:-60px;background:linear-gradient(transparent,rgba(var(--fg-rgb),.12),transparent);animation:scanbar 4s linear infinite}
+@keyframes scanbar{to{top:110%}}
+.id-top{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.2em;color:var(--dim);margin-bottom:20px}
+.id-row{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.id-row span:first-child{color:var(--dim)}
+.dot-live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--fg);margin-right:8px;animation:blink 1.2s infinite}
+.chips-s{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chips-s i,.tags i{font-style:normal;font-size:11px;border:1px solid var(--line);padding:4px 10px;letter-spacing:.06em}
+
+/* ---------- PROJECTS ---------- */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.card{position:relative;overflow:hidden;cursor:pointer;transition:transform .2s ease,border-color .3s;transform-style:preserve-3d;height:100%;display:flex;flex-direction:column}
+.card:hover{border-color:rgba(var(--fg-rgb),.7)}
+.card::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(var(--fg-rgb),.13),transparent 45%)}
+.card:hover::before{opacity:1}
+.pv{height:210px;position:relative;overflow:hidden;display:grid;place-items:center;border-bottom:1px solid var(--line);background:rgba(var(--fg-rgb),.03)}
+.pv svg{width:62%;max-width:190px;color:var(--fg);transition:transform .5s}
+.card:hover .pv svg{transform:scale(1.1)}
+.card-body{padding:24px;display:flex;flex-direction:column;flex:1}
+.card-top{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.18em;color:var(--dim);margin-bottom:12px}
+.card h3{font-family:var(--head);font-size:20px;font-weight:700;margin-bottom:10px;letter-spacing:-.01em}
+.card p{color:rgba(var(--fg-rgb),.7);font-size:13.5px;margin-bottom:18px;flex:1}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.more{font-size:12px;letter-spacing:.16em;text-transform:uppercase;transition:letter-spacing .3s}
+.card:hover .more{letter-spacing:.3em}
+
+.pv-matrix span{position:absolute;top:-260px;white-space:pre;font-size:12px;line-height:1.15;color:var(--fg);opacity:.75;animation:fall linear infinite}
+.pv-matrix::after{content:'{ DIRECTOR }';position:absolute;font-family:var(--head);font-weight:900;font-size:18px;padding:10px 16px;background:var(--bg);border:1px solid var(--fg);letter-spacing:.1em}
+@keyframes fall{from{transform:translateY(0)}to{transform:translateY(520px)}}
+.steam{animation:steam 2.6s infinite ease-in-out;opacity:0}
+.steam.s2{animation-delay:.8s}.steam.s3{animation-delay:1.6s}
+@keyframes steam{0%{opacity:0;transform:translateY(8px)}40%{opacity:1}100%{opacity:0;transform:translateY(-10px)}}
+.flag{transform-origin:100px 8px;animation:wave 2s infinite ease-in-out}
+@keyframes wave{50%{transform:skewY(6deg)}}
+
+/* ---------- SERVICES ---------- */
+.svc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.svc{padding:28px 22px;transition:.3s;position:relative;overflow:hidden}
+.svc:hover{background:var(--fg);color:var(--bg)}
+.svc:hover .svc-n,.svc:hover p{color:inherit}
+.svc-n{font-size:12px;color:var(--dim);letter-spacing:.2em}
+.svc h4{font-family:var(--head);font-size:17px;margin:34px 0 12px;line-height:1.25}
+.svc p{font-size:13px;color:rgba(var(--fg-rgb),.65)}
+.steps{display:flex;margin-top:46px;border:1px solid var(--line);background:rgba(var(--bg-rgb),.66);backdrop-filter:blur(8px)}
+.step{flex:1;padding:22px;border-right:1px solid var(--line);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.step:last-child{border:0}
+.step b{display:block;font-family:var(--head);font-size:22px;margin-bottom:4px}
+
+/* ---------- TERMINAL ---------- */
+.term{max-width:980px;margin:0 auto;background:rgba(var(--bg-rgb),.86);backdrop-filter:blur(10px);border:1px solid var(--line);box-shadow:0 30px 90px rgba(0,0,0,.55)}
+.term-bar{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--dim)}
+.dots{display:flex;gap:7px}
+.dots i{width:11px;height:11px;border-radius:50%;border:1px solid var(--fg);opacity:.75}
+.dots i:first-child{background:var(--fg)}
+.term-bar .ttl{flex:1;text-align:center}
+.term-body{height:450px;overflow-y:auto;padding:18px 20px;font-size:14px;line-height:1.65;cursor:text}
+.ln{white-space:pre-wrap;word-break:break-word}
+.ln b{font-weight:700}
+.ln.dim{color:var(--dim)}
+.ln.err{color:var(--fg);opacity:.65;font-style:italic}
+.ln.big{font-weight:700;letter-spacing:.1em}
+.prompt-line{display:flex;gap:10px;align-items:center}
+.prompt{white-space:nowrap}
+.prompt .host{color:var(--dim)}
+#tin{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--fg);font:inherit;caret-color:var(--fg)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+.chip{background:none;border:1px solid var(--line);color:var(--fg);padding:5px 12px;font-size:12px;transition:.2s}
+.chip:hover{background:var(--fg);color:var(--bg)}
+.term-note{text-align:center;margin-top:18px;font-size:12px;color:var(--dim);letter-spacing:.08em}
+
+/* ---------- CONTACT ---------- */
+.contact-lead{max-width:640px;font-size:clamp(15px,1.6vw,18px);color:rgba(var(--fg-rgb),.8);margin-bottom:46px}
+.pills{display:flex;gap:70px;justify-content:center;flex-wrap:wrap;margin-bottom:60px}
+.pill{background:none;border:0;color:var(--fg);display:flex;flex-direction:column;align-items:center;gap:22px;cursor:pointer}
+.cap{position:relative;display:block;width:210px;height:84px;border-radius:84px;border:2px solid var(--fg);transform:rotate(-14deg);transition:transform .4s cubic-bezier(.2,1.4,.4,1),box-shadow .4s}
+.cap::after{content:'';position:absolute;left:16px;right:16px;top:10px;height:13px;border-radius:13px;background:rgba(255,255,255,.35)}
+.pill.w .cap{background:linear-gradient(90deg,#fff 50%,#d6d6d6 50%);box-shadow:0 0 40px rgba(255,255,255,.25)}
+.pill.b .cap{background:linear-gradient(90deg,#000 50%,#1d1d1d 50%);transform:rotate(14deg)}
+body.light .pill.b .cap{border-color:#000}
+.pill:hover .cap{transform:rotate(0) scale(1.1);box-shadow:0 0 60px rgba(var(--fg-rgb),.5)}
+.pill b{font-family:var(--head);font-size:18px}
+.pill small{display:block;color:var(--dim);font-size:12px;letter-spacing:.1em;margin-top:2px}
+.contact-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:900px;margin:0 auto}
+.cc{padding:24px;text-align:left;background:rgba(var(--bg-rgb),.66);backdrop-filter:blur(8px);border:1px solid var(--line);color:var(--fg);font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.3s;display:block}
+.cc span{display:block;margin-top:10px;font-size:15px;letter-spacing:0;text-transform:none;font-weight:700;word-break:break-all}
+.cc:hover{background:var(--fg);color:var(--bg);transform:translateY(-4px)}
+footer{position:relative;z-index:2;text-align:center;padding:36px 5vw 44px;border-top:1px solid var(--line);color:var(--dim);font-size:12px;letter-spacing:.1em;background:rgba(var(--bg-rgb),.8)}
+
+/* ---------- ПРОБИТАЯ МАТРИЦА ---------- */
+#breach{position:fixed;inset:0;z-index:9000;visibility:hidden;pointer-events:none}
+#breach.on{visibility:visible;pointer-events:auto}
+.b-dim{position:absolute;inset:0;background:rgba(var(--bg-rgb),0);transition:background 1s}
+#breach.open .b-dim{background:rgba(var(--bg-rgb),.72)}
+#cracks{position:absolute;inset:0;width:100%;height:100%}
+.b-flash{position:absolute;inset:0;background:var(--fg);opacity:0;pointer-events:none}
+.hole-wrap{position:absolute;inset:0;display:grid;place-items:center;padding-bottom:12vh;transform:scale(.15);opacity:0;transition:transform .55s cubic-bezier(.2,1.5,.35,1),opacity .15s;filter:drop-shadow(0 0 28px rgba(255,255,255,.55))}
+#breach.open .hole-wrap{transform:scale(1);opacity:1}
+.hole{width:min(66vmin,620px);aspect-ratio:1;overflow:hidden;background:#fff}
+#faceWrap{width:100%;height:100%;transition:transform .12s linear}
+#face{width:100%;height:100%;display:block}
+.lid{transform-box:fill-box;transform-origin:center;animation:blinkEye 5s infinite}
+@keyframes blinkEye{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.06)}}
+.hood-b{animation:breathe 4s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes breathe{50%{transform:scale(1.012)}}
+.b-text{position:absolute;left:0;right:0;bottom:4vh;text-align:center;padding:0 5vw;opacity:0;transform:translateY(24px);transition:.8s}
+#breach.show .b-text{opacity:1;transform:none}
+.b-text h2{font-family:var(--head);font-weight:900;font-size:clamp(24px,5vw,54px);letter-spacing:-.02em;text-shadow:0 0 30px rgba(var(--bg-rgb),1)}
+.b-text p{margin:8px 0 18px;color:rgba(var(--fg-rgb),.85);text-shadow:0 0 14px rgba(var(--bg-rgb),1)}
+.b-text .cta{gap:12px}
+.b-text .btn{padding:13px 22px}
+.shard{position:absolute;pointer-events:none;background:linear-gradient(135deg,rgba(var(--fg-rgb),.6),rgba(var(--fg-rgb),.06))}
+
+/* ---------- кролик ---------- */
+#rabbit{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.93);color:#fff;display:grid;place-items:center;padding:30px;visibility:hidden;opacity:0;transition:opacity .5s,visibility .5s}
+#rabbit.on{visibility:visible;opacity:1}
+#rabbitTx{font-size:clamp(16px,3vw,28px);line-height:1.6;white-space:pre-wrap;max-width:700px;text-shadow:0 0 14px #fff}
+.rb-skip{position:absolute;bottom:26px;font-size:11px;letter-spacing:.2em;color:#777}
+
+/* ---------- модалка ---------- */
+#modal{position:fixed;inset:0;z-index:8000;display:none;place-items:center;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);padding:20px}
+#modal.on{display:grid;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}}
+.m-box{width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--bg);border:1px solid var(--fg);position:relative;animation:pop .4s cubic-bezier(.2,1.3,.4,1)}
+@keyframes pop{from{transform:scale(.92);opacity:0}}
+.m-close{position:absolute;top:12px;right:12px;z-index:5}
+.m-body{padding:28px}
+.m-body h3{font-family:var(--head);font-size:clamp(22px,3.6vw,34px);margin:6px 0 14px}
+.m-body ul{list-style:none;margin:18px 0}
+.m-body li{padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.m-body li::before{content:'▸ ';color:var(--dim)}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,30px);z-index:9800;background:var(--fg);color:var(--bg);padding:12px 22px;font-size:13px;opacity:0;transition:.4s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- адаптив ---------- */
+@media(max-width:980px){
+  .grid{grid-template-columns:1fr;max-width:520px;margin:0 auto}
+  .about-grid{grid-template-columns:1fr}
+  .svc-grid{grid-template-columns:1fr 1fr}
+  .steps{flex-direction:column}
+  .step{border-right:0;border-bottom:1px solid var(--line)}
+  .contact-cards{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  section{padding:90px 5vw}
+  .nav-links{position:fixed;top:64px;left:0;right:0;flex-direction:column;gap:0;background:rgba(var(--bg-rgb),.96);border-bottom:1px solid var(--line);max-height:0;overflow:hidden;transition:max-height .4s}
+  nav.open .nav-links{max-height:360px}
+  .nav-links a{padding:16px 5vw;border-top:1px solid var(--line)}
+  .burger{display:block}
+  #clock{display:none}
+  .stats{grid-template-columns:1fr 1fr 1fr}
+  .svc-grid{grid-template-columns:1fr}
+  .prompt .host{display:none}
+  #tin{font-size:16px}
+  .term-body{height:400px;font-size:13px}
+  .pills{gap:40px}
+  .hint{display:none}
+}
+</style>
 </head>
 <body>
-  <!-- progress bar -->
-  <div class="progress-bar" id="progressBar"></div>
 
-  <!-- cursor glow -->
-  <div class="cursor-glow" id="cursorGlow"></div>
+<!-- загрузчик -->
+<div id="loader"><div class="ld-box"><pre id="ldText"></pre><div class="ld-bar"><i></i></div></div></div>
 
-  <!-- canvas background -->
-  <canvas id="bg-canvas"></canvas>
+<canvas id="rain"></canvas>
+<div class="vignette"></div>
+<div class="scan"></div>
+<div id="cur"></div><div id="dot"></div>
+<div id="progress"></div>
 
-  <!-- glass header -->
-  <header class="glass-header">
-    <div class="logo">ДИРЕКТОР</div>
-    <nav>
-      <a href="#about">Обо мне</a>
-      <a href="#projects">Проекты</a>
-      <a href="#calculator">Калькулятор</a>
-      <a href="#terminal">Терминал</a>
-      <a href="#contacts">Контакты</a>
-    </nav>
-  </header>
+<nav id="nav">
+  <a href="#home" class="logo">DIRECTOR<span>_</span></a>
+  <div class="nav-links">
+    <a href="#about">Обо мне</a>
+    <a href="#projects">Проекты</a>
+    <a href="#services">Услуги</a>
+    <a href="#terminal">Терминал</a>
+    <a href="#contact">Контакты</a>
+  </div>
+  <div class="nav-right">
+    <span id="clock">00:00:00</span>
+    <button class="icon-btn" id="themeBtn" title="Сменить тему">◐</button>
+    <button class="icon-btn burger" id="burger">≡</button>
+  </div>
+</nav>
 
-  <main>
-    <!-- HERO -->
-    <section id="hero" class="visible" style="opacity:1; transform:translateY(0);">
-      <h1 id="glitchTitle">ДИРЕКТОР</h1>
-      <div class="subhead">ВЕБ-РАЗРАБОТКА // ИНТЕРАКТИВ // AI-КОДИНГ</div>
-      <div class="marquee-wrap">
-        <div class="marquee">
-          <span>HTML5</span><span>CSS3</span><span>JAVASCRIPT</span><span>CANVAS API</span><span>TELEGRAM BOTS</span><span>UI/UX</span>
-          <span>HTML5</span><span>CSS3</span><span>JAVASCRIPT</span><span>CANVAS API</span><span>TELEGRAM BOTS</span><span>UI/UX</span>
+<main>
+<!-- ================= HERO ================= -->
+<section class="hero" id="home">
+  <div class="hero-in">
+    <div class="tag a">[ ВЕБ-РАЗРАБОТЧИК · СОЗДАТЕЛЬ САЙТОВ ]</div><br>
+    <h1 class="glitch a a2" data-text="ДИРЕКТОР">ДИРЕКТОР</h1>
+    <p class="sub a a3"><span id="typed"></span><span class="caret"></span></p>
+    <div class="cta a a4">
+      <a href="#projects" class="btn">Смотреть проекты →</a>
+      <button class="btn ghost pulse" id="breakBtn">⚡ Разбить матрицу</button>
+    </div>
+    <p class="hint a a5">Подсказка: нажми <kbd>`</kbd> — откроется терминал</p>
+  </div>
+  <div class="scroll-ind"></div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section id="about">
+  <div class="container">
+    <div class="sec-head rv"><span class="sec-num">01</span><h2 class="sec-title scr">ОБО МНЕ</h2><span class="sec-line"></span></div>
+    <div class="about-grid">
+      <div class="about-text rv">
+        <p>Я — <b>Директор</b>. Делаю сайты, которые не теряются в сером потоке одинаковых шаблонов.</p>
+        <p>Для меня сайт — это не просто страница, а <b>впечатление</b>. Человек зашёл на пару секунд и уже понял, что здесь серьёзный подход, вкус и характер.</p>
+        <p>Чёрное, белое и ничего лишнего. Чистый код, плавные анимации и продуманный интерфейс, который работает на ваш бизнес.</p>
+        <div class="stats">
+          <div class="panel stat"><strong>3</strong><span>проекта в портфолио</span></div>
+          <div class="panel stat"><strong>100%</strong><span>чёрно-белый стиль</span></div>
+          <div class="panel stat"><strong>∞</strong><span>чашек кофе</span></div>
         </div>
       </div>
-      <div class="btn-group">
-        <a href="#calculator" class="btn">Рассчитать стоимость</a>
-        <a href="#terminal" class="btn btn-outline">Запустить терминал</a>
-      </div>
-    </section>
-
-    <!-- ABOUT / STATS -->
-    <section id="about">
-      <div class="section-title">Обо мне</div>
-      <div class="section-sub">цифры и факты</div>
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-number">100%</div><div class="stat-label">Адаптив</div></div>
-        <div class="stat-card"><div class="stat-number">24/7</div><div class="stat-label">На связи</div></div>
-        <div class="stat-card"><div class="stat-number">от 2 дней</div><div class="stat-label">Срок запуска</div></div>
-        <div class="stat-card"><div class="stat-number">0₽</div><div class="stat-label">Предоплата для старта</div></div>
-      </div>
-    </section>
-
-    <!-- PROJECTS -->
-    <section id="projects">
-      <div class="section-title">Проекты</div>
-      <div class="section-sub">избранные работы</div>
-      <div class="projects-grid">
-        <div class="project-card tilt">
-          <div class="project-id">#001</div>
-          <div class="project-title">Матричное портфолио</div>
-          <div class="project-desc">Интерактивный сайт с Canvas, терминалом и мини-игрой. Полное погружение в цифровую эстетику.</div>
-        </div>
-        <div class="project-card tilt">
-          <div class="project-id">#002</div>
-          <div class="project-title">Кофейня: меню и доставка</div>
-          <div class="project-desc">Корзина товаров и мгновенная отправка заказов в Telegram бариста. Быстро, удобно, стильно.</div>
-        </div>
-        <div class="project-card tilt">
-          <div class="project-id">#003</div>
-          <div class="project-title">Образовательный портал</div>
-          <div class="project-desc">Многостраничный информационный ресурс со сложной структурой и продвинутой навигацией.</div>
+      <div class="rv">
+        <div class="panel idcard">
+          <div class="id-top"><span>ID // КАРТА ДОСТУПА</span><span>№ 0001</span></div>
+          <div class="id-row"><span>ИМЯ</span><span>Директор</span></div>
+          <div class="id-row"><span>РОЛЬ</span><span>Веб-разработчик</span></div>
+          <div class="id-row"><span>СТИЛЬ</span><span>Чёрно-белый</span></div>
+          <div class="id-row"><span>СТАТУС</span><span><i class="dot-live"></i>Принимаю заказы</span></div>
+          <div class="chips-s"><i>HTML5</i><i>CSS3</i><i>JavaScript</i><i>Canvas</i><i>SVG</i><i>Анимации</i><i>Адаптив</i></div>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    <!-- CALCULATOR -->
-    <section id="calculator">
-      <div class="section-title">Калькулятор стоимости</div>
-      <div class="section-sub">выберите нужные опции</div>
-      <div class="calc-container">
-        <div class="calc-options" id="calcOptions">
-          <div class="calc-option" data-price="5000">
-            <div class="calc-check">✓</div>
-            <div class="calc-label">Одностраничный лендинг</div>
-            <div class="calc-price">+5000₽</div>
-          </div>
-          <div class="calc-option" data-price="2000">
-            <div class="calc-check">✓</div>
-            <div class="calc-label">Корзина / Прием заказов в Telegram</div>
-            <div class="calc-price">+2000₽</div>
-          </div>
-          <div class="calc-option" data-price="3000">
-            <div class="calc-check">✓</div>
-            <div class="calc-label">Сложные анимации и Canvas</div>
-            <div class="calc-price">+3000₽</div>
-          </div>
-          <div class="calc-option" data-price="2000">
-            <div class="calc-check">✓</div>
-            <div class="calc-label">Срочность за 48 часов</div>
-            <div class="calc-price">+2000₽</div>
-          </div>
+<!-- ================= PROJECTS ================= -->
+<section id="projects">
+  <div class="container">
+    <div class="sec-head rv"><span class="sec-num">02</span><h2 class="sec-title scr">ПРОЕКТЫ</h2><span class="sec-line"></span></div>
+    <div class="grid">
+
+      <div class="rv"><article class="card panel" data-i="0" tabindex="0">
+        <div class="pv pv-matrix"></div>
+        <div class="card-body">
+          <div class="card-top"><span>01</span><span>ПОРТФОЛИО · ИНТЕРАКТИВ</span></div>
+          <h3>MATRIX.PORTFOLIO</h3>
+          <p>Сайт, на котором ты сейчас находишься: цифровой дождь, пробитая матрица, живой терминал и секреты.</p>
+          <div class="tags"><i>Canvas</i><i>JS</i><i>SVG</i></div>
+          <div class="more">Подробнее →</div>
         </div>
-        <div class="calc-total" id="calcTotal">0 ₽</div>
+      </article></div>
+
+      <div class="rv"><article class="card panel" data-i="1" tabindex="0">
+        <div class="pv">
+          <svg viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M50 62H140V96Q140 122 114 122H76Q50 122 50 96Z"/>
+            <path d="M140 72H155Q172 72 172 89Q172 106 150 106H138"/>
+            <path d="M34 130H162"/>
+            <path class="steam s1" d="M80 52Q70 40 80 28Q90 16 80 6"/>
+            <path class="steam s2" d="M100 52Q90 40 100 28Q110 16 100 6"/>
+            <path class="steam s3" d="M120 52Q110 40 120 28Q130 16 120 6"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-top"><span>02</span><span>БИЗНЕС · HORECA</span></div>
+          <h3>Сайт для кофейни</h3>
+          <p>Тёплый и аппетитный сайт: меню, атмосфера, адрес и часы работы. Гость хочет зайти ещё до первого глотка.</p>
+          <div class="tags"><i>HTML</i><i>CSS</i><i>Адаптив</i></div>
+          <div class="more">Подробнее →</div>
+        </div>
+      </article></div>
+
+      <div class="rv"><article class="card panel" data-i="2" tabindex="0">
+        <div class="pv">
+          <svg viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 64L100 30L178 64Z"/>
+            <circle cx="100" cy="52" r="6"/>
+            <path d="M30 70H170"/>
+            <path d="M45 76V112M72 76V112M100 76V112M128 76V112M155 76V112"/>
+            <path d="M26 118H174"/>
+            <path d="M16 128H184"/>
+            <path d="M100 30V8"/>
+            <path class="flag" d="M100 8H124L116 14L124 20H100"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-top"><span>03</span><span>ОБРАЗОВАНИЕ</span></div>
+          <h3>Сайт для школы</h3>
+          <p>Понятный сайт для родителей и учеников: новости, расписание, педагоги и контакты в пару кликов.</p>
+          <div class="tags"><i>HTML</i><i>CSS</i><i>JS</i></div>
+          <div class="more">Подробнее →</div>
+        </div>
+      </article></div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<section id="services">
+  <div class="container">
+    <div class="sec-head rv"><span class="sec-num">03</span><h2 class="sec-title scr">ЧТО ЯЛ ДЕЛАЮ</h2><span class="sec-line"></span></div>
+    <div class="svc-grid">
+      <div class="rv"><div class="panel svc"><span class="svc-n">/01</span><h4>Лендинги и сайты-визитки</h4><p>Одна страница, которая продаёт. Чёткая структура, сильный первый экран, понятная кнопка.</p></div></div>
+      <div class="rv"><div class="panel svc"><span class="svc-n">/02</span><h4>Сайты для бизнеса</h4><p>Кофейни, школы, студии и услуги. Всё, что нужно клиенту, находится за пару секунд.</p></div></div>
+      <div class="rv"><div class="panel svc"><span class="svc-n">/03</span><h4>Анимации и интерактив</h4><p>Эффекты, которые запоминаются: от плавных появлений до игр с курсором.</p></div></div>
+      <div class="rv"><div class="panel svc"><span class="svc-n">/04</span><h4>Адаптив под всё</h4><p>Телефон, планшет, ноутбук или огромный монитор. Везде выглядит безупречно.</p></div></div>
+    </div>
+    <div class="steps rv">
+      <div class="step"><b>01</b>Бриф</div>
+      <div class="step"><b>02</b>Дизайн</div>
+      <div class="step"><b>03</b>Код</div>
+      <div class="step"><b>04</b>Запуск</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TERMINAL ================= -->
+<section id="terminal">
+  <div class="container">
+    <div class="sec-head rv"><span class="sec-num">04</span><h2 class="sec-title scr">ТЕРМИНАЛ</h2><span class="sec-line"></span></div>
+    <div class="term rv">
+      <div class="term-bar">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="ttl">director@matrix: ~</span>
+        <span>ctrl+L — очистить</span>
       </div>
-    </section>
-
-    <!-- STEPS -->
-    <section id="steps">
-      <div class="section-title">Этапы работы</div>
-      <div class="section-sub">от идеи до запуска</div>
-      <div class="steps-grid">
-        <div class="stat-card"><div class="stat-number">01.</div><div class="stat-label">Идея и бриф</div></div>
-        <div class="stat-card"><div class="stat-number">02.</div><div class="stat-label">Сборка прототипа</div></div>
-        <div class="stat-card"><div class="stat-number">03.</div><div class="stat-label">Тест на вашем устройстве</div></div>
-        <div class="stat-card"><div class="stat-number">04.</div><div class="stat-label">Оплата по факту</div></div>
+      <div class="term-body" id="tbody">
+        <div id="tout"></div>
+        <div class="prompt-line"><span class="prompt"><span class="host">director@matrix:~</span>$</span><input id="tin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Командная строка"></div>
       </div>
-    </section>
+      <div class="chips" id="chips"></div>
+    </div>
+    <p class="term-note">Введи <b>help</b>, чтобы начать. Говорят, здесь спрятано кое-что ещё…</p>
+  </div>
+</section>
 
-    <!-- TERMINAL -->
-    <section id="terminal">
-      <div class="section-title">Терминал</div>
-      <div class="section-sub">введите help для списка команд</div>
-      <div class="terminal">
-        <div class="terminal-header">
-          <div class="terminal-dot" style="background:#ff5f56;"></div>
-          <div class="terminal-dot" style="background:#ffbd2e;"></div>
-          <div class="terminal-dot" style="background:#27c93f;"></div>
-        </div>
-        <div class="terminal-output" id="terminalOutput">
-          > Добро пожаловать в терминал ДИРЕКТОР.<br>
-          > Введите 'help' для списка команд.<br>
-          > 
-        </div>
-        <div class="terminal-input-line">
-          <span class="terminal-prompt">$</span>
-          <input type="text" class="terminal-input" id="terminalInput" placeholder="введите команду..." autocomplete="off">
-        </div>
+<!-- ================= CONTACT ================= -->
+<section id="contact">
+  <div class="container">
+    <div class="sec-head rv"><span class="sec-num">05</span><h2 class="sec-title scr">ВЫБЕРИ ТАБЛЕТКУ</h2><span class="sec-line"></span></div>
+    <p class="contact-lead rv">Белая — всё останется как есть. Чёрная — у тебя появится сайт, который пробивает экран. Выбор за тобой.</p>
+    <div class="pills rv">
+      <button class="pill w" id="pillWhite"><span class="cap"></span><span><b>Белая</b><small>Остаться как есть</small></span></button>
+      <button class="pill b" id="pillBlack"><span class="cap"></span><span><b>Чёрная</b><small>Заказать сайт</small></span></button>
+    </div>
+    <div class="contact-cards rv">
+      <a class="cc" data-tg target="_blank" rel="noopener">Telegram<span data-tgtext></span></a>
+      <a class="cc" data-mail>Email<span data-mailtext></span></a>
+      <button class="cc" id="copyTg">Скопировать ник<span>Одним кликом</span></button>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>© <span id="year"></span> ДИРЕКТОР · Сделано внутри матрицы</footer>
+
+<!-- ================= ПРОБИТАЯ МАТРИЦА ================= -->
+<div id="breach" aria-hidden="true">
+  <div class="b-dim"></div>
+  <canvas id="cracks"></canvas>
+  <div class="hole-wrap">
+    <div class="hole" id="hole">
+      <div id="faceWrap">
+        <svg id="face" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="glow" cx="50%" cy="42%" r="65%">
+              <stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#d8d8d8"/><stop offset="1" stop-color="#6a6a6a"/>
+            </radialGradient>
+            <linearGradient id="hoodG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#262626"/><stop offset="1" stop-color="#000"/>
+            </linearGradient>
+            <radialGradient id="faceG" cx="50%" cy="38%" r="65%">
+              <stop offset="0" stop-color="#303030"/><stop offset="1" stop-color="#030303"/>
+            </radialGradient>
+            <clipPath id="eyeClip"><path d="M-32 0Q0 -24 32 0Q0 22 -32 0Z"/></clipPath>
+          </defs>
+          <rect width="400" height="400" fill="url(#glow)"/>
+          <g stroke="#fff" stroke-opacity=".35" stroke-width="2">
+            <path d="M200 200L0 40M200 200L60 0M200 200L340 0M200 200L400 50M200 200L0 200M200 200L400 210"/>
+          </g>
+          <g class="hood-b">
+            <path d="M200 22C92 22 40 124 48 246C52 316 22 356 0 400L400 400C378 356 348 316 352 246C360 124 308 22 200 22Z" fill="url(#hoodG)" stroke="#fff" stroke-opacity=".3" stroke-width="2"/>
+            <path d="M200 86C130 86 100 148 104 228C108 292 150 328 200 328C250 328 292 292 296 228C300 148 270 86 200 86Z" fill="url(#faceG)"/>
+          </g>
+          <g class="eye" transform="translate(154 206)">
+            <g class="lid">
+              <path d="M-32 0Q0 -24 32 0Q0 22 -32 0Z" fill="#fff"/>
+              <g clip-path="url(#eyeClip)"><circle class="pupil" r="10" fill="#000"/><circle class="pupil" r="3" cx="-3" cy="-4" fill="#fff"/></g>
+            </g>
+          </g>
+          <g class="eye" transform="translate(246 206)">
+            <g class="lid">
+              <path d="M-32 0Q0 -24 32 0Q0 22 -32 0Z" fill="#fff"/>
+              <g clip-path="url(#eyeClip)"><circle class="pupil" r="10" fill="#000"/><circle class="pupil" r="3" cx="-3" cy="-4" fill="#fff"/></g>
+            </g>
+          </g>
+          <path d="M112 176L184 190" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+          <path d="M288 176L216 190" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+          <path d="M162 274Q206 292 242 262" stroke="#fff" stroke-opacity=".7" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        </svg>
       </div>
-    </section>
+    </div>
+  </div>
+  <div class="b-flash" id="bflash"></div>
+  <div class="b-text">
+    <h2>Я ВИЖУ ТЕБЯ.</h2>
+    <p>Ты здесь не случайно. Нужен сайт, который пробивает экран?</p>
+    <div class="cta">
+      <a class="btn" data-tg target="_blank" rel="noopener">Написать Директору →</a>
+      <button class="btn ghost" id="bClose">Вернуться в матрицу</button>
+    </div>
+  </div>
+</div>
 
-    <!-- MINI GAME -->
-    <section id="game">
-      <div class="section-title">Поймай белый пиксель</div>
-      <div class="section-sub">мини-игра на реакцию</div>
-      <div class="game-area">
-        <div class="game-stats">
-          <span>Счёт: <span id="gameScore">0</span></span>
-          <span>Рекорд: <span id="gameHigh">0</span></span>
-        </div>
-        <div class="game-field" id="gameField">
-          <div class="pixel" id="pixel"></div>
-        </div>
-      </div>
-    </section>
+<!-- секретная последовательность -->
+<div id="rabbit"><pre id="rabbitTx"></pre><span class="rb-skip">[ клик или Esc — пропустить ]</span></div>
 
-    <!-- CONTACTS -->
-    <section id="contacts">
-      <div class="section-title">Контакты и заявка</div>
-      <div class="section-sub">напишите мне</div>
-      <form class="contact-form" id="contactForm">
-        <input type="text" placeholder="Имя" required>
-        <input type="text" placeholder="Телеграм / Телефон" required>
-        <textarea placeholder="Задача" required></textarea>
-        <button type="submit" class="btn submit-btn" id="submitBtn">Отправить заявку</button>
-        <div class="success-msg" id="successMsg">✓ Заявка отправлена! Я свяжусь с вами.</div>
-      </form>
-    </section>
-  </main>
+<!-- модалка проекта -->
+<div id="modal"><div class="m-box panel"><button class="icon-btn m-close" id="mClose">✕</button><div id="mBody"></div></div></div>
 
-  <script>
-    (function() {
-      'use strict';
+<div id="toast"></div>
 
-      // ========== CANVAS DIGITAL RAIN ==========
-      const canvas = document.getElementById('bg-canvas');
-      const ctx = canvas.getContext('2d');
-      let width, height;
-      let columns = [];
-      const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF';
-      let speedMultiplier = 1;
-      let speedTimeout = null;
+<script>
+(() => {
+'use strict';
 
-      function resizeCanvas() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
-        const colCount = Math.floor(width / 24);
-        columns = [];
-        for (let i = 0; i < colCount; i++) {
-          columns.push({
-            x: i * 24,
-            y: Math.random() * height,
-            speed: 0.5 + Math.random() * 1.5,
-            opacity: 0.15 + Math.random() * 0.45,
-            char: chars[Math.floor(Math.random() * chars.length)]
-          });
-        }
-      }
+/* ============ НАСТРОЙКИ — ПОМЕНЯЙ НА СВОИ ============ */
+const CONFIG = {
+  tg: 'director',                 // твой ник в Telegram (без @)
+  email: 'director@example.com',  // твоя почта
+  promo: 'WHITE-RABBIT'           // секретный промокод
+};
+/* ===================================================== */
 
-      function drawCanvas() {
-        ctx.fillStyle = 'rgba(5, 5, 5, 0.08)';
-        ctx.fillRect(0, 0, width, height);
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const rand = (a, b) => Math.random() * (b - a) + a;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const isLight = () => document.body.classList.contains('light');
+const mouse = { x: innerWidth / 2, y: innerHeight * .8 };
+addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+addEventListener('touchmove', e => { const t = e.touches[0]; mouse.x = t.clientX; mouse.y = t.clientY; }, { passive: true });
 
-        for (let col of columns) {
-          ctx.fillStyle = `rgba(255, 255, 255, ${col.opacity})`;
-          ctx.font = '16px "Courier New", monospace';
-          ctx.fillText(col.char, col.x, col.y);
-          col.y += col.speed * speedMultiplier;
-          if (col.y > height + 20) {
-            col.y = -20;
-            col.char = chars[Math.floor(Math.random() * chars.length)];
-            col.opacity = 0.15 + Math.random() * 0.45;
-          }
-          // occasionally change char
-          if (Math.random() < 0.02) {
-            col.char = chars[Math.floor(Math.random() * chars.length)];
-          }
-        }
-        requestAnimationFrame(drawCanvas);
-      }
+/* ссылки контактов */
+$$('[data-tg]').forEach(a => a.href = 'https://t.me/' + CONFIG.tg);
+$$('[data-tgtext]').forEach(s => s.textContent = '@' + CONFIG.tg);
+$$('[data-mail]').forEach(a => a.href = 'mailto:' + CONFIG.email);
+$$('[data-mailtext]').forEach(s => s.textContent = CONFIG.email);
+$('#year').textContent = new Date().getFullYear();
 
-      resizeCanvas();
-      drawCanvas();
-      window.addEventListener('resize', resizeCanvas);
+/* toast */
+let toastT;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2800);
+}
 
-      // expose speed control for terminal
-      window.__matrixSpeed = function(mult, duration) {
-        speedMultiplier = mult;
-        if (speedTimeout) clearTimeout(speedTimeout);
-        speedTimeout = setTimeout(() => { speedMultiplier = 1; }, duration);
-      };
+/* ============ ЗАГРУЗЧИК ============ */
+(function loader() {
+  const lines = ['> инициализация матрицы...', '> загрузка символов...', '> поиск Директора...', '> доступ разрешён.'];
+  const el = $('#ldText'); let i = 0;
+  const iv = setInterval(() => { if (i < lines.length) el.textContent += lines[i++] + '\n'; else clearInterval(iv); }, 380);
+  setTimeout(() => { $('#loader').classList.add('hide'); document.body.classList.add('ready'); }, 2000);
+})();
 
-      // ========== CURSOR GLOW ==========
-      const cursorGlow = document.getElementById('cursorGlow');
-      document.addEventListener('mousemove', (e) => {
-        cursorGlow.style.setProperty('--mouse-x', e.clientX + 'px');
-        cursorGlow.style.setProperty('--mouse-y', e.clientY + 'px');
-      });
+/* ============ МАТРИЧНЫЙ ДОЖДЬ ============ */
+const CH_DEFAULT = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFZ:.=*+-<>¦';
+const rain = { chars: CH_DEFAULT, delay: 45 };
+const rcv = $('#rain'), rctx = rcv.getContext('2d');
+const FS = 16;
+let RW, RH, cols, drops, slow;
+function rainResize() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  RW = innerWidth; RH = innerHeight;
+  rcv.width = RW * dpr; rcv.height = RH * dpr;
+  rctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cols = Math.ceil(RW / FS);
+  drops = Array.from({ length: cols }, () => rand(-RH / FS, 0));
+  slow = Array.from({ length: cols }, () => 1 + Math.floor(Math.random() * 3));
+  rctx.fillStyle = isLight() ? '#f1f1f1' : '#000'; rctx.fillRect(0, 0, RW, RH);
+}
+addEventListener('resize', rainResize); rainResize();
+let lastT = 0, tick = 0;
+function rainLoop(t) {
+  requestAnimationFrame(rainLoop);
+  if (t - lastT < rain.delay) return;
+  lastT = t; tick++;
+  const light = isLight();
+  rctx.fillStyle = light ? 'rgba(241,241,241,.1)' : 'rgba(0,0,0,.085)';
+  rctx.fillRect(0, 0, RW, RH);
+  rctx.font = FS + 'px monospace';
+  const cs = rain.chars;
+  for (let i = 0; i < cols; i++) {
+    if (tick % slow[i]) continue;
+    const x = i * FS, y = drops[i] * FS;
+    const near = Math.hypot(x - mouse.x, y - mouse.y) < 110;
+    const g = Math.floor(rand(120, 255));
+    rctx.fillStyle = near ? (light ? '#000' : '#fff') : (light ? `rgb(${255 - g},${255 - g},${255 - g})` : `rgb(${g},${g},${g})`);
+    rctx.fillText(cs[Math.floor(Math.random() * cs.length)], x, y);
+    if (y > RH && Math.random() > .975) drops[i] = rand(-20, 0); else drops[i]++;
+  }
+}
+requestAnimationFrame(rainLoop);
 
-      // ========== SCROLL PROGRESS ==========
-      const progressBar = document.getElementById('progressBar');
-      window.addEventListener('scroll', () => {
-        const scrollTop = window.scrollY;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-        progressBar.style.width = pct + '%';
-      });
+/* ============ ПЕЧАТЬ В HERO ============ */
+(async function typer() {
+  const el = $('#typed');
+  const phrases = ['Делаю сайты, которые запоминаются.', 'Чёрное. Белое. Без компромиссов.', 'Твой бизнес достоин лучшего интерфейса.', 'Проснись, клиент. Пора обновить сайт.'];
+  await sleep(2400);
+  for (let i = 0; ; i++) {
+    const p = phrases[i % phrases.length];
+    for (let c = 1; c <= p.length; c++) { el.textContent = p.slice(0, c); await sleep(45); }
+    await sleep(1800);
+    for (let c = p.length; c >= 0; c--) { el.textContent = p.slice(0, c); await sleep(20); }
+    await sleep(300);
+  }
+})();
 
-      // ========== INTERSECTION OBSERVER ==========
-      const sections = document.querySelectorAll('section:not(#hero)');
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, { threshold: 0.15 });
-      sections.forEach(s => observer.observe(s));
+/* ============ НАВИГАЦИЯ ============ */
+const nav = $('#nav');
+addEventListener('scroll', () => {
+  nav.classList.toggle('solid', scrollY > 30);
+  const h = document.documentElement.scrollHeight - innerHeight;
+  $('#progress').style.width = (scrollY / h * 100) + '%';
+}, { passive: true });
+$('#burger').onclick = () => nav.classList.toggle('open');
+$$('.nav-links a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+setInterval(() => { $('#clock').textContent = new Date().toLocaleTimeString('ru-RU'); }, 1000);
 
-      // ========== GLITCH / SCRAMBLE TEXT ==========
-      const glitchTitle = document.getElementById('glitchTitle');
-      const originalText = 'ДИРЕКТОР';
-      const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-      let scrambleInterval = null;
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  rctx.fillStyle = isLight() ? '#f1f1f1' : '#000'; rctx.fillRect(0, 0, RW, RH);
+  $('meta[name=theme-color]').content = isLight() ? '#f1f1f1' : '#000';
+}
+$('#themeBtn').onclick = toggleTheme;
 
-      function scrambleText() {
-        let iteration = 0;
-        clearInterval(scrambleInterval);
-        scrambleInterval = setInterval(() => {
-          glitchTitle.textContent = originalText
-            .split('')
-            .map((char, index) => {
-              if (index < iteration) return originalText[index];
-              return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
-            })
-            .join('');
-          iteration += 1 / 3;
-          if (iteration >= originalText.length) {
-            clearInterval(scrambleInterval);
-            glitchTitle.textContent = originalText;
-          }
-        }, 35);
-      }
+/* ============ ПОЯВЛЕНИЕ + СКРАМБЛ ============ */
+function scramble(el) {
+  const txt = el.dataset.t || el.textContent; el.dataset.t = txt;
+  const G = '01ｱｲｳｴｵｶｷｸｹｺ#$%&@'; let f = 0; const total = 26;
+  const iv = setInterval(() => {
+    f++;
+    el.textContent = [...txt].map((c, i) => c === ' ' ? ' ' : (i < txt.length * f / total ? c : G[Math.floor(Math.random() * G.length)])).join('');
+    if (f >= total) { clearInterval(iv); el.textContent = txt; }
+  }, 35);
+}
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add('in');
+  $$('.scr', e.target).forEach(scramble);
+  io.unobserve(e.target);
+}), { threshold: .15 });
+$$('.rv').forEach((el, i) => { el.style.transitionDelay = (i % 4) * 90 + 'ms'; io.observe(el); });
 
-      // initial scramble on load
-      setTimeout(scrambleText, 300);
-      glitchTitle.addEventListener('mouseenter', scrambleText);
+/* ============ КУРСОР ============ */
+if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
+  document.body.classList.add('has-cursor');
+  const cur = $('#cur'), dot = $('#dot'); let cx = mouse.x, cy = mouse.y;
+  (function loop() {
+    cx += (mouse.x - cx) * .18; cy += (mouse.y - cy) * .18;
+    cur.style.transform = `translate(${cx}px,${cy}px)`;
+    dot.style.transform = `translate(${mouse.x}px,${mouse.y}px)`;
+    requestAnimationFrame(loop);
+  })();
+  document.addEventListener('mouseover', e => cur.classList.toggle('big', !!e.target.closest('a,button,.card,.chip')));
+}
 
-      // ========== 3D TILT ON PROJECT CARDS ==========
-      const tiltCards = document.querySelectorAll('.tilt');
-      tiltCards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
-          const rotateX = ((y - centerY) / centerY) * -8;
-          const rotateY = ((x - centerX) / centerX) * 8;
-          card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-        });
-        card.addEventListener('mouseleave', () => {
-          card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
-        });
-      });
+/* ============ КАРТОЧКИ ============ */
+$$('.card').forEach(c => {
+  c.addEventListener('mousemove', e => {
+    const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    c.style.setProperty('--mx', x * 100 + '%'); c.style.setProperty('--my', y * 100 + '%');
+    c.style.transform = `perspective(900px) rotateY(${(x - .5) * 9}deg) rotateX(${(.5 - y) * 9}deg) translateY(-4px)`;
+  });
+  c.addEventListener('mouseleave', () => c.style.transform = '');
+  c.addEventListener('click', () => openModal(+c.dataset.i));
+  c.addEventListener('keydown', e => { if (e.key === 'Enter') openModal(+c.dataset.i); });
+});
+$$('.pv-matrix').forEach(pv => {
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('span');
+    s.textContent = Array.from({ length: 20 }, () => CH_DEFAULT[Math.floor(Math.random() * CH_DEFAULT.length)]).join('\n');
+    s.style.left = (i / 16 * 100) + '%';
+    s.style.animationDuration = rand(2.5, 5.5) + 's';
+    s.style.animationDelay = -rand(0, 5) + 's';
+    pv.appendChild(s);
+  }
+});
 
-      // ========== CALCULATOR ==========
-      const calcOptions = document.querySelectorAll('.calc-option');
-      const calcTotal = document.getElementById('calcTotal');
-      let totalPrice = 0;
+/* ============ МОДАЛКА ============ */
+const PROJECTS = [
+  { title: 'MATRIX.PORTFOLIO', type: 'Портфолио · Интерактив',
+    desc: 'Портфолио, в которое можно провалиться. Цифровой дождь на canvas, разбивающаяся матрица, живой терминал и секреты для тех, кто любит искать.',
+    features: ['Дождь из символов на Canvas, реагирует на курсор', 'Пробитая матрица: трещины, осколки и взгляд на посетителя', 'Интерактивный терминал с командами', 'Секретные команды и пасхалки', 'Смена темы: чёрная и белая'],
+    stack: ['HTML5', 'CSS3', 'JavaScript', 'Canvas', 'SVG'] },
+  { title: 'Сайт для кофейни', type: 'Бизнес · HoReCa',
+    desc: 'Тёплый сайт для кофейни: меню, атмосфера, адрес и часы работы. Гость хочет зайти ещё до того, как почувствует запах кофе.',
+    features: ['Меню с категориями и ценами', 'Блок «О нас» и атмосфера заведения', 'Адрес, карта и часы работы', 'Адаптивный дизайн под телефон'],
+    stack: ['HTML5', 'CSS3', 'JavaScript', 'Адаптив'] },
+  { title: 'Сайт для школы', type: 'Образование',
+    desc: 'Понятный сайт для школы: всё нужное родителям и ученикам находится за пару кликов — новости, расписание, педагоги и контакты.',
+    features: ['Структура: о школе, новости, педагоги', 'Расписание и объявления', 'Контакты и форма обратной связи', 'Читаемый, спокойный интерфейс'],
+    stack: ['HTML5', 'CSS3', 'JavaScript', 'Адаптив'] }
+];
+function openModal(i) {
+  const p = PROJECTS[i], pv = $$('.card')[i].querySelector('.pv').cloneNode(true);
+  $('#mBody').innerHTML = '';
+  $('#mBody').appendChild(pv);
+  const b = document.createElement('div'); b.className = 'm-body';
+  b.innerHTML = `<div class="card-top"><span>0${i + 1}</span><span>${p.type.toUpperCase()}</span></div>
+    <h3>${p.title}</h3><p>${p.desc}</p>
+    <ul>${p.features.map(f => `<li>${f}</li>`).join('')}</ul>
+    <div class="tags">${p.stack.map(s => `<i>${s}</i>`).join('')}</div>
+    <button class="btn" id="mCta">${i === 0 ? 'Хочу такой же сайт →' : 'Хочу такой же сайт →'}</button>`;
+  $('#mBody').appendChild(b);
+  $('#mCta').onclick = () => { closeModal(); $('#contact').scrollIntoView(); };
+  $('#modal').classList.add('on');
+}
+function closeModal() { $('#modal').classList.remove('on'); }
+$('#mClose').onclick = closeModal;
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 
-      calcOptions.forEach(opt => {
-        opt.addEventListener('click', () => {
-          opt.classList.toggle('active');
-          totalPrice = 0;
-          document.querySelectorAll('.calc-option.active').forEach(active => {
-            totalPrice += parseInt(active.dataset.price, 10);
-          });
-          calcTotal.textContent = totalPrice.toLocaleString('ru-RU') + ' ₽';
-        });
-      });
+/* ============ ПРОБИТАЯ МАТРИЦА ============ */
+const B = { el: $('#breach'), active: false, id: 0, geo: null };
+let ac;
+function thud(power = 1) {
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const t = ac.currentTime;
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(130 * power, t); o.frequency.exponentialRampToValueAtTime(30, t + .35);
+    g.gain.setValueAtTime(.45, t); g.gain.exponentialRampToValueAtTime(.001, t + .4);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t + .45);
+    const len = Math.floor(ac.sampleRate * .3), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+    const n = ac.createBufferSource(); n.buffer = buf;
+    const f = ac.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1800;
+    const ng = ac.createGain(); ng.gain.value = .22 * power;
+    n.connect(f).connect(ng).connect(ac.destination); n.start(t);
+  } catch (e) {}
+}
+function shake(strong) {
+  const amp = strong ? 22 : 12;
+  const fr = Array.from({ length: 9 }, (_, i) => ({ transform: i === 8 ? 'translate(0,0)' : `translate(${rand(-amp, amp)}px,${rand(-amp, amp)}px)` }));
+  [$('main'), $('#rain')].forEach(e => e.animate(fr, { duration: 480, easing: 'linear' }));
+}
+function flash() { $('#bflash').animate([{ opacity: .9 }, { opacity: 0 }], { duration: 450 }); }
+function jagged() {
+  const n = 28, pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = i / n * Math.PI * 2, r = i % 2 ? rand(33, 42) : rand(43, 50);
+    pts.push(`${50 + Math.cos(a) * r}% ${50 + Math.sin(a) * r}%`);
+  }
+  return `polygon(${pts.join(',')})`;
+}
+function makeCracks(cx, cy) {
+  const R = Math.hypot(Math.max(cx, RW - cx), Math.max(cy, RH - cy)), rays = [], rings = [];
+  function add(x, y, a, len, depth) {
+    const pts = [[x, y]]; let d = 0;
+    while (d < len) {
+      const st = rand(25, 70); a += rand(-.25, .25);
+      x += Math.cos(a) * st; y += Math.sin(a) * st; d += st; pts.push([x, y]);
+      if (depth < 3 && Math.random() < .17) add(x, y, a + rand(-1, 1) * .9, (len - d) * rand(.25, .55), depth + 1);
+    }
+    rays.push({ pts, depth });
+  }
+  const n = 16;
+  for (let i = 0; i < n; i++) add(cx, cy, i / n * Math.PI * 2 + rand(-.15, .15), R, 0);
+  [70, 140, 230, 350, 520, 760].forEach(r => {
+    if (r > R * 1.1) return;
+    const m = 18, pts = [];
+    for (let k = 0; k < m; k++) { const an = k / m * Math.PI * 2 + rand(-.1, .1), rd = r * rand(.88, 1.12); pts.push([cx + Math.cos(an) * rd, cy + Math.sin(an) * rd]); }
+    rings.push({ r, pts });
+  });
+  return { cx, cy, R, rays, rings };
+}
+function drawCracks(c, g, front) {
+  c.clearRect(0, 0, RW, RH);
+  const col = isLight() ? '5,5,5' : '255,255,255';
+  c.shadowBlur = 8; c.shadowColor = `rgba(${col},.9)`; c.lineJoin = 'round';
+  g.rays.forEach(r => {
+    c.strokeStyle = `rgba(${col},${r.depth ? .65 : .95})`; c.lineWidth = r.depth ? 1 : 1.7;
+    c.beginPath(); c.moveTo(r.pts[0][0], r.pts[0][1]);
+    for (let k = 1; k < r.pts.length; k++) {
+      const p = r.pts[k];
+      if (Math.hypot(p[0] - g.cx, p[1] - g.cy) > front && r.depth === 0) break;
+      if (r.depth && Math.hypot(r.pts[0][0] - g.cx, r.pts[0][1] - g.cy) > front) break;
+      c.lineTo(p[0], p[1]);
+    }
+    c.stroke();
+  });
+  c.lineWidth = 1; c.strokeStyle = `rgba(${col},.4)`;
+  g.rings.forEach(ring => {
+    if (ring.r > front) return;
+    c.beginPath(); ring.pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); c.stroke();
+  });
+}
+function crackAnim(cx, cy, dur, id) {
+  return new Promise(res => {
+    const cv = $('#cracks'), dpr = Math.min(devicePixelRatio || 1, 2);
+    cv.width = RW * dpr; cv.height = RH * dpr;
+    const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const g = makeCracks(cx, cy); B.geo = g; const t0 = performance.now();
+    (function step(now) {
+      const t = Math.min((now - t0) / dur, 1);
+      drawCracks(c, g, (1 - Math.pow(1 - t, 3)) * g.R);
+      if (t < 1 && B.active && B.id === id) requestAnimationFrame(step); else res();
+    })(t0);
+  });
+}
+function spawnShards() {
+  const cx = RW / 2, cy = RH * .44;
+  for (let i = 0; i < 24; i++) {
+    const a = rand(0, Math.PI * 2), dist = Math.min(RW, RH) * rand(.12, .42), s = rand(50, 150);
+    const el = document.createElement('div'); el.className = 'shard';
+    el.style.cssText = `left:${cx + Math.cos(a) * dist - s / 2}px;top:${cy + Math.sin(a) * dist - s / 2}px;width:${s}px;height:${s}px;clip-path:polygon(${rand(0, 50)}% 0,100% ${rand(30, 100)}%,${rand(0, 60)}% 100%)`;
+    B.el.appendChild(el);
+    el.animate([
+      { transform: 'translate(0,0) rotate(0)', opacity: 1 },
+      { transform: `translate(${Math.cos(a) * rand(120, 420)}px,${Math.sin(a) * rand(60, 260) + rand(300, 700)}px) rotate(${rand(-540, 540)}deg)`, opacity: 0 }
+    ], { duration: rand(1100, 1700), easing: 'cubic-bezier(.2,.7,.4,1)' }).onfinish = () => el.remove();
+  }
+}
+let gazeRAF; const gz = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
+function gazeLoop() {
+  $$('#face .eye').forEach((eye, i) => {
+    const r = eye.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const dx = mouse.x - cx, dy = mouse.y - cy, d = Math.hypot(dx, dy) || 1, m = Math.min(d / 180, 1);
+    gz[i].x += (dx / d * 12 * m - gz[i].x) * .2; gz[i].y += (dy / d * 5.5 * m - gz[i].y) * .2;
+    $$('.pupil', eye).forEach(p => p.setAttribute('transform', `translate(${gz[i].x} ${gz[i].y})`));
+  });
+  const px = mouse.x / innerWidth - .5, py = mouse.y / innerHeight - .5;
+  $('#faceWrap').style.transform = `translate(${px * -18}px,${py * -12}px) rotate(${px * 3}deg)`;
+  gazeRAF = requestAnimationFrame(gazeLoop);
+}
+async function openBreach() {
+  if (B.active) return;
+  B.active = true; const id = ++B.id;
+  const el = B.el; el.classList.remove('open', 'show'); el.classList.add('on');
+  $('#hole').style.clipPath = jagged();
+  const cx = RW / 2, cy = RH * .44;
+  thud(1); flash(); shake();
+  await crackAnim(cx, cy, 750, id);
+  if (B.id !== id || !B.active) return;
+  await sleep(160); if (B.id !== id || !B.active) return;
+  thud(2); flash(); shake(true);
+  el.classList.add('open'); spawnShards();
+  cancelAnimationFrame(gazeRAF); gazeLoop();
+  await sleep(1000); if (B.id !== id || !B.active) return;
+  el.classList.add('show');
+}
+function closeBreach() {
+  if (!B.active) return;
+  B.active = false; B.id++;
+  B.el.classList.remove('on', 'open', 'show');
+  cancelAnimationFrame(gazeRAF);
+  $$('.shard').forEach(s => s.remove());
+  const cv = $('#cracks'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
+}
+$('#breakBtn').onclick = openBreach;
+$('#bClose').onclick = closeBreach;
+B.el.addEventListener('click', e => { if (B.el.classList.contains('show') && !e.target.closest('a,button')) closeBreach(); });
+$('#pillBlack').onclick = openBreach;
+$('#pillWhite').onclick = () => { toast('Хороший выбор… но конкуренты не спят.'); scrollTo({ top: 0 }); };
+$('#copyTg').onclick = () => {
+  const t = '@' + CONFIG.tg;
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Ник ' + t + ' скопирован'), () => toast('Мой ник: ' + t));
+};
 
-      // ========== TERMINAL ==========
-      const terminalOutput = document.getElementById('terminalOutput');
-      const terminalInput = document.getElementById('terminalInput');
-      const terminalPrompt = '$ ';
+/* ============ СЕКРЕТ: БЕЛЫЙ КРОЛИК ============ */
+const RABBIT = String.raw`
+   (\_/)
+   (='.'=)
+   (")_(")`;
+const rb = { on: false, cancel: false };
+$('#rabbit').addEventListener('click', () => rb.cancel = true);
+async function typeInto(el, text, d) {
+  for (const ch of text) { if (rb.cancel) return; el.textContent += ch; await sleep(d); }
+}
+async function rabbitSeq() {
+  if (rb.on) return; rb.on = true; rb.cancel = false;
+  const ov = $('#rabbit'), tx = $('#rabbitTx'); tx.textContent = ''; ov.classList.add('on');
+  rain.chars = '01'; rain.delay = 22;
+  const lines = ['Проснись, гость...', 'Матрица держит тебя.', 'Следуй за белым кроликом.', 'Тук-тук.'];
+  for (const l of lines) { if (rb.cancel) break; await typeInto(tx, l + '\n\n', 60); await sleep(650); }
+  if (!rb.cancel) { tx.textContent += RABBIT; await sleep(2000); }
+  ov.classList.remove('on'); rain.chars = CH_DEFAULT; rain.delay = 45; rb.on = false;
+}
 
-      function appendTerminal(text) {
-        terminalOutput.innerHTML += text + '<br>';
-        terminalOutput.scrollTop = terminalOutput.scrollHeight;
-      }
+/* ============ ТЕРМИНАЛ ============ */
+const tout = $('#tout'), tin = $('#tin'), tbody = $('#tbody');
+const esc = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function print(html, cls = '') {
+  const d = document.createElement('div'); d.className = 'ln ' + cls; d.innerHTML = html;
+  tout.appendChild(d); tbody.scrollTop = tbody.scrollHeight; return d;
+}
+const row = (c, d) => `<b>${c}</b>${' '.repeat(Math.max(1, 14 - c.length))}— ${d}`;
+let busy = false;
 
-      const commands = {
-        help() {
-          appendTerminal('> Доступные команды:');
-          appendTerminal('  help    - список команд');
-          appendTerminal('  about   - информация об авторе');
-          appendTerminal('  stack   - используемые технологии');
-          appendTerminal('  matrix  - ускорить падающие цифры на 5 секунд');
-          appendTerminal('  hack    - запустить анимацию взлома');
-          appendTerminal('  clear   - очистить терминал');
-        },
-        about() {
-          appendTerminal('> ДИРЕКТОР — веб-разработчик, специализация:');
-          appendTerminal('  интерактивные сайты, Canvas, Telegram-боты, AI-кодинг.');
-          appendTerminal('  Работаю быстро, качественно, без предоплаты.');
-        },
-        stack() {
-          appendTerminal('> HTML5, CSS3, JavaScript (Vanilla), Canvas API, Telegram Bot API, Node.js (базово), Figma.');
-        },
-        matrix() {
-          appendTerminal('> Ускорение цифрового дождя на 5 секунд...');
-          window.__matrixSpeed(6, 5000);
-        },
-        hack() {
-          appendTerminal('> Запуск взлома...');
-          let percent = 0;
-          const hackInterval = setInterval(() => {
-            percent += Math.floor(Math.random() * 12) + 3;
-            if (percent >= 100) {
-              percent = 100;
-              clearInterval(hackInterval);
-              appendTerminal(`> Взлом завершён: ${percent}% [OK]`);
-              appendTerminal('> Доступ получен. Добро пожаловать, ДИРЕКТОР.');
-            } else {
-              appendTerminal(`> Взлом... ${percent}%`);
-            }
-          }, 180);
-        },
-        clear() {
-          terminalOutput.innerHTML = '> Терминал очищен.<br>> ';
-        }
-      };
+const CMDS = {
+  help() {
+    print('<b>Доступные команды:</b>');
+    [['help', 'список команд'], ['about', 'кто такой Директор'], ['whoami', 'кто ты?'], ['projects', 'мои проекты'], ['open &lt;n&gt;', 'открыть проект (1–3)'],
+     ['skills', 'навыки'], ['contact', 'как связаться'], ['ls', 'осмотреться'], ['cat &lt;файл&gt;', 'прочитать файл'], ['theme', 'чёрная / белая тема'],
+     ['matrix &lt;режим&gt;', 'fast · slow · normal'], ['break', 'разбить матрицу'], ['hack', 'взломать всё (почти)'], ['coffee', 'выпить кофе'],
+     ['date', 'дата и время'], ['echo &lt;текст&gt;', 'повторить'], ['clear', 'очистить экран']].forEach(([c, d]) => print(row(c, d)));
+    print('\nЕсть и скрытые команды. Ищи… 🐇', 'dim');
+  },
+  about() { print('Я — <b>Директор</b>. Создаю сайты, которые пробивают экран.\nЧёрно-белый стиль, чистый код, сильный эффект.'); },
+  whoami() { print('guest — тот, кто зашёл посмотреть. А скоро, возможно, станет моим клиентом.'); },
+  projects() {
+    print(row('1', 'MATRIX.PORTFOLIO — этот сайт'));
+    print(row('2', 'Сайт для кофейни'));
+    print(row('3', 'Сайт для школы'));
+    print('\nВведи <b>open &lt;номер&gt;</b>, чтобы посмотреть подробнее.', 'dim');
+  },
+  open(a) {
+    const n = parseInt(a[0]);
+    if (n >= 1 && n <= 3) { print('Открываю проект ' + n + '...'); openModal(n - 1); }
+    else print('Использование: <b>open 1</b>, <b>open 2</b> или <b>open 3</b>', 'err');
+  },
+  skills() { ['HTML5 / CSS3', 'JavaScript', 'Canvas / SVG', 'CSS- и JS-анимации', 'Адаптивная вёрстка'].forEach(s => print('▸ ' + s)); },
+  contact() {
+    print(row('telegram', `<a href="https://t.me/${CONFIG.tg}" target="_blank" rel="noopener"><u>@${CONFIG.tg}</u></a>`));
+    print(row('email', `<a href="mailto:${CONFIG.email}"><u>${CONFIG.email}</u></a>`));
+  },
+  ls(a) {
+    print('readme.txt   projects/   secret.txt' + (a.includes('-a') ? '   .white_rabbit' : ''));
+  },
+  cat(a) {
+    const f = (a[0] || '').toLowerCase();
+    if (f === 'readme.txt') print('Добро пожаловать в матрицу Директора.\nЗдесь делают сайты. Если нужен такой же — напиши.');
+    else if (f === 'secret.txt') print('🔒 ДОСТУП ЗАПРЕЩЁН.\nПодсказка: некоторые файлы не видны, пока не попросишь показать всё (ls -a).', 'err');
+    else if (f === '.white_rabbit') print('Ты на верном пути. Попробуй: <b>follow the white rabbit</b>');
+    else if (!f) print('Использование: cat &lt;файл&gt;', 'err');
+    else print('cat: ' + esc(f) + ': нет такого файла', 'err');
+  },
+  theme() { toggleTheme(); print('Тема переключена.'); },
+  matrix(a) {
+    const m = { fast: 22, slow: 95, normal: 45 }[a[0]];
+    if (!m) return print('Использование: <b>matrix fast</b> | <b>slow</b> | <b>normal</b>', 'err');
+    rain.delay = m; print('Скорость дождя: ' + a[0]);
+  },
+  break() { print('Бью по матрице...'); setTimeout(openBreach, 400); },
+  async hack() {
+    busy = true; print('Запуск взлома...', 'dim');
+    const line = print(''); 
+    for (let i = 0; i <= 10; i++) { line.textContent = `[${'█'.repeat(i)}${'░'.repeat(10 - i)}] ${i * 10}%`; await sleep(180); }
+    print('<b>ДОСТУП РАЗРЕШЁН</b>', 'big'); await sleep(700);
+    print('...шучу. Я не взламываю. Я создаю.', 'dim'); busy = false;
+  },
+  coffee() { print(String.raw`
+     ( (
+      ) )
+    ........
+    |      |]
+    \      /
+     '----'
+  Держи. Хороший код начинается с кофе.`); },
+  date() { print(new Date().toLocaleString('ru-RU')); },
+  echo(a, raw) { print(esc(raw.slice(5))); },
+  clear() { tout.innerHTML = ''; },
+  exit() { print('Из матрицы выхода нет… кроме команды <b>break</b>.'); },
+  sudo() { print('director is not in the sudoers file. This incident will be reported.', 'err'); },
+  rm() { print('Ха-ха. Хорошая попытка.', 'err'); },
+  vim() { print('Ты не выйдешь отсюда. Шутка. :q!', 'err'); }
+};
 
-      terminalInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          const cmd = terminalInput.value.trim().toLowerCase();
-          terminalInput.value = '';
-          if (cmd === '') return;
-          appendTerminal(terminalPrompt + cmd);
-          if (commands[cmd]) {
-            commands[cmd]();
-          } else {
-            appendTerminal(`> Команда не найдена: "${cmd}". Введите 'help'.`);
-          }
-        }
-      });
+const SECRET = {
+  async 'follow the white rabbit'() { await secretRabbit(); },
+  async 'rabbit'() { await secretRabbit(); },
+  async 'white rabbit'() { await secretRabbit(); },
+  async 'wake up neo'() { await secretRabbit(); },
+  async 'neo'() { await secretRabbit(); },
+  async 'sudo hire director'() {
+    busy = true;
+    print('Проверка прав...', 'dim'); await sleep(600);
+    print('Права получены.', 'dim'); await sleep(500);
+    print('<b>Поздравляю: ты принял лучшее решение дня.</b>', 'big'); await sleep(600);
+    print('Перенаправляю к контактам...', 'dim'); await sleep(900);
+    busy = false; $('#contact').scrollIntoView(); toast('Напиши мне — сделаем что-то крутое 🖤');
+  }
+};
+async function secretRabbit() {
+  busy = true; print('...', 'dim');
+  await rabbitSeq();
+  print('\n██ SECRET UNLOCKED ██', 'big');
+  print('Ты нашёл кроличью нору. Таких, как ты, единицы.');
+  print(`Промокод: <b>${CONFIG.promo}</b>\nНазови его мне в личке, и я сделаю приятный бонус к заказу.`);
+  print(`<a href="https://t.me/${CONFIG.tg}" target="_blank" rel="noopener"><u>Написать в Telegram →</u></a>`);
+  busy = false; toast('Секрет найден! 🐇');
+}
 
-      // ========== MINI GAME ==========
-      const gameField = document.getElementById('gameField');
-      const pixel = document.getElementById('pixel');
-      const gameScoreEl = document.getElementById('gameScore');
-      const gameHighEl = document.getElementById('gameHigh');
-      let score = 0;
-      let highScore = localStorage.getItem('directorHighScore') ? parseInt(localStorage.getItem('directorHighScore')) : 0;
-      gameHighEl.textContent = highScore;
+const hist = []; let hi = 0;
+async function run(line) {
+  const raw = line.trim(); if (!raw) return;
+  print(`<span class="prompt"><span class="host">director@matrix:~</span>$</span> ${esc(raw)}`);
+  hist.push(raw); hi = hist.length;
+  const low = raw.toLowerCase();
+  if (SECRET[low]) return SECRET[low]();
+  const [name, ...args] = low.split(/\s+/);
+  const fn = Object.prototype.hasOwnProperty.call(CMDS, name) ? CMDS[name] : null;
+  if (fn) return fn(args, raw);
+  print(`команда не найдена: <b>${esc(name)}</b>. Введи <b>help</b>.`, 'err');
+}
+tin.addEventListener('keydown', async e => {
+  if (e.key === 'Enter') {
+    if (busy) return;
+    const v = tin.value; tin.value = '';
+    await run(v);
+    tbody.scrollTop = tbody.scrollHeight;
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault(); if (hi > 0) tin.value = hist[--hi] || '';
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault(); hi = Math.min(hi + 1, hist.length); tin.value = hist[hi] || '';
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    const v = tin.value.toLowerCase(); if (!v) return;
+    const m = Object.keys(CMDS).filter(c => c.startsWith(v));
+    if (m.length === 1) tin.value = m[0]; else if (m.length > 1) print(m.join('   '), 'dim');
+  } else if (e.key.toLowerCase() === 'l' && e.ctrlKey) {
+    e.preventDefault(); CMDS.clear();
+  }
+});
+tbody.addEventListener('click', () => { if (!getSelection().toString()) tin.focus({ preventScroll: true }); });
+['help', 'about', 'projects', 'skills', 'contact', 'theme', 'break', 'hack', 'coffee', 'clear'].forEach(c => {
+  const b = document.createElement('button'); b.className = 'chip'; b.textContent = c;
+  b.onclick = () => { if (!busy) run(c); };
+  $('#chips').appendChild(b);
+});
+print('<b>DIRECTOR OS v1.0</b> — добро пожаловать, гость.', 'big');
+print('Введи <b>help</b>, чтобы увидеть команды.', 'dim');
 
-      function movePixel() {
-        const fieldRect = gameField.getBoundingClientRect();
-        const maxX = fieldRect.width - 22;
-        const maxY = fieldRect.height - 22;
-        const x = Math.random() * maxX;
-        const y = Math.random() * maxY;
-        pixel.style.left = x + 'px';
-        pixel.style.top = y + 'px';
-      }
+/* ============ ГОРЯЧИЕ КЛАВИШИ ============ */
+const konami = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
+let kbuf = [];
+addEventListener('keydown', e => {
+  const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
+  if (e.key === 'Escape') { closeBreach(); closeModal(); rb.cancel = true; return; }
+  if (typing) return;
+  if (e.code === 'Backquote') { e.preventDefault(); $('#terminal').scrollIntoView(); setTimeout(() => tin.focus({ preventScroll: true }), 600); return; }
+  kbuf.push(e.key.toLowerCase()); kbuf = kbuf.slice(-10);
+  if (kbuf.join() === konami.join()) { kbuf = []; toast('KONAMI! Матрица пробита.'); openBreach(); }
+});
 
-      function resetGame() {
-        score = 0;
-        gameScoreEl.textContent = score;
-        movePixel();
-      }
-
-      pixel.addEventListener('click', (e) => {
-        e.stopPropagation();
-        score++;
-        gameScoreEl.textContent = score;
-        if (score > highScore) {
-          highScore = score;
-          gameHighEl.textContent = highScore;
-          localStorage.setItem('directorHighScore', highScore);
-        }
-        movePixel();
-      });
-
-      // initial move
-      movePixel();
-      // periodic auto-move if user is idle (makes game slightly harder)
-      setInterval(() => {
-        if (Math.random() < 0.3) movePixel();
-      }, 2000);
-
-      // ========== CONTACT FORM ==========
-      const contactForm = document.getElementById('contactForm');
-      const successMsg = document.getElementById('successMsg');
-      const submitBtn = document.getElementById('submitBtn');
-
-      contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        submitBtn.textContent = 'Отправка...';
-        submitBtn.disabled = true;
-        setTimeout(() => {
-          submitBtn.textContent = 'Отправлено ✓';
-          successMsg.classList.add('show');
-          contactForm.reset();
-          setTimeout(() => {
-            submitBtn.textContent = 'Отправить заявку';
-            submitBtn.disabled = false;
-          }, 2000);
-        }, 800);
-      });
-
-      // ========== SMOOTH SCROLL FOR NAV ==========
-      document.querySelectorAll('nav a, .btn[href^="#"]').forEach(link => {
-        link.addEventListener('click', (e) => {
-          const href = link.getAttribute('href');
-          if (href && href.startsWith('#')) {
-            e.preventDefault();
-            const target = document.querySelector(href);
-            if (target) {
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }
-        });
-      });
-
-      // ========== ENSURE CANVAS RESIZE ON MOBILE ==========
-      window.addEventListener('orientationchange', () => {
-        setTimeout(resizeCanvas, 200);
-      });
-
-      // fine — everything is set.
-    })();
-  </script>
+})();
+</script>
 </body>
 </html>
+```
+
+Одна опечатка: в заголовке секции услуг написано «ЧТО ЯЛ ДЕЛАЮ». Исправь на **«ЧТО Я ДЕЛАЮ»** в строке `<h2 class="sec-title scr">`.
+
+## Что внутри
+
+- **Матричный дождь.** Он чёрно-белый, на canvas. Символы вспыхивают белым рядом с курсором.
+- **«Разбить матрицу»**: кнопка в hero, чёрная таблетка внизу, команда `break` или код Konami (↑↑↓↓←→←→BA). Экран трясётся и вспыхивает, по нему расходятся трещины. Со второго удара матрица пробивается, летят осколки, и в дыре появляется человек в капюшоне, чьи глаза следят за курсором. Под ним надпись «Я ВИДЖУ ТЕБЯ» и кнопка «Написать Директору». Закрыть можно кликом или Esc. Звук удара синтезируется в браузере, без файлов.
+- **3 проекта.** У каждого своя анимированная превью-картинка (дождь, чашка с паром, школа с флагом), 3D-наклон карточек и модалка с подробностями.
+- **Терминал.** В нём около 20 команд, история стрелками ↑↓ и автодополнение по Tab. Для телефона есть кнопки-подсказки, а на ПК терминал открывается клавишей `` ` ``.
+- **От меня:**
+  - кастомный курсор;
+  - загрузочный экран;
+  - расшифровка заголовков при появлении;
+  - переключатель чёрной и белой темы (◐);
+  - карта доступа «ID»;
+  - блок «Выбери таблетку» с контактами.
+
+## Секретные команды (не показаны в `help`)
+
+- Цепочка-квест: `ls -a`, затем `cat .white_rabbit`, затем **`follow the white rabbit`**. Запускается сцена «Проснись, гость…» с кроликом, после неё выдаётся промокод. Работают и короткие варианты: `rabbit`, `neo`, `wake up neo`.
+- `sudo hire director` ведёт на блок контактов.
+- Ещё есть шуточные `hack`, `coffee`, `rm`, `vim`.
+
+## Что поменять под себя
+
+В начале скрипта есть блок `CONFIG`. Впиши туда свой **ник в Telegram**, **email** и **промокод**. Условия бонуса за промокод придумай сам: сейчас в терминале написано просто «приятный бонус к заказу».
