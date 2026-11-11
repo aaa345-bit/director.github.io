@@ -1210,7 +1210,76 @@ const SECRET = {
 };
 
 /* ============ СЕКРЕТ: LIFE IS MATRIX ============ */
+/* ============ ПОДСКАЗКИ И СЧЁТЧИК СЕКРЕТОВ ============ */
 (() => {
+  const KEY = 'director_secrets';
+  let found = [];
+  try { found = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(found)); } catch (e) {} };
+
+  const GROUPS = [
+    { id: 'rabbit',  name: 'Белый кролик',   keys: ['follow the white rabbit', 'rabbit', 'white rabbit', 'wake up neo', 'neo'] },
+    { id: 'monster', name: 'Спящий монстр',  keys: ['wake the monster', 'monster', 'summon'] },
+    { id: 'truth',   name: 'Правда',         keys: ['life is matrix', 'life is a matrix', 'lifeismatrix', 'we live in the matrix'] },
+    { id: 'hire',    name: 'Права директора', keys: ['sudo hire director'] }
+  ];
+
+  /* считаем найденные секреты */
+  GROUPS.forEach(g => g.keys.forEach(k => {
+    const orig = SECRET[k];
+    if (!orig) return;
+    SECRET[k] = async () => {
+      if (!found.includes(g.id)) {
+        found.push(g.id); save();
+        toast(`Секрет ${found.length}/${GROUPS.length}: ${g.name}`);
+      }
+      return orig();
+    };
+  }));
+
+  /* hint: подсказки по нарастающей */
+  const HINTS = [
+    'Не всё в этой папке видно с первого взгляда. Попроси показать всё.',
+    'Попробуй <b>ls -a</b>, а потом прочитай найденное командой <b>cat</b>.',
+    'Скрытые файлы сами подсказывают, что нужно ввести. Читай внимательно.',
+    'Директору можно отдать приказ через <b>sudo</b>. Подумай, чего ты хочешь.',
+    'Фильм «Матрица» — хороший источник паролей. Кролик, Нео, правда...'
+  ];
+  let hn = 0;
+  CMDS.hint = () => {
+    print('💡 ' + HINTS[Math.min(hn, HINTS.length - 1)], 'dim');
+    if (hn >= HINTS.length - 1) print('Больше подсказок нет. Дальше сам.', 'dim');
+    hn++;
+  };
+
+  /* secrets: прогресс */
+  CMDS.secrets = () => {
+    print(`<b>Найдено секретов в терминале: ${found.length}/${GROUPS.length}</b>`);
+    GROUPS.forEach(g => print(found.includes(g.id) ? `[x] ${g.name}` : '[ ] ???'));
+    print('Есть ещё секреты вне терминала. Удачи.', 'dim');
+    if (found.length === GROUPS.length) {
+      print('\n<b>Ты нашёл всё. Респект.</b> Напиши мне, такие люди мне нравятся.');
+    }
+  };
+
+  /* help теперь упоминает hint и secrets */
+  const helpOld = CMDS.help;
+  CMDS.help = () => { helpOld(); print('<b>hint</b> — подсказка · <b>secrets</b> — прогресс поиска', 'dim'); };
+
+  /* подсказка, если человек завис */
+  let idle, told = false;
+  const arm = () => {
+    if (told) return;
+    clearTimeout(idle);
+    idle = setTimeout(() => { told = true; print('\n💡 Тишина... Введи <b>hint</b>, если не знаешь, с чего начать.', 'dim'); }, 30000);
+  };
+  tin.addEventListener('focus', arm);
+  tin.addEventListener('keydown', arm);
+
+  /* послание тем, кто открыл консоль браузера */
+  console.log('%cПроснись, разработчик...', 'color:#fff;background:#000;font-size:16px;padding:6px 10px');
+  console.log('Секреты живут в терминале на сайте. Начни с: ls -a');
+})();(() => {
   const PROMO = 'NO-SPOON'; // секретный промокод за этот квест
 
   const st = document.createElement('style');
